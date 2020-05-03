@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hqz.hzuoj.judge.mapper.UserMapper">
+    <resultMap id="UserResultMap" type="com.hqz.hzuoj.bean.user.User">
+        <id column="user_id" property="userId"/>
+        <result column="username" property="username"/>
+        <result column="email" property="email"/>
+        <result column="user_img" property="UserImg"/>
+        <result column="user_rating" property="userRating"/>
+        <result column="school" property="school"/>
+        <result column="signature" property="signature"/>
+        <result column="school" property="school"/>
+        <result column="user_submit_total" property="userSubmitTotal"/>
+        <result column="user_challenge_total" property="userChallengeTotal"/>
+        <result column="user_accepted_total" property="userAcceptedTotal"/>
+        <result column="user_submit_accepted_total" property="userSubmitAcceptedTotal"/>
+    </resultMap>
+    <resultMap id="RankResultMap" type="com.hqz.hzuoj.bean.user.Rank">
+        <id column="user_id" property="user.userId"/>
+        <result column="rank" property="rank"/>
+        <result column="user_accepted" property="userAccepted"/>
+        <association property="user" javaType="com.hqz.hzuoj.bean.user.User">
+            <id column="user_id" property="userId"/>
+            <result column="username" property="username"/>
+            <result column="email" property="email"/>
+            <result column="user_img" property="UserImg"/>
+            <result column="user_rating" property="userRating"/>
+            <result column="school" property="school"/>
+            <result column="signature" property="signature"/>
+            <result column="user_accepted_total" property="userAcceptedTotal"/>
+            <result column="school" property="school"/>
+            <result column="user_submit_total" property="userSubmitTotal"/>
+            <result column="user_challenge_total" property="userChallengeTotal"/>
+        </association>
+    </resultMap>
+    <resultMap id="userContestResultMap" type="com.hqz.hzuoj.bean.contest.Contest">
+        <id column="contest_id" property="contestId"/>
+        <result column="contest_name" property="contestName"/>
+        <result column="contest_start" property="contestStart"/>
+        <result column="contest_end" property="contestEnd"/>
+        <result column="contest_explain" property="contestExplain"/>
+        <result column="contest_create_time" property="contestCreateTime"/>
+        <result column="contest_apply_start_time" property="contestApplyStartTime"/>
+        <result column="contest_apply_end_time" property="contestApplyEndTime"/>
+        <result column="contest_status" property="contestStatus"/>
+        <result column="contest_time_length" property="contestTimeLength"/>
+        <result column="contest_public" property="contestPublic"/>
+        <result column="contest_code" property="contestCode"/>
+        <result column="contest_apply_status" property="contestApplyStatus"/>
+        <result column="contest_apply_count" property="contestApplyCount"/>
+        <result column="contest_is_rank" property="contestIsRank"/>
+        <result column="contest_rank_status" property="contestRankStatus"/>
+        <result column="contest_rank_is_finish" property="contestRankIsFinish"/>
+        <association property="contestType" javaType="com.hqz.hzuoj.bean.contest.ContestType">
+            <id column="contest_type_id" property="contestTypeId"/>
+            <result column="contest_type_name" property="contestTypeName"/>
+            <result column="contest_type_explain" property="contestTypeExplain"/>
+        </association>
+    </resultMap>
+    <resultMap id="userSubmitResultMap" type="com.hqz.hzuoj.bean.submit.Submit">
+        <id column="submit_id" property="submitId"/>
+        <result column="submit_time" property="submitTime"/>
+        <result column="submit_code" property="submitCode"/>
+        <result column="submit_compile_info" property="submitCompileInfo"/>
+        <result column="submit_code_length" property="submitCodeLength"/>
+        <result column="submit_score" property="submitScore"/>
+        <result column="submit_runtime_time" property="submitRuntimeTime"/>
+        <result column="submit_runtime_memory" property="submitRuntimeMemory"/>
+        <result column="submit_public" property="submitPublic"/>
+        <association property="language" javaType="com.hqz.hzuoj.bean.language.Language">
+            <id column="language_id" property="languageId"/>
+            <result column="language_name" property="languageName"/>
+            <result column="language_compile_cmd" property="languageCompileCmd"/>
+            <result column="language_runtime_cmd" property="languageRuntimeCmd"/>
+            <result column="language_model" property="languageModel"/>
+        </association>
+        <association property="problem" javaType="com.hqz.hzuoj.bean.problem.Problem">
+            <id column="problem_id" property="problemId"/>
+            <result column="problem_title" property="problemTitle"/>
+            <result column="problem_background" property="problemBackground"/>
+            <result column="problem_content" property="problemContent"/>
+            <result column="problem_data_address" property="problemDataAddress"/>
+            <result column="problem_explain" property="problemExplain"/>
+            <result column="problem_input_format" property="problemInputFormat"/>
+            <result column="problem_output_format" property="problemOutputFormat"/>
+            <result column="problem_public" property="problemPublic"/>
+            <result column="problem_create_time" property="problemCreateTime"/>
+            <result column="problem_update_time" property="problemUpdateTime"/>
+        </association>
+        <association property="user" javaType="com.hqz.hzuoj.bean.user.User">
+            <id column="user_id" property="userId"/>
+            <result column="username" property="username"/>
+            <result column="email" property="email"/>
+            <result column="register_time" property="registerTime"/>
+            <result column="gender" property="gender"/>
+            <result column="user_img" property="UserImg"/>
+            <result column="user_rating" property="userRating"/>
+            <result column="user_accepted_total" property="userAcceptedTotal"/>
+            <result column="school" property="school"/>
+            <result column="user_submit_total" property="userSubmitTotal"/>
+            <result column="user_challenge_total" property="userChallengeTotal"/>
+        </association>
+        <association property="judgeResult" javaType="com.hqz.hzuoj.bean.submit.JudgeResult">
+            <id column="judge_result_id" property="judgeResultId"/>
+            <result column="judge_name" property="judgeName"/>
+            <result column="judge_abbreviation" property="judgeAbbreviation"/>
+        </association>
+    </resultMap>
+   <select id="loginUser" resultType="com.hqz.hzuoj.bean.user.User">
+       SELECT * FROM hzuoj_users AS u WHERE u.username=#{username} AND u.password = #{password}
+   </select>
+    <select id="getUser" resultMap="UserResultMap">
+        SELECT * FROM hzuoj_users WHERE user_id = #{userId}
+    </select>
+    <select id="getRanks" resultMap="RankResultMap">
+       SELECT * FROM hzuoj_users u
+        <where>
+            1 = 1
+            <if test="userId != null">
+                and u.user_id = #{userId}
+            </if>
+            <if test="indistinct != null">
+                AND (u.username LIKE '%${indistinct}%' OR u.school LIKE '%${indistinct}%')
+            </if>
+        </where>
+        <if test="order == 1">
+            order by u.user_rating DESC,
+            u.user_accepted_total DESC
+        </if>
+        <if test="order == 2">
+            order by u.user_accepted_total DESC,
+            u.user_rating DESC
+        </if>
+        <if test="order == null">
+            order by u.user_rating DESC
+        </if>
+
+    </select>
+    <select id="getUserRank" resultType="java.lang.Integer">
+        SELECT COUNT(*) FROM hzuoj_users u1
+        INNER JOIN hzuoj_users u2
+        <if test="order == 2">
+            ON u1.user_accepted_total &lt; u2.user_accepted_total
+        </if>
+        <if test="order != 2">
+            ON u1.user_rating &lt; u2.user_rating
+        </if>
+        WHERE u1.user_id = #{userId}
+    </select>
+    <select id="getUserRanking" resultType="java.lang.Integer">
+        SELECT COUNT(u2.user_id) FROM hzuoj_users u1
+        INNER JOIN hzuoj_users u2
+        ON  u2.user_rating &gt; u1.user_rating
+        WHERE u1.user_id = #{userId}
+
+    </select>
+    <select id="getUserAcceptedRanking"  resultType="java.lang.Integer">
+        SELECT COUNT(u2.user_id) FROM hzuoj_users u1
+        INNER JOIN hzuoj_users u2
+        ON  u2.user_accepted_total &gt; u1.user_accepted_total
+        WHERE u1.user_id = #{userId}
+    </select>
+    <select id="getUserAcceptedTotal" resultType="java.lang.Integer">
+        SELECT COUNT(*) FROM hzuoj_users u
+        INNER JOIN (
+        SELECT s.`problem_id`,s.`user_id` FROM hzuoj_submits s
+        WHERE s.`judge_result_id` = #{judgeResultId} AND s.`submit_public` = #{submitPublic}
+        GROUP BY s.`problem_id`,s.`user_id`) t
+        ON t.user_id = u.`user_id`
+        WHERE u.`user_id` = #{userId}
+    </select>
+    <select id="getUserSubmitTotal" resultType="java.lang.Integer">
+        SELECT COUNT(*) FROM hzuoj_submits s
+        WHERE s.`user_id` = #{userId} AND s.`submit_public`  = #{submitPublic}
+    </select>
+    <select id="getUserSubmitAcceptedTotal" resultType="java.lang.Integer">
+        SELECT COUNT(*) FROM hzuoj_submits s
+        WHERE s.`user_id` = #{userId} and s.`judge_result_id` = #{judgeResultId}  AND s.`submit_public`  = #{submitPublic}
+    </select>
+    <select id="getUserChallengeTotal" resultType="java.lang.Integer">
+         SELECT COUNT(*) FROM hzuoj_users u
+        INNER JOIN (
+        SELECT s.`problem_id`,s.`user_id` FROM hzuoj_submits s
+        WHERE s.`submit_public`  = #{submitPublic}
+        GROUP BY s.`problem_id`,s.`user_id`) t
+        ON t.user_id = u.`user_id`
+        WHERE u.`user_id` = #{userId}
+    </select>
+</mapper>

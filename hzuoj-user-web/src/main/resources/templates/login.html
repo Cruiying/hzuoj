@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>登录</title>
+    <link rel="stylesheet" href="../static/lib/layui/css/layui.css" th:href="@{/lib/layui/css/layui.css}">
+    <link rel="stylesheet" href="../static/css/style.css" th:href="@{/css/style.css}">
+    <link rel="stylesheet" href="../static/lib/layui/css/layui.css" media="all"
+          th:href="@{/lib/layui-v2.5.4/css/layui.css}">
+    <link rel="stylesheet" href="../static/css/admin.css" th:href="@{/css/admin.css}">
+    <!--[if lt IE 9]>
+    <script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
+    <script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+</head>
+<body>
+<div class="layui-container">
+    <div class="admin-login-background">
+        <div class="layui-form login-form">
+            <form class="layui-form" action="">
+                <div class="layui-form-item logo-title">
+                    <h1>HzuOJ用户登陆</h1>
+                </div>
+                <!--底部-->
+                <input type="hidden" id = "ReturnUrl" th:value="${param.ReturnUrl}"/>
+                <div class="layui-form-item">
+                    <label class="layui-icon layui-icon-username" for="username"></label>
+                    <input type="text" name="username" id="username" lay-verify="required|account" placeholder="用户名或者邮箱"
+                           autocomplete="off" class="layui-input">
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-icon layui-icon-password" for="password"></label>
+                    <input type="password" id="password" name="password" lay-verify="required|password" placeholder="密码"
+                           autocomplete="off" class="layui-input" >
+                </div>
+                <div class="layui-form-item">
+                    <button class="layui-btn layui-btn-fluid" type="submit" lay-submit="" lay-filter="login">登 入
+                    </button>
+                </div>
+                <div class="layui-form-item">
+                    <div class="layui-inline" style="float: right">
+                        <a href="/user/register" style="text-align: right; text-decoration: underline">还没账号？立即注册</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script src="../static/lib/layui/layui.js" th:src="@{/lib/layui/layui.js}"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.2/dist/jquery.min.js"></script>
+<!--<script src="../static/lib/vs/loader.js" th:src="@{/lib/vs/loader.js}"></script>-->
+<script src="../static/js/jquery.min.js" th:src="@{/js/jquery.min.js}"></script>
+<script src="../static/js/jquery.min.js" th:src="@{/js/jquery.min.js}"
+        charset="utf-8"></script>
+<script src="../static/lib/layui/layui.js" th:src="@{/lib/layui-v2.5.4/layui.js}" charset="utf-8"></script>
+<script src="../static/lib/jq-module/jquery.particleground.min.js"
+        th:src="@{/lib/jq-module/jquery.particleground.min.js}" charset="utf-8"></script>
+<script type="text/javascript">
+    layui.use(['form', 'layer', 'jquery'], function () {
+        // 操作对象
+        const form = layui.form;
+        const $ = layui.jquery;
+        form.on('submit(login)', function (data) {
+            data = data.field;
+            if (data.username == '') {
+                layer.msg('用户名不能为空');
+                return false;
+            }
+            if (data.password == '') {
+                layer.msg('密码不能为空');
+                return false;
+            }
+            if (data.captcha == '') {
+                layer.msg('验证码不能为空');
+                return false;
+            }
+            $(function () {
+                //请求参数
+                let list = {"username": data.username, "password": data.password};
+                //
+                $.ajax({
+                    //请求格式
+                    datatype: 'json',
+                    //请求方式
+                    type: "post",
+                    //请求的媒体类型
+                    contentType: "application/json;charset=UTF-8",
+                    //请求地址
+                    url: "/login",
+                    //数据，json字符串
+                    data: JSON.stringify(list),
+                    //请求成功
+                    success: function (token) {
+                        if (token == "fail") {
+                            layer.msg("登陆失败，用户名或密码错误");
+                        } else {
+                            let url = $("#ReturnUrl").val();
+                            if (url == null || url == "") {
+                                url = "/user/index";
+                            }
+                            window.location.href = url + "?userToken=" + token;
+                            layer.msg("登陆成功");
+                        }
+                    },
+                    //请求失败，包含具体的错误信息
+                    error: function (e) {
+                        layer.msg("登陆失败，用户名或密码错误");
+                    }
+                });
+            });
+            return false;
+        });
+
+    });
+</script>
+</body>
+</html>

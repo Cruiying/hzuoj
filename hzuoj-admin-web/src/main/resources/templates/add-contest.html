@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>添加比赛</title>
+    <link rel="stylesheet" href="../static/lib/layui/css/layui.css" media="all" th:href="@{/lib/layui/css/layui.css}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/semantic-ui/2.2.4/semantic.min.css">
+    <link rel="stylesheet" href="../static/lib/editormd/css/editormd.min.css"
+          th:href="@{/lib/editormd/css/editormd.min.css}">
+    <script type="text/javascript" src="../static/js/xadmin.js" th:src="@{/js/xadmin.js}"></script>
+    <link rel="stylesheet" href="../static/css/me.css" th:href="@{/css/me.css}">
+    <link rel="stylesheet" href="../static/lib/jq-module/zyupload/zyupload-1.0.0.min.css"
+          th:href="@{/lib/jq-module/zyupload/zyupload-1.0.0.min.css}" media="all">
+    <link rel="stylesheet" href="../static/css/public.css" th:href="@{/css/public.css}" media="all">
+    <script type="text/javascript" async
+            src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+    </script>
+</head>
+<body id="app">
+<form class="layui-form" action="" lay-filter="example" id="problem">
+    <div class="layui-form-item">
+        <input id="adminId" type="hidden" name="adminId" th:value="${adminId}">
+        <input id="contestId" type="hidden" name="contestId" th:value="${contestId}">
+    </div>
+    <div class="layui-form-item">
+        <h3>比赛名称</h3>
+        <input type="text" id="contestName" name="contestName" class="layui-input">
+    </div>
+    <div class="layui-form-item">
+        <h3>比赛赛制</h3>
+        <div>
+            <input th:each="contestType : ${contestTypes}" type="radio" name="contestType"
+                   th:value="${contestType.contestTypeId}" th:title="${contestType.contestTypeName}" value="1"
+                   title="ACM" th:checked="${(contest.contestType != null &&  contest.contestType.contestTypeId == contestType.contestTypeId) || (contest.contestType == null && contestType.contestTypeName == 'ACM')}">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <h3>是否公开</h3>
+        <div>
+            <input type="radio" id="no" name="contestPublic" value="0" title="不公开"
+                   th:checked="${contest.contestPublic == null ||contest.contestPublic != 1}">
+            <input type="radio" id="yes" name="contestPublic" value="1" title="公开"
+                   th:checked="${contest.contestPublic == 1}">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <h3>是否计算Rating</h3>
+        <div>
+            <input type="radio" id="noRank" name="contestIsRank" value="0" title="不计算" th:checked="${contest.contestIsRank != 1}">
+            <input type="radio" id="yesRank" name="contestIsRank" value="1" title="计算" th:checked="${contest.contestIsRank == 1}">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <h3>邀请码</h3>
+        <div>
+            <span id="contestCode" th:text="${contest.contestCode == null ? '先创建比赛，才能生成邀请码' : contest.contestCode}">先创建比赛，才能生成邀请码</span>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <div>
+            <div class="layui-col-xs12 layui-col-sm3 layui-col-lg3">
+                <h3>比赛开始时间</h3>
+                <div class="layui-inline">
+                    <div class="layui-input-inline">
+                        <input type="text" class="layui-input" name="contestStart" id="contestStart" th:value="${#dates.format(contest.contestStart, 'yyyy-MM-dd HH:mm')}"
+                               placeholder="yyyy-MM-dd HH:mm">
+                    </div>
+                </div>
+            </div>
+            <div class="layui-col-xs12 layui-col-sm3 layui-col-lg3">
+                <h3>比赛结束时间</h3>
+                <div class="layui-inline">
+                    <div class="layui-input-inline">
+                        <input type="text" class="layui-input" name="contestEnd" id="contestEnd" th:value="${#dates.format(contest.contestEnd, 'yyyy-MM-dd HH:mm')}"
+                               placeholder="yyyy-MM-dd HH:mm">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <div class="layui-container-filed">
+            <div class="layui-col-xs12 layui-col-sm3 layui-col-lg3">
+                <h3>报名开始时间</h3>
+                <div class="layui-inline">
+                    <div class="layui-input-inline">
+                        <input type="text" name="contestApplyStartTime" class="layui-input" id="contestApplyStartTime"  th:value="${#dates.format(contest.contestApplyStartTime, 'yyyy-MM-dd HH:mm')}"
+                               placeholder="yyyy-MM-dd HH:mm">
+                    </div>
+                </div>
+            </div>
+            <div class="layui-col-xs12 layui-col-sm3 layui-col-lg3">
+                <h3>报名结束时间</h3>
+                <div class="layui-inline">
+                    <div class="layui-input-inline">
+                        <input type="text" class="layui-input" name="contestApplyEndTime" id="contestApplyEndTime" th:value="${#dates.format(contest.contestApplyEndTime, 'yyyy-MM-dd HH:mm')}"
+                               placeholder="yyyy-MM-dd HH:mm">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <h3>比赛题目</h3>
+        <div id="problemIdlist">
+        </div>
+    </div>
+    <br><br>
+    <div class="layui-form-item" id="addProblemId">
+        <h4>先创建比赛后，才能添加比赛题目</h4>
+
+    </div>
+    <div class="layui-form-item  layui-form-text">
+        <div class="layui-container-filed">
+            <h3>比赛说明</h3>
+            <div id="md-explain">
+                <textarea id="contestExplain" placeholder="比赛说明" name="contestExplain"
+                          class="typo  typo-selection js-toc-content"  th:value="${contest.contestExplain}"
+                          style="display: none"></textarea>
+            </div>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <button type="button" class="layui-btn layui-btn-normal"
+                onclick="window.history.go(-1)">返回
+        </button>
+        <button type="button" class="layui-btn layui-btn-normal" id="LAY-component-form-getval">保存</button>
+        <button type="submit" class="layui-btn" lay-submit="" lay-filter="submit">确定</button>
+    </div>
+</form>
+<script src="../static/lib/layui/layui.js" charset="utf-8" th:src="@{/lib/layui/layui.js}"></script>
+<script src="../static/js/jquery.min.js" charset="utf-8" th:src="@{/js/jquery.min.js}"></script>
+<script src="https://cdn.jsdelivr.net/semantic-ui/2.2.4/semantic.min.js"></script>
+<script src="../static/lib/editormd/editormd.min.js" th:src="@{/lib/editormd/editormd.min.js}"></script>
+<script src="../static/js/mathjax.js" th:src="@{/js/mathjax.js}"></script>
+<script src="../static/lib/jq-module/zyupload/zyupload-1.0.0.min.js"
+        th:src="@{/lib/jq-module/zyupload/zyupload-1.0.0.min.js}" charset="utf-8"></script>
+<script src="../static/js/DateUtils.js" th:src="@{/js/DateUtils.js}"></script>
+<!--初始化日期-->
+<script>
+    let date = new Date();
+    let date1 = new Date();
+    date1.setHours(date1.getHours() + 1);
+    $("#contestApplyStartTime").val(date1.format("yyyy-MM-dd hh:mm"));
+    date.setDate(date.getDate() + 5);
+    $("#contestStart").val(date1.format("yyyy-MM-dd hh:mm"));
+    date.setHours(date.getHours() + 5);
+    $("#contestEnd").val(date.format("yyyy-MM-dd hh:mm"));
+    $("#contestApplyEndTime").val(date.format("yyyy-MM-dd hh:mm"));
+
+    $('.menu.toggle').click(function () {
+        $('.m-item').toggleClass('m-mobile-hide');
+    });
+    layui.use('laydate', function () {
+        var laydate = layui.laydate;
+        //日期时间选择器
+        laydate.render({
+            elem: '#contestStart'
+            , format: 'yyyy-MM-dd HH:mm'
+            , type: "datetime"
+        });
+        //日期时间选择器
+        laydate.render({
+            elem: '#contestEnd'
+            , format: 'yyyy-MM-dd HH:mm'
+            , type: "datetime"
+        }); //日期时间选择器
+        laydate.render({
+            elem: '#contestApplyStartTime'
+            , format: 'yyyy-MM-dd HH:mm'
+            , type: "datetime"
+        }); //日期时间选择器
+        laydate.render({
+            elem: '#contestApplyEndTime'
+            , format: 'yyyy-MM-dd HH:mm'
+            , type: "datetime"
+        });
+    });
+
+
+    $('.ui.dropdown').dropdown({
+        on: 'hover'
+    });
+
+    $('#save-btn').click(function () {
+        $('[name="published"]').val(false);
+        $('#blog-form').submit();
+    });
+
+    $('#publish-btn').click(function () {
+        $('[name="published"]').val(true);
+        $('#blog-form').submit();
+    });
+
+    $('.ui.form').form({
+        fields: {
+            title: {
+                identifier: 'title',
+                rules: [{
+                    type: 'empty',
+                    prompt: '标题：请输入题目名称'
+                }]
+            },
+            content: {
+                identifier: 'content',
+                rules: [{
+                    type: 'empty',
+                    prompt: '标题：请输入题目内容'
+                }]
+            }
+        }
+    });
+</script>
+<!--初始化mathjax-->
+<script th:inline="none">
+    let isMathjaxConfig = false; // 防止重复调用Config，造成性能损耗
+
+    const initMathjaxConfig = () => {
+        if (!window.MathJax) {
+            return;
+        }
+        window.MathJax.Hub.Config({
+            showProcessingMessages: false, //关闭js加载过程信息
+            messageStyle: "none", //不显示信息
+            jax: ["input/TeX", "output/HTML-CSS"],
+            tex2jax: {
+                inlineMath: [["$", "$"], ["\\(", "\\)"]], //行内公式选择符
+                displayMath: [["$$", "$$"], ["\\[", "\\]"]], //段内公式选择符
+                skipTags: ["script", "noscript", "style", "textarea", "pre", "code", "a"] //避开某些标签
+            },
+            "HTML-CSS": {
+                availableFonts: ["STIX", "TeX"], //可选字体
+                showMathMenu: false //关闭右击菜单显示
+            }
+        });
+        isMathjaxConfig = true; //
+    };
+    if (isMathjaxConfig === false) { // 如果：没有配置MathJax
+        initMathjaxConfig();
+    }
+
+    // 如果，不传入第三个参数，则渲染整个document
+    // 因为使用的Vuejs，所以指明#app，以提高速度
+    window.MathJax.Hub.Queue(["Typeset", MathJax.Hub, document.getElementById('app')]);
+</script>
+<!--初始化markdown和加载数据-->
+<script>
+    //异步删除题目节点
+    function del(obj, problemId) {
+        const contestId = $("#contestId").val();
+        $.ajax({
+            //请求格式
+            datatype: 'json',
+            //请求方式
+            type: "POST",
+            //请求的媒体类型
+            contentType: "application/json;charset=UTF-8",
+            url: "/admin/contest/" + contestId + "/del/problem?problemId=" + problemId,
+            success: function (result) {
+                layer.msg(result.msg);
+                if (result.flag) {
+                    $(obj.parentNode.parentNode).remove();
+                }
+            },
+            error: function (result) {
+                layer.msg("服务器出现问题");
+            }
+        });
+    }
+
+    <!--    异步添加题目-->
+    function add() {
+        let problemId = $("#problemId").val();
+        let contestProblemScore = $("#contestProblemScore").val();
+        let contestId = $("#contestId").val();
+        let contestProblem = {};
+        let contest = {};
+        let problem = {};
+        contest["contestId"] = contestId;
+        problem["problemId"] = problemId;
+        contestProblem["contest"] = contest;
+        contestProblem["problem"] = problem;
+        contestProblem["contestProblemScore"] = contestProblemScore;
+        console.log(JSON.stringify(contestProblem))
+        $.ajax({
+            //请求格式
+            datatype: 'json',
+            //请求方式
+            type: "POST",
+            //请求的媒体类型
+            contentType: "application/json;charset=UTF-8",
+            url: "/admin/contest/" + contestId + "/add/problem",
+            data: JSON.stringify(contestProblem),
+
+            success: function (result) {
+                if (result.flag) {
+                    const contestProblem = result.contestProblem;
+                    addProblem(contestProblem.problem.problemId, contestProblem.problem.problemTitle, contestProblem.contestProblemScore);
+                    const contest = result.contest;
+                    $("#contestId").val(result.contest.contestId);
+                    if (contest.contestStatus == 2) {
+                        contestStatus2();
+                    } else if (contest.contestStatus == 1) {
+                        contestStatus1();
+                    } else {
+                        contestStatus0();
+                    }
+                }
+                layer.alert(result.msg);
+            }
+        });
+
+    }
+
+    //向页面添加题目的方法
+    function addProblem(problemId, problemTitle, problemScore) {
+        $("#problemIdlist").append("<div>\n" +
+            "                <div class=\"layui-inline\">\n" +
+            "                    <label class=\"layui-form-label  layui-word-aux layui-form-mid\"><h4>#" + problemId + " 题目</h4></label>\n" +
+            "                    <div class=\"layui-input-inline\">\n" +
+            "                        <input type=\"text\" name=\"problemTitle\" autocomplete=\"off\" value='" + problemTitle + "'  class=\"layui-input layui-btn-disabled\" disabled>\n" +
+            "                    </div>\n" +
+            "                </div>\n" +
+            "                <div class=\"layui-inline\">\n" +
+            "                    <label class=\"layui-form-label  layui-word-aux layui-form-mid\"><h4>题目分数</h4></label>\n" +
+            "                    <div class=\"layui-input-inline\">\n" +
+            "                        <input type=\"text\" name=\"problemScore\" autocomplete=\"off\" value='" + problemScore + "' class=\"layui-input layui-btn-disabled\" disabled>\n" +
+            "                    </div>\n" +
+            "                </div>\n" +
+            "                <div class=\"layui-inline\">\n" +
+            "                    <button type=\"button\" name =\"delBtn\"  class=\"layui-btn\" onclick=\"del(this, " + problemId + ")\">删除</button>\n" +
+            "                </div>\n" +
+            "            </div>")
+    }
+
+    //初始化Markdown编辑器
+    var contentEditor;
+    $(function () {
+        contentEditor = editormd("md-explain", {
+            width: "100%",
+            height: 200,
+            watch: false,
+            //markdown : md,
+            codeFold: true,
+            syncScrolling: "single",
+            toolbar: true,
+            imageUpload: true,//图片上传功能
+            imageFormats: ["jpg", "jpeg", "gif", "png", "bmp", "webp"],
+            imageUploadURL: "../article/uploadImage",
+            /* theme: "dark",//工具栏主题
+            previewTheme: "dark",//预览主题
+            editorTheme: "pastel-on-dark",//编辑主题  */
+            emoji: true,
+            taskList: true,
+            tocm: true,         // Using [TOCM]
+            tex: true,                   // 开启科学公式TeX语言支持，默认关闭
+            flowChart: true,             // 开启流程图支持，默认关闭
+            sequenceDiagram: true,       // 开启时序/序列图支持，默认关闭,
+            //这个配置在simple.html中并没有，但是为了能够提交表单，使用这个配置可以让构造出来的HTML代码直接在第二个隐藏的textarea域中，方便post提交表单。
+            saveHTMLToTextarea: true,
+            toolbarIcons: function () {
+                // Or return editormd.toolbarModes[name]; // full, simple, mini
+                // Using "||" set icons align right.
+                return ["undo", "redo", "|", "bold", "italic", "quote", "uppercase", "lowercase", "|", "h1", "h2", "h3", "h4", "|", "list-ul", "list-ol", "hr", "|", "link", "image", "code", "code-block", "table", "html-entities", "|", "watch", "preview", "fullscreen", "clear", "|", "help"]
+            },
+            //你的lib目录的路径
+            path: "/lib/editormd/lib/"
+        });
+        //需要在markdown之后加载数据
+        let contestId = $("#contestId").val();
+        if (contestId != null && contestId.length > 0) {
+            let url = "/admin/contest/" + contestId + "/info";
+            $.ajax({
+                dataType: "json",
+                //请求方式
+                type: "POST",
+                //请求的媒体类型
+                contentType: "application/json;charset=UTF-8",
+                //请求地址
+                url: url,
+                //请求成功
+                success: function (result) {
+                    const contest = result.contest;
+                    $("#contestId").val(contest.contestId);
+                    $("#contestName").val(contest.contestName);
+                    $("#contestCode").html("<h4 style='color: red'>" + contest.contestCode + "</h4>");
+                    $("#contestStart").val(contest.contestStart);
+                    $("#contestEnd").val(contest.contestEnd);
+                    $("#contestApplyStartTime").val(contest.contestApplyStartTime);
+                    $("#contestApplyEndTime").val(contest.contestApplyEndTime);
+                    $("#contestExplain").val(contest.contestExplain);
+                    showAddBtn();
+                    let contestType = $("[name = 'contestType']");
+                    for (let i = 0; i < contestType.length; i++) {
+                        $(contestType[i]).attr("checked", false);
+                    }
+                    for (let i = 0; i < contestType.length; i++) {
+                        if ($(contestType[i]).val() == contest.contestType.contestTypeId) {
+                            $(contestType[i]).attr("checked", true);
+                        }
+                    }
+                    const contestProblems = contest.contestProblems;
+                    for (let i = 0; i < contestProblems.length; i++) {
+                        addProblem(contestProblems[i].problem.problemId, contestProblems[i].problem.problemTitle, contestProblems[i].contestProblemScore)
+                    }
+                    return false;
+                },
+                //请求失败，包含具体的错误信息
+                error: function (e) {
+                    layui.msg("提交失败")
+                }
+            });
+        }
+    });
+</script>
+<script>
+    function showAddBtn() {
+        $("#addProblemId").html("<div>\n" +
+            "            <div class=\"layui-inline\">\n" +
+            "                <label class=\"layui-form-label  layui-word-aux layui-form-mid\">题目ID</label>\n" +
+            "                <div class=\"layui-input-inline\">\n" +
+            "                    <input id=\"problemId\" type=\"text\" name=\"problemId\" autocomplete=\"off\" class=\"layui-input\">\n" +
+            "                </div>\n" +
+            "            </div>\n" +
+            "            <div class=\"layui-inline\">\n" +
+            "                <label class=\"layui-form-label  layui-word-aux layui-form-mid\">题目分数</label>\n" +
+            "                <div class=\"layui-input-inline\">\n" +
+            "                    <input id=\"contestProblemScore\" type=\"text\" name=\"contestProblemScore\" autocomplete=\"off\" class=\"layui-input\">\n" +
+            "                </div>\n" +
+            "            </div>\n" +
+            "            <div class=\"\">\n" +
+            "                <button type=\"button\" id = \"add-btn\" class=\"layui-btn\" onclick=\"add();\">添加题目</button>\n" +
+            "            </div>\n" +
+            "        </div>");
+    }
+</script>
+<!--添加比赛-->
+<script>
+    layui.use(['form', 'layedit', 'laydate'], function () {
+        let form = layui.form, layer = layui.layer;
+        //监听提交
+        form.on('submit(submit)', function (data) {
+            let contest = {};
+            const field = data.field;
+            let contestType = {};
+            let admin = {};
+            admin["adminId"] = field.adminId;
+            contest["contestId"] = field.contestId;
+            contestType["contestTypeId"] = field.contestType;
+            contest["contestName"] = field.contestName;
+            contest["contestId"] = field.contestId;
+            contest["contestPublic"] = field.contestPublic;
+            contest["contestIsRank"] = field.contestIsRank;
+            contest["contestExplain"] = field.contestExplain;
+            contest["contestStart"] = field.contestStart;
+            contest["contestEnd"] = field.contestEnd;
+            contest["contestApplyStartTime"] = field.contestApplyStartTime;
+            contest["contestApplyEndTime"] = field.contestApplyEndTime;
+            contest["contestType"] = contestType;
+            contest["admin"] = admin;
+            $.ajax({
+                //请求格式
+                datatype: 'json',
+                //请求方式
+                type: "POST",
+                //请求的媒体类型
+                contentType: "application/json;charset=UTF-8",
+                //请求地址
+                url: "/admin/add/contest",
+                //数据，json字符串
+                data: JSON.stringify(contest),
+                //请求成功
+                success: function (info) {
+                    if (info.flag) {
+                        showAddBtn();
+                        const contest = info.contest;
+                        layer.msg(info.msg);
+                        $("#contestId").val(info.contest.contestId);
+                    } else {
+                        layer.msg(info.msg);
+                    }
+                    return false;
+                },
+                //请求失败，包含具体的错误信息
+                error: function (e) {
+                    layui.msg("提交失败")
+                }
+            });
+            return false;
+        });
+    });
+</script>
+
+</body>
+</html>

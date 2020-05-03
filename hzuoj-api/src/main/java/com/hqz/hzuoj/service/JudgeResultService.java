@@ -1,6 +1,6 @@
 package com.hqz.hzuoj.service;
 
-import com.hqz.hzuoj.bean.JudgeResult;
+import com.hqz.hzuoj.bean.submit.JudgeResult;
 
 import java.util.List;
 

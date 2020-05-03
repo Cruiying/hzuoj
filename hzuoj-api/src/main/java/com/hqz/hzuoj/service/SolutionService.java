@@ -1,7 +1,10 @@
 package com.hqz.hzuoj.service;
 
 import com.github.pagehelper.PageInfo;
-import com.hqz.hzuoj.bean.Solution;
+import com.hqz.hzuoj.bean.solution.Solution;
+import com.hqz.hzuoj.bean.solution.SolutionStatus;
+
+import java.util.List;
 
 /**
  * @Author: HQZ
@@ -15,4 +18,12 @@ public interface SolutionService {
     Solution getSolution(Integer solutionId);
 
     PageInfo<Solution> getSolutions(Integer page, Integer problemId);
+
+    PageInfo<Solution> getSolutions(Integer page);
+
+    List<SolutionStatus> getSolutionStatus();
+
+    boolean deleteSolution(Integer solutionId);
+
+    Solution updateSolutionStatus(Solution solution);
 }

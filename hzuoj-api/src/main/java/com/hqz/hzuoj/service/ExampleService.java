@@ -1,7 +1,6 @@
 package com.hqz.hzuoj.service;
 
-import com.hqz.hzuoj.bean.Example;
-import com.hqz.hzuoj.bean.Problem;
+import com.hqz.hzuoj.bean.problem.Example;
 
 import java.util.List;
 

@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>发表讨论</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport"
+          content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi"/>
+    <link rel="stylesheet" href="../static/css/semantic.css" th:href="@{/css/semantic.css}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/semantic-ui/2.2.4/semantic.min.css">
+    <link rel="stylesheet" href="../static/lib/editormd/css/editormd.min.css"
+          th:href="@{/lib/editormd/css/editormd.min.css}">
+    <link rel="stylesheet" href="../static/css/me.css" th:href="@{/css/me.css}">
+    <!--    <script type="text/javascript" src="../static/js/xadmin.js" th:src="@{/js/xadmin.js}"></script>-->
+    <link rel="stylesheet" href="../static/lib/layui/css/layui.css" media="all" th:href="@{/lib/layui/css/layui.css}">
+    <link rel="stylesheet" href="../static/lib/jq-module/zyupload/zyupload-1.0.0.min.css"
+          th:href="@{/lib/jq-module/zyupload/zyupload-1.0.0.min.css}" media="all">
+    <link href="https://cdn.bootcss.com/prism/1.15.0/themes/prism.css" rel="stylesheet">
+    <link href="https://cdn.bootcss.com/prism/1.15.0/plugins/line-numbers/prism-line-numbers.css" rel="stylesheet">
+    <script type="text/javascript" async
+            src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+    </script>
+    <link rel="stylesheet" href="https://apps.bdimg.com/libs/highlight.js/9.1.0/styles/tomorrow.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.2/dist/jquery.min.js"></script>
+    <script src="../static/lib/vue/vue.js" th:src="@{/lib/vue/vue.js}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <link rel="stylesheet" href="../static/lib/jq-module/zyupload/zyupload-1.0.0.min.css"
+          th:href="@{/lib/jq-module/zyupload/zyupload-1.0.0.min.css}" media="all">
+    <link rel="stylesheet" href="../static/css/public.css" th:href="@{/css/public.css}" media="all">
+    <script type="text/javascript" async
+            src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+    </script>
+    <!--    <script src="../static/lib/vs/basic-languages/cpp/cpp.js" th:src="@{/lib/vs/basic-languages/cpp/cpp.js}"></script>-->
+    <!--    <script src="../static/lib/vs/basic-languages/**" th:src="@{/lib/vs/basic-languages/}"></script>-->
+    <link rel="stylesheet" type="text/css" href="../static/css/main.css" th:href="@{/css/main.css}">
+    <style>
+        html, body {
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+
+        a {
+            text-decoration: none !important;
+        }
+
+        .dropdown-content {
+            display: none;
+        }
+        .item.dropdown:hover .dropdown-content{
+            display: block;
+        }
+
+    </style>
+    <link rel="stylesheet" type="text/css" data-name="vs/editor/editor.main"
+          href="https://cdn.jsdelivr.net/npm/syzoj-public-cdn@1.0.6/cdnjs/monaco-editor/0.18.1/min/vs/editor/editor.main.css">
+    <!--    <script async="async" type="text/javascript" src="https://cdn.jsdelivr.net/npm/syzoj-public-cdn@1.0.6/self/vendor/tokenizer/definitions/c_cpp.js"></script>-->
+    <!--    <script async="async" type="text/javascript" src="https://cdn.jsdelivr.net/npm/syzoj-public-cdn@1.0.6/self/vendor/tokenizer/definitions/java.js"></script>-->
+    <!--    <script async="async" type="text/javascript" src="https://cdn.jsdelivr.net/npm/syzoj-public-cdn@1.0.6/self/vendor/tokenizer/definitions/python.js"></script>-->
+    <script src="../static/js/jquery.min.js" charset="utf-8" th:src="@{/js/jquery.min.js}"></script>
+</head>
+<body>
+<nav th:replace="fragment::menu('discussions')"></nav>
+<div style="height: 20px;"></div>
+<div class="ui container">
+    <div class="ui segment grid">
+        <div class="sixteen wide column">
+                <div class="ui form">
+                    <div class="field">
+                        <label><h2>标题</h2></label>
+                        <input id="discussionTitle" type="text" name="discussionTitle" th:value="${discussion != null ? discussion.discussionTitle : ''}" placeholder="请输入标题....">
+                    </div>
+                    <div class="field">
+                        <label><h2>内容</h2></label>
+                        <div id="editor">
+                            <textarea id="discussionContent" name="discussionContent" class="typo  typo-selection js-toc-content"></textarea>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <div class="ui middle aligned one column grid">
+                            <div class="center aligned column">
+                                <button onclick="sendPost()" class="ui teal button">发布</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+        </div>
+    </div>
+</div>
+<footer style="margin-top: 20px; background: rgba(33,33,33,0.1)!important;"
+        class="ui inverted vertical segment m-padded-tb-large">
+    <div class="content container ui">
+        <div class=" wide column">
+            <h2 class="m-text-thin m-text-spaced m-opacity-tiny" style="color: black">贺州学院算法竞赛训练平台</h2>
+        </div>
+    </div>
+</footer>
+</body>
+<script src="https://cdn.bootcss.com/prism/1.15.0/prism.js"></script>
+<script src="https://cdn.bootcss.com/prism/1.15.0/components/prism-java.js"></script>
+<script src="//cdn.jsdelivr.net/npm/jquery.scrollto@2.1.2/jquery.scrollTo.min.js"></script>
+<script src="http://cdn.bootcss.com/highlight.js/8.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/marked/0.3.4/marked.min.js"></script>
+<script src="../static/lib/layui/layui.js" charset="utf-8" th:src="@{/lib/layui/layui.js}"></script>
+<script src="../static/js/semantic.js" th:src="@{/js/semantic.js}"></script>
+<script src="../static/js/DateUtils.js" th:src="@{/js/DateUtils.js}"></script>
+<script src="../static/lib/editormd/editormd.min.js" th:src="@{/lib/editormd/editormd.min.js}"></script>
+<script src="../static/lib/jq-module/zyupload/zyupload-1.0.0.min.js"
+        th:src="@{/lib/jq-module/zyupload/zyupload-1.0.0.min.js}" charset="utf-8"></script>
+<script src="../static/js/mathjax.js" th:src="@{/js/mathjax.js}"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.17.1/build/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+<!--初始化mathjax-->
+<script th:inline="none">
+    let isMathjaxConfig = false; // 防止重复调用Config，造成性能损耗
+    const initMathjaxConfig = () => {
+        if (!window.MathJax) {
+            return;
+        }
+        window.MathJax.Hub.Config({
+            showProcessingMessages: false, //关闭js加载过程信息
+            messageStyle: "none", //不显示信息
+            jax: ["input/TeX", "output/HTML-CSS"],
+            tex2jax: {
+                inlineMath: [["$", "$"], ["\\(", "\\)"]], //行内公式选择符
+                displayMath: [["$$", "$$"], ["\\[", "\\]"]], //段内公式选择符
+                skipTags: ["script", "noscript", "style", "textarea", "pre", "code", "a"] //避开某些标签
+            },
+            "HTML-CSS": {
+                availableFonts: ["STIX", "TeX"], //可选字体
+                showMathMenu: false //关闭右击菜单显示
+            }
+        });
+        isMathjaxConfig = true; //
+    };
+    if (isMathjaxConfig === false) { // 如果：没有配置MathJax
+        initMathjaxConfig();
+    }
+
+    // 如果，不传入第三个参数，则渲染整个document
+    // 因为使用的Vuejs，所以指明#app，以提高速度
+    window.MathJax.Hub.Queue(["Typeset", MathJax.Hub, document.getElementById('app')]);
+</script>
+<script th:inline="javascript">
+    $('.ui.dropdown').dropdown();
+    let contentEditor;
+    $(function () {
+        contentEditor = editormd("editor", {
+            width: "100%",
+            height: 600,
+            watch: false,
+            //markdown : md,
+            codeFold: true,
+            syncScrolling: "single",
+            toolbar: true,
+            imageUpload: true,//图片上传功能
+            imageFormats: ["jpg", "jpeg", "gif", "png", "bmp", "webp"],
+            imageUploadURL: "../article/uploadImage",
+            /* theme: "dark",//工具栏主题
+            previewTheme: "dark",//预览主题
+            editorTheme: "pastel-on-dark",//编辑主题  */
+            emoji: true,
+            taskList: true,
+            tocm: true,         // Using [TOCM]
+            tex: true,                   // 开启科学公式TeX语言支持，默认关闭
+            flowChart: true,             // 开启流程图支持，默认关闭
+            sequenceDiagram: true,       // 开启时序/序列图支持，默认关闭,
+            //这个配置在simple.html中并没有，但是为了能够提交表单，使用这个配置可以让构造出来的HTML代码直接在第二个隐藏的textarea域中，方便post提交表单。
+            saveHTMLToTextarea: true,
+            toolbarIcons: function () {
+                // Or return editormd.toolbarModes[name]; // full, simple, mini
+                // Using "||" set icons align right.
+                return ["undo", "redo", "|", "bold", "italic", "quote", "uppercase", "lowercase", "|", "h1", "h2", "h3", "h4", "|", "list-ul", "list-ol", "hr", "|", "link", "image", "code", "code-block", "table", "html-entities", "|", "watch", "preview", "fullscreen", "clear", "|", "help"]
+            },
+            //你的lib目录的路径
+            path: "/lib/editormd/lib/"
+        });
+        const discussion = [[${discussion}]];
+        if (discussion != null) {
+            $("#discussionTitle").val(discussion.discussionTitle);
+            $("#discussionContent").val(discussion.discussionContent);
+        }
+
+    });
+    let discussionId = [[${discussionId}]];
+    const userId = [[${session.userId}]];
+    function sendPost() {
+        let discussion = {};
+        discussion["discussionId"] = discussionId;
+        discussion["discussionTitle"]= $("#discussionTitle").val();
+        discussion["discussionContent"]= $("#discussionContent").val();
+        if (userId == null) {
+            window.location.href="/user/login";
+        }
+        $.ajax({
+            dataType: "json",
+            //请求方式
+            type: "post",
+            //请求的媒体类型
+            contentType: "application/json;charset=UTF-8",
+            //请求地址
+            url: "/discussion/save",
+            data: JSON.stringify(discussion),
+            success: function (result) {
+                if (result != null) {
+                    if (discussionId == null) {
+                        alert("保存成功");
+                        discussionId=result.discussionId;
+                    } else {
+                        alert("修改成功");
+
+                    }
+                } else {
+                    if (discussionId == null) {
+                        alert("保存失败");
+                    } else {
+                        alert("修改失败");
+                    }
+                }
+            },
+            error: function (result) {
+
+            }
+        });
+
+    }
+</script>
+</html>

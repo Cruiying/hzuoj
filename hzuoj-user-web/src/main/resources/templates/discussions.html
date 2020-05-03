@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:v-on="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
+<head>
+    <title>讨论</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport"
+          content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi"/>
+    <link rel="stylesheet" href="../static/css/semantic.css" th:href="@{/css/semantic.css}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/semantic-ui/2.2.4/semantic.min.css">
+
+    <link rel="stylesheet" href="../static/css/me.css" th:href="@{/css/me.css}">
+    <!--    <script type="text/javascript" src="../static/js/xadmin.js" th:src="@{/js/xadmin.js}"></script>-->
+    <link rel="stylesheet" href="../static/lib/layui/css/layui.css" media="all" th:href="@{/lib/layui/css/layui.css}">
+    <link rel="stylesheet" href="../static/lib/jq-module/zyupload/zyupload-1.0.0.min.css"
+          th:href="@{/lib/jq-module/zyupload/zyupload-1.0.0.min.css}" media="all">
+    <script src="../static/lib/vue/vue.js" th:src="@{/lib/vue/vue.js}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script type="text/javascript" src="https://cdn.bootcss.com/axios/0.19.0-beta.1/axios.js"></script>
+
+    <script type="text/javascript" async
+            src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+    </script>
+    <!--    <script src="../static/lib/vs/basic-languages/cpp/cpp.js" th:src="@{/lib/vs/basic-languages/cpp/cpp.js}"></script>-->
+    <!--    <script src="../static/lib/vs/basic-languages/**" th:src="@{/lib/vs/basic-languages/}"></script>-->
+    <link rel="stylesheet" type="text/css" href="../static/css/main.css" th:href="@{/css/main.css}">
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+        }
+
+        a {
+            text-decoration: none !important;
+        }
+
+    </style>
+    <link rel="stylesheet" type="text/css" data-name="vs/editor/editor.main"
+          href="https://cdn.jsdelivr.net/npm/syzoj-public-cdn@1.0.6/cdnjs/monaco-editor/0.18.1/min/vs/editor/editor.main.css">
+</head>
+<body>
+<nav th:replace="fragment::menu('discussions')"></nav>
+<div style="height: 50px;"></div>
+<div id="app" class="ui container" style="min-height: 350px;">
+
+
+    <div style="display: block;" :style="'display: none'" class="ui active centered inline loader"></div>
+    <div class="ui" style="margin-top: 20px;display: none" :style="'display: block'" v-if="pageInfo != null">
+        <!--    搜索-->
+        <div class="ui ">
+            <div class="seven wide column">
+                <form action="/discussions" class="layui-form" method="get">
+                    <div class="ui search" style="width: 280px; height: 28px; margin-top: -5.3px; ">
+                        <div class="ui icon input" style="width: 100%; ">
+                            <input class="prompt" style="width: 100%;" :value="discussionQuery.discussionTitle"
+                                   type="text" placeholder="输入标题搜索..."
+                                   name="discussionTitle" autocomplete="off">
+                            <i class="search icon"></i>
+                        </div>
+                        <div class="results" style="width: 100%; "></div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="column">
+            <div class="ui middle aligned two column grid">
+                <div class="column">
+                    <a href="/discussions?order=1" style="color:  rgba(33,33,33,0.5)">最新发表</a>
+                    &nbsp; | &nbsp;
+                    <a href="/discussions?order=2" style="color:  rgba(33,33,33,0.5);">最多回复</a>
+                    &nbsp; | &nbsp;
+                    <a href="/discussions?order=3" style="color:  rgba(33,33,33,0.5);">最热</a>
+                </div>
+                <div class="right aligned column">
+                    <a href="/discussion/editor" class="ui teal button"><i class="paint brush icon"></i>我要发帖</a>
+                </div>
+            </div>
+        </div>
+        <div class="ui" v-for="discussion in pageInfo.list">
+            <div class="ui grid">
+                <div class="column">
+                    <div class="header">
+                        <a :href="'/user/'+discussion.user.userId"><img alt="头像" class="head-pic"
+                                                                        :src="discussion.user.userImg != null && discussion.user.userImg.length>0 ? discussion.user.userImg: '/images/default.png'"></a>
+                        <h4>
+                            <a class="m-black" :href="'/discussion/'+discussion.discussionId" style="color: #333; "
+                               v-text="discussion.discussionTitle"></a>
+                            &nbsp&nbsp;<a v-if="discussion.discussionTop!=null && discussion.discussionTop>0"
+                                          style="font-size: 11px"
+                                          class="ui inverted red button m-padded-tiny m-text-thin"><b> 置顶 </b></a>
+                        </h4>
+                    </div>
+                    <div style="padding-top: 8px;" class="ui middle aligned two column grid">
+                        <div class="left aligned column">
+                            <div style="color: rgba(33,33,33,0.5);">
+                                <a :href="'/user/'+discussion.user.userId" style="margin-right: 10px;"
+                                   v-html="getUserRatingColor(discussion.user.username,discussion.user.userRating)"></a>
+                                <span v-text="dateFormat(discussion.discussionCreateTime)"></span>
+                            </div>
+                        </div>
+                        <div class="right aligned column">
+                            <div style="color: rgba(33,33,33,0.5)">
+                                <span v-text="'回复 '+discussion.discussionReplyCount"></span>
+                                <span> | </span>
+                                <span v-text="'赞 ' + discussion.discussionCommendCount"></span>
+                                <span> | </span>
+                                <span v-text="'浏览 ' + discussion.discussionBrowseCount"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <hr>
+        </div>
+        <!--    分页-->
+        <div style="margin-top:  30px; " v-if="pageInfo != null">
+            <div style="text-align: center; ">
+                <div class="ui pagination menu" style="box-shadow: none; ">
+                    <a class="icon item" :href="'/discussions' + getURL(1)"
+                       :class="{'disabled':page.page==1}">首页</a>
+                    <a class="icon item" :href="'/discussions' + getURL(page.page-1)"
+                       :class="{'disabled':page.page==1}"><i class="left chevron icon"></i></a>
+                    <a v-for="index in page.end" v-if="index>=page.begin" :href="'/discussions' + getURL(index)" class="item"
+                       :class="{'active':page.page==index}" v-text="index"></a>
+                    <a :href="'/discussions' + getURL(page.page+1)"
+                       :class="{'disabled':page.page==page.total}" class=" icon item"
+                    ><i class="right chevron icon"></i></a>
+                    <a :href="'/discussions' + getURL(page.total)"
+                       :class="{'disabled':page.page==page.total}" class=" icon item">尾页</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<footer style="margin-top: 50px; background: rgba(33,33,33,0.1)!important;"
+        class="ui inverted vertical segment m-padded-tb-large">
+    <div class="content container ui">
+        <div class=" wide column">
+            <h2 class="m-text-thin m-text-spaced m-opacity-tiny" style="color: black">贺州学院算法竞赛训练平台</h2>
+        </div>
+    </div>
+</footer>
+</body>
+<script src="../static/js/jquery.min.js" charset="utf-8" th:src="@{/js/jquery.min.js}"></script>
+<script src="../static/lib/layui/layui.js" charset="utf-8" th:src="@{/lib/layui/layui.js}"></script>
+<script src="../static/js/semantic.js" th:src="@{/js/semantic.js}"></script>
+<script src="../static/js/DateUtils.js" th:src="@{/js/DateUtils.js}"></script>
+<script src="../static/lib/jq-module/zyupload/zyupload-1.0.0.min.js"
+        th:src="@{/lib/jq-module/zyupload/zyupload-1.0.0.min.js}" charset="utf-8"></script>
+<script src="../static/js/mathjax.js" th:src="@{/js/mathjax.js}"></script>
+<script src="../static/js/common.js" th:src="@{/js/common.js}"></script>
+<script th:inline="javascript">
+    new Vue({
+        el: '#app',
+        data: {
+            pageInfo: [[${pageInfo}]],
+            loginUserId: [[${session.userId}]],
+            discussionQuery: [[${discussionQuery}]],
+            page: null
+        },
+        methods: {
+            getBeginAndEnd: function () {
+                if (this.pageInfo == null) return null;
+                this.begin = 1;
+                this.end = this.pageInfo.pages;
+                const currentPage = this.pageInfo.pageNum;
+                if ((this.end - this.begin) <= 14) {
+                    /**
+                     * 显示十个页码，不足十个不做处理
+                     */
+                } else {
+                    if ((currentPage - this.begin) >= 7) {
+                        if ((currentPage + 7) >= this.pageInfo.pages) {
+                            this.end = this.pageInfo.pages;
+                            this.begin = this.end - 14;
+                        } else {
+                            this.end = currentPage + 7;
+                            this.begin = currentPage - 7;
+                        }
+                    } else {
+                        if ((currentPage - 7) >= 1) {
+                            this.begin = currentPage - 7;
+                            this.end = this.begin + 14;
+                        } else {
+                            this.begin = 1;
+                            this.end = this.begin + 14;
+                        }
+                    }
+                }
+            },
+            dateFormat: function (time) {
+                return common.getDateFormat(time);
+            },
+            getUserRatingColor: function (username, rating) {
+                return common.getUserRatingColor(username, rating);
+            },
+            getURL: function (page) {
+                let url = "?";
+                if (this.discussionQuery.discussionId != null) url += 'discussionId=' + this.discussionQuery.discussionId + "&";
+                if (this.discussionQuery.userId != null) url += 'userId=' + this.discussionQuery.userId + "&";
+                if (this.discussionQuery.discussionTitle != null) url += 'discussionTitle=' + this.discussionQuery.discussionTitle + "&";
+                if (this.discussionQuery.order != null) url += 'order=' + this.discussionQuery.order + "&";
+                url += "page=" + page;
+                return url;
+            }
+        },
+        created: function () {
+            this.page = common.getPage(this.pageInfo.pageNum, this.pageInfo.pages);
+        }
+    });
+</script>
+</html>

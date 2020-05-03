@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hqz.hzuoj.mapper.contest.ContestSubmitMapper">
+    <resultMap id="contestSubmitResultMap" type="com.hqz.hzuoj.bean.contest.ContestSubmit">
+        <id column="" property=""/>
+        <association property="contest" javaType="com.hqz.hzuoj.bean.contest.Contest">
+            <id column="contest_id" property="contestId"/>
+            <result column="contest_name" property="contestName"/>
+            <result column="contest_start" property="contestStart"/>
+            <result column="contest_end" property="contestEnd"/>
+            <result column="contest_explain" property="contestExplain"/>
+            <result column="contest_create_time" property="contestCreateTime"/>
+            <result column="contest_apply_start_time" property="contestApplyStartTime"/>
+            <result column="contest_apply_end_time" property="contestApplyEndTime"/>
+            <result column="contest_status" property="contestStatus"/>
+            <result column="contest_time_length" property="contestTimeLength"/>
+            <result column="contest_public" property="contestPublic"/>
+            <result column="contest_code" property="contestCode"/>
+            <result column="contest_apply_status" property="contestApplyStatus"/>
+            <result column="contest_apply_count" property="contestApplyCount"/>
+            <result column="contest_is_rank" property="contestIsRank"/>
+            <result column="contest_rank_status" property="contestRankStatus"/>
+            <result column="contest_rank_is_finish" property="contestRankIsFinish"/>
+            <association property="contestType" javaType="com.hqz.hzuoj.bean.contest.ContestType">
+                <id column="contest_type_id" property="contestTypeId"/>
+                <result column="contest_type_name" property="contestTypeName"/>
+                <result column="contest_type_explain" property="contestTypeExplain"/>
+            </association>
+        </association>
+        <association property="submit" javaType="com.hqz.hzuoj.bean.submit.Submit">
+            <id column="submit_id" property="submitId"/>
+            <result column="submit_time" property="submitTime"/>
+            <result column="submit_code" property="submitCode"/>
+            <result column="submit_compile_info" property="submitCompileInfo"/>
+            <result column="submit_code_length" property="submitCodeLength"/>
+            <result column="submit_score" property="submitScore"/>
+            <result column="submit_runtime_time" property="submitRuntimeTime"/>
+            <result column="submit_runtime_memory" property="submitRuntimeMemory"/>
+            <result column="submit_public" property="submitPublic"/>
+            <association property="language" javaType="com.hqz.hzuoj.bean.language.Language">
+                <id column="language_id" property="languageId"/>
+                <result column="language_name" property="languageName"/>
+                <result column="language_compile_cmd" property="languageCompileCmd"/>
+                <result column="language_runtime_cmd" property="languageRuntimeCmd"/>
+                <result column="language_model" property="languageModel"/>
+            </association>
+            <association property="problem" javaType="com.hqz.hzuoj.bean.problem.Problem">
+                <id column="problem_id" property="problemId"/>
+                <result column="problem_title" property="problemTitle"/>
+                <result column="problem_background" property="problemBackground"/>
+                <result column="problem_content" property="problemContent"/>
+                <result column="problem_data_address" property="problemDataAddress"/>
+                <result column="problem_explain" property="problemExplain"/>
+                <result column="problem_input_format" property="problemInputFormat"/>
+                <result column="problem_output_format" property="problemOutputFormat"/>
+                <result column="problem_public" property="problemPublic"/>
+                <result column="problem_create_time" property="problemCreateTime"/>
+                <result column="problem_update_time" property="problemUpdateTime"/>
+            </association>
+            <association property="user" javaType="com.hqz.hzuoj.bean.user.User">
+                <id column="user_id" property="userId"/>
+                <result column="username" property="username"/>
+                <result column="email" property="email"/>
+                <result column="register_time" property="registerTime"/>
+                <result column="gender" property="gender"/>
+                <result column="user_img" property="UserImg"/>
+                <result column="user_rating" property="userRating"/>
+                <result column="school" property="school"/>
+                <result column="user_submit_total" property="userSubmitTotal"/>
+                <result column="user_challenge_total" property="userChallengeTotal"/>
+            </association>
+            <association property="judgeResult" javaType="com.hqz.hzuoj.bean.submit.JudgeResult">
+                <id column="judge_result_id" property="judgeResultId"/>
+                <result column="judge_name" property="judgeName"/>
+                <result column="judge_abbreviation" property="judgeAbbreviation"/>
+            </association>
+        </association>
+    </resultMap>
+    <insert id="saveContestSubmit">
+        <selectKey order="AFTER" keyProperty="contestSubmitId" resultType="int">
+            select LAST_INSERT_ID()
+        </selectKey>
+        INSERT INTO hzuoj_contests_submits (submit_id,contest_id)
+        VALUES(#{submit.submitId}, #{contest.contestId})
+    </insert>
+    <select id="getContestSubmit" resultMap="contestSubmitResultMap">
+        SELECT
+        s.submit_id,s.submit_time,s.submit_code_length,s.submit_code,s.submit_compile_info,
+        s.submit_runtime_memory,s.submit_runtime_time,s.submit_score,
+        p.problem_id,p.problem_title,
+        c.contest_id,c.contest_status,
+        l.*,
+        jr.*,
+        u.*
+        FROM
+          hzuoj_contests c
+          INNER JOIN hzuoj_contests_submits cs
+            ON c.contest_id = cs.contest_id
+          INNER JOIN hzuoj_contests_types ct
+            ON c.contest_type_id = ct.contest_type_id
+          INNER JOIN hzuoj_submits s
+            ON s.submit_id = cs.submit_id
+          INNER JOIN hzuoj_problems p
+            ON p.problem_id = s.problem_id
+          INNER JOIN hzuoj_languages l
+            ON l.language_id = s.language_id
+          INNER JOIN hzuoj_users u
+            ON u.user_id = s.user_id
+          INNER JOIN hzuoj_judge_result jr
+            ON jr.judge_result_id = s.judge_result_id
+        WHERE c.contest_id = #{contest.contestId} AND s.submit_id = #{submit.submitId}
+    </select>
+    <select id="getContestSubmits" resultMap="contestSubmitResultMap">
+        SELECT
+        s.submit_id,s.submit_time,s.submit_code_length,
+        s.submit_runtime_memory,s.submit_runtime_time,s.submit_score,
+        p.problem_id,p.problem_title,
+        l.*,
+        jr.*,
+        u.*
+        FROM
+          hzuoj_contests c
+          INNER JOIN hzuoj_contests_submits cs
+            ON c.contest_id = cs.contest_id
+          INNER JOIN hzuoj_contests_types ct
+            ON c.contest_type_id = ct.contest_type_id
+          INNER JOIN hzuoj_submits s
+            ON s.submit_id = cs.submit_id
+          INNER JOIN hzuoj_problems p
+            ON p.problem_id = s.problem_id
+          INNER JOIN hzuoj_languages l
+            ON l.language_id = s.language_id
+          INNER JOIN hzuoj_users u
+            ON u.user_id = s.user_id
+          INNER JOIN hzuoj_judge_result jr
+            ON jr.judge_result_id = s.judge_result_id
+        <where>
+            c.contest_id = #{contestId}
+            <if test="param2.languageId != null and param2.languageId != -1">
+                and l.language_id = #{param2.languageId}
+            </if>
+            <if test="param2.judgeResultId != null and param2.judgeResultId != -1">
+                and jr.judge_result_id = #{param2.judgeResultId}
+            </if>
+            <if test="param2.problemId != null and param2.problemId != -1">
+                and s.problem_id=#{param2.problemId}
+            </if>
+            <if test="param2.username != null and param2.username != ''">
+                and u.username like '%${param2.username}%'
+            </if>
+        </where>
+
+        order by s.submit_time desc
+    </select>
+    <select id="getRankContestSubmits" resultMap="contestSubmitResultMap">
+        SELECT
+        *
+        FROM
+        hzuoj_contests c
+        INNER JOIN hzuoj_contests_submits cs
+        ON c.contest_id = cs.contest_id
+        INNER JOIN hzuoj_contests_types ct
+        ON c.contest_type_id = ct.contest_type_id
+        INNER JOIN hzuoj_submits s
+        ON s.submit_id = cs.submit_id
+        INNER JOIN hzuoj_problems p
+        ON p.problem_id = s.problem_id
+        INNER JOIN hzuoj_languages l
+        ON l.language_id = s.language_id
+        INNER JOIN hzuoj_users u
+        ON u.user_id = s.user_id
+        INNER JOIN hzuoj_judge_result jr
+        ON jr.judge_result_id = s.judge_result_id
+        WHERE c.contest_id = #{contestId}
+        AND s.submit_time &lt;= c.contest_end
+        AND s.submit_public = 0
+        AND jr.judge_name != 'CE'
+        AND jr.judge_name != 'SE'
+        ORDER BY s.submit_time
+    </select>
+    <resultMap id="contestProblemResultMap" type="com.hqz.hzuoj.bean.contest.ContestProblem">
+        <id column="contest_problem_id" property="contestProblemId"/>
+        <result column="contest_problem_score" property="contestProblemScore"/>
+        <association property="contest" javaType="com.hqz.hzuoj.bean.contest.Contest">
+            <id column="contest_id" property="contestId"/>
+            <result column="contest_name" property="contestName"/>
+            <result column="contest_start" property="contestStart"/>
+            <result column="contest_end" property="contestEnd"/>
+            <result column="contest_explain" property="contestExplain"/>
+            <result column="contest_create_time" property="contestCreateTime"/>
+            <result column="contest_apply_start_time" property="contestApplyStartTime"/>
+            <result column="contest_apply_end_time" property="contestApplyEndTime"/>
+            <result column="contest_status" property="contestStatus"/>
+            <result column="contest_time_length" property="contestTimeLength"/>
+            <result column="contest_public" property="contestPublic"/>
+            <result column="contest_code" property="contestCode"/>
+            <result column="contest_apply_status" property="contestApplyStatus"/>
+            <result column="contest_apply_count" property="contestApplyCount"/>
+            <result column="contest_is_rank" property="contestIsRank"/>
+            <result column="contest_rank_status" property="contestRankStatus"/>
+            <association property="admin" javaType="com.hqz.hzuoj.bean.user.Admin">
+                <id column="admin_id" property="adminId"/>
+                <result column="admin_name" property="adminName"/>
+                <result column="admin_status" property="adminStatus"/>
+                <result column="admin_create_time" property="adminCreateTime"/>
+                <association property="user" javaType="com.hqz.hzuoj.bean.user.User">
+                    <id column="user_id" property="userId"/>
+                    <result column="username" property="username"/>
+                    <result column="register_time" property="registerTime"/>
+                    <result column="user_rating" property="userRating"/>
+                    <result column="gender" property="gender"/>
+                    <result column="user_img" property="userImg"/>
+                    <result column="email" property="email"/>
+                    <result column="school" property="school"/>
+                </association>
+            </association>
+            <association property="contestType" javaType="com.hqz.hzuoj.bean.contest.ContestType">
+                <id column="contest_type_id" property="contestTypeId"/>
+                <result column="contest_type_name" property="contestTypeName"/>
+                <result column="contest_type_explain" property="contestTypeExplain"/>
+            </association>
+        </association>
+        <association property="problem" javaType="com.hqz.hzuoj.bean.problem.Problem">
+            <id column="problem_id" property="problemId"/>
+            <result column="problem_title" property="problemTitle"/>
+            <result column="problem_background" property="problemBackground"/>
+            <result column="problem_content" property="problemContent"/>
+            <result column="problem_data_address" property="problemDataAddress"/>
+            <result column="problem_explain" property="problemExplain"/>
+            <result column="problem_input_format" property="problemInputFormat"/>
+            <result column="problem_output_format" property="problemOutputFormat"/>
+            <result column="problem_public" property="problemPublic"/>
+            <result column="problem_create_time" property="problemCreateTime"/>
+            <result column="problem_update_time" property="problemUpdateTime"/>
+        </association>
+    </resultMap>
+    <select id="getContestProblemAll" resultMap="contestProblemResultMap">
+        select * from hzuoj_contests c
+        inner join hzuoj_contests_problems cp
+        on c.contest_id = cp.contest_id
+        inner join hzuoj_problems p
+        on cp.problem_id = p.problem_id
+        where c.contest_id = #{contestId}
+    </select>
+</mapper>

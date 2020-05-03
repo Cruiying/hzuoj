@@ -1,6 +1,6 @@
 package com.hqz.hzuoj.service;
 
-import com.hqz.hzuoj.bean.Language;
+import com.hqz.hzuoj.bean.language.Language;
 
 import java.util.List;
 

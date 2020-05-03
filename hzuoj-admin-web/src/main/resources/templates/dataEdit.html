@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>欢迎页面-X-admin2.2</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport"
+          content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi"/>
+    <link rel="stylesheet" href="../static/css/font.css" th:href="@{/css/font.css}">
+    <link rel="stylesheet" href="../static/css/xadmin.css" th:href="@{/css/xadmin.css}">
+    <script type="text/javascript" src="../static/lib/layui/layui.js" th:src="@{/lib/layui.js}"
+            charset="utf-8"></script>
+    <script type="text/javascript" src="../static/js/xadmin.js" th:src="@{/js/xadmin.js}"></script>
+    <!-- 让IE8/9支持媒体查询，从而兼容栅格 -->
+    <!--[if lt IE 9]>
+    <script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
+    <script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
+    <link rel="stylesheet" href="../static/lib/layui/css/layui.css" media="all" th:href="@{/lib/layui/css/layui.css}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/semantic-ui/2.2.4/semantic.min.css">
+    <link rel="stylesheet" href="../static/lib/editormd/css/editormd.min.css"
+          th:href="@{/lib/editormd/css/editormd.min.css}">
+    <script type="text/javascript" src="../static/js/xadmin.js" th:src="@{/js/xadmin.js}"></script>
+    <link rel="stylesheet" href="../static/css/me.css" th:href="@{/css/me.css}">
+    <link rel="stylesheet" href="../static/lib/jq-module/zyupload/zyupload-1.0.0.min.css"
+          th:href="@{/lib/jq-module/zyupload/zyupload-1.0.0.min.css}" media="all">
+    <link rel="stylesheet" href="../static/css/public.css" th:href="@{/css/public.css}" media="all">
+    <script type="text/javascript" async
+            src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+    </script>
+    <![endif]-->
+</head>
+<body>
+<br><br>
+<div class="layui-container">
+    <form class="layui-form" action="" lay-filter="example" id="problem">
+        <div class="layui-container" id="dataInfo">
+            <h1>还没有测试数据......</h1>
+        </div>
+        <div class="layui-form-item" id="btn">
+        </div>
+    </form>
+</div>
+<input id="problemId" type="hidden" th:value="${problemId}">
+</body>
+<script src="../static/lib/layui/layui.js" charset="utf-8" th:src="@{/lib/layui/layui.js}"></script>
+<script src="../static/js/jquery.min.js" charset="utf-8" th:src="@{/js/jquery.min.js}"></script>
+<script src="https://cdn.jsdelivr.net/semantic-ui/2.2.4/semantic.min.js"></script>
+<script src="../static/lib/editormd/editormd.min.js" th:src="@{/lib/editormd/editormd.min.js}"></script>
+<script src="../static/js/jquery.min.js" charset="utf-8" th:src="@{/js/jquery.min.js}"></script>
+<script src="../static/js/mathjax.js" th:src="@{/js/mathjax.js}"></script>
+<script src="../static/lib/jq-module/zyupload/zyupload-1.0.0.min.js"
+        th:src="@{/lib/jq-module/zyupload/zyupload-1.0.0.min.js}" charset="utf-8"></script>
+
+<!--加载测试数据-->
+<script>
+    window.onload = function () {
+        let problemId = $("#problemId").val();
+        let url = "/admin/" + problemId + "/dataInfo";
+        $.ajax({
+            //请求格式
+            datatype: 'json',
+            //请求方式
+            type: "POST",
+            //请求的媒体类型
+            contentType: "application/json;charset=UTF-8",
+            //请求地址
+            url: url,
+            //数据，json字符串
+            data: JSON.stringify(problemId),
+            //请求成功
+            success: function (info) {
+                let datas = info.datas;
+                let dataInfo = "";
+                for (let i = 0; i < datas.length; i++) {
+                    let name = "#" + i + ": " + datas[i].dataInput + " " + datas[i].dataOutput;
+                    let Time = datas[i].dataMaxRuntimeTime;
+                    let Memory = datas[i].dataMaxRuntimeMemory;
+                    let dataId = datas[i].dataId;
+                    dataInfo += "<input type=\"hidden\" name=\"dataId\" value=\"" + dataId + "\">\n" +
+                        "            <div class=\"layui-form-item\">\n" +
+                        "                <div class=\"layui-input-inline\">\n" +
+                        "                    <h3 class=\"layui-form-mid\">" + name + "</h3>\n" +
+                        "                </div>\n" +
+                        "                <div class=\"layui-input-inline\">\n" +
+                        "                    <input type=\"text\" class=\"layui-input\" name=\"dataMaxRuntimeTime\" value=\"" + Time + "\">\n" +
+                        "                </div>\n" +
+                        "                <div class=\"layui-form-mid layui-word-aux\">ms</div>\n" +
+                        "                <div class=\"layui-input-inline\">\n" +
+                        "                    <input type=\"text\" class=\"layui-input\" name=\"dataMaxRuntimeMemory\" value=\"" + Memory + "\">\n" +
+                        "                </div>\n" +
+                        "                <div class=\"layui-form-mid layui-word-aux\">KB</div>\n" +
+                        "            </div>"
+                }
+                if (datas.length>0) {
+                    $("#dataInfo").html(dataInfo);
+                    $("#btn").html(" <button type=\"submit\" class=\"layui-btn\" lay-submit=\"\" lay-filter=\"submit\">保存设置</button>");
+                } else {
+
+                }
+                return false;
+            },
+            //请求失败，包含具体的错误信息
+            error: function (e) {
+                layui.msg("提交失败")
+            }
+        });
+    }
+</script>
+<!--修改测试数据-->
+<script>
+    layui.use(['form', 'layedit', 'laydate'], function () {
+        var form = layui.form
+            , layer = layui.layer
+            , layedit = layui.layedit
+            , laydate = layui.laydate;
+        //日期
+        laydate.render({
+            elem: '#date'
+        });
+        laydate.render({
+            elem: '#date1'
+        });
+        //创建一个编辑器
+        var editIndex = layedit.build('LAY_demo_editor');
+
+        //自定义验证规则
+        form.verify({
+            title: function (value) {
+                if (value.length < 5) {
+                    return '标题至少得5个字符啊';
+                }
+            }
+            , pass: [
+                /^[\S]{6,12}$/
+                , '密码必须6到12位，且不能出现空格'
+            ]
+            , content: function (value) {
+                layedit.sync(editIndex);
+            }
+        });
+        //监听提交
+        form.on('submit(submit)', function (data) {
+            let dataMaxRuntimeTime = $("[name='dataMaxRuntimeTime']");//单引号 的name替换为相应的name
+            let dataMaxRuntimeMemory = $("[name='dataMaxRuntimeMemory']");//单引号 的name替换为相应的name
+            let dataId = $("[name='dataId']");//单引号 的name替换为相应的name
+            let datas = new Array(dataId.length);
+            for (let i = 0; i < dataMaxRuntimeTime.length; i++) {
+                let data = {};
+                data["dataMaxRuntimeTime"] = $(dataMaxRuntimeTime[i]).val();
+                data["dataMaxRuntimeMemory"] = $(dataMaxRuntimeMemory[i]).val();
+                data["dataId"] = $(dataId[i]).val();
+                data["dataInput"] = "";
+                data["dataOutput"] = "";
+                datas[i] = data;
+            }
+            let url = "/admin/" + $("#problemId").val() + "/updateData";
+            $.ajax({
+                //请求格式
+                datatype: 'json',
+                //请求方式
+                type: "POST",
+                //请求的媒体类型
+                contentType: "application/json;charset=UTF-8",
+                //请求地址
+                url: url,
+                //数据，json字符串
+                data: JSON.stringify(datas),
+                //请求成功
+                success: function (result) {
+                    layer.alert(result.msg)
+                    return false;
+                },
+                //请求失败，包含具体的错误信息
+                error: function (e) {
+                    layui.msg("提交失败")
+                }
+            });
+            return false;
+        });
+    });
+</script>
+
+</html>

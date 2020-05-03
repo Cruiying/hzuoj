@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:v-on="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
+<head>
+    <meta charset="UTF-8">
+    <title>比赛列表</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport"
+          content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi"/>
+    <link rel="stylesheet" href="../static/css/semantic.css" th:href="@{/css/semantic.css}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/semantic-ui/2.2.4/semantic.min.css">
+
+    <link rel="stylesheet" href="../static/css/me.css" th:href="@{/css/me.css}">
+    <!--    <script type="text/javascript" src="../static/js/xadmin.js" th:src="@{/js/xadmin.js}"></script>-->
+    <link rel="stylesheet" href="../static/lib/layui/css/layui.css" media="all" th:href="@{/lib/layui/css/layui.css}">
+    <link rel="stylesheet" href="../static/lib/jq-module/zyupload/zyupload-1.0.0.min.css"
+          th:href="@{/lib/jq-module/zyupload/zyupload-1.0.0.min.css}" media="all">
+    <script src="../static/lib/vue/vue.js" th:src="@{/lib/vue/vue.js}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script type="text/javascript" src="https://cdn.bootcss.com/axios/0.19.0-beta.1/axios.js"></script>
+
+    <script type="text/javascript" async
+            src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+    </script>
+    <!--    <script src="../static/lib/vs/basic-languages/cpp/cpp.js" th:src="@{/lib/vs/basic-languages/cpp/cpp.js}"></script>-->
+    <!--    <script src="../static/lib/vs/basic-languages/**" th:src="@{/lib/vs/basic-languages/}"></script>-->
+    <link rel="stylesheet" type="text/css" href="../static/css/main.css" th:href="@{/css/main.css}">
+    <style>
+        .icon {
+            margin: 0 !important;
+        }
+    </style>
+</head>
+<body class="dimmable">
+<!--导航-->
+<nav th:replace="fragment::menu('contests')"></nav>
+<div class="ui " style="background-image: url('/images/top.png'); height: 180px;" >
+    <div class="ui container" style="padding-top: 60px;padding-left: 9%; float: left">
+        <div class="ui middle container">
+            <h1 style="color: white;font-weight: 700; font-size: 35px;">贺州学院<span style="color: red; text-align: center">H</span>
+                <span style="color: orange;text-align: center">z</span>
+                <span style="color: yellow; text-align: center">u</span>
+                <span style="color: green; text-align: center">O</span>
+                <span style="color: cyan; text-align: center">J</span>比赛列表
+            </h1>
+        </div>
+    </div>
+</div>
+<div style="height: 50px;"></div>
+<!--中间内容-->
+<div class="ui container" id="app" style="min-height: 350px;">
+    <div style="display: block;height: 80px;" :style="'display: none'"  class="ui active centered inline loader"></div>
+    <div style="display: none;" :style="'display: block'">
+        <div  class="ui stackable grid">
+            <div class="eleven wide column">
+                <div class="html ui top attached segment">
+                    <div style="margin: 5px;">
+                        <span style="margin: 5px;">赛制</span>
+                        <a style="margin: 5px;" :href="'/contests'+getURL('contestTypeId','-1')+'page=1'" :class="contestQuery == null || contestQuery.contestTypeId == -1 || contestQuery.contestTypeId == null ?'teal':''"  class="ui mini basic button"> 全部 </a>
+                        <a style="margin: 5px;" v-for="contestType in contestTypes" :href="'/contests'+getURL('contestTypeId',contestType.contestTypeId)+'page=1'" :class="contestQuery.contestTypeId == contestType.contestTypeId?'teal':''"  class="ui mini basic button" v-text="contestType.contestTypeName+'赛制'">ACM赛制</a>
+                    </div>
+                    <div style="margin: 5px;">
+                        <span style="margin: 5px;">类型</span>
+                        <a style="margin: 5px;" :href="'/contests'+getURL('categoryFilter','-1')+'page=1'" :class="contestQuery == null || contestQuery.categoryFilter == -1 || contestQuery.categoryFilter == null ?'teal':''"   class="ui mini basic button"> 全部 </a>
+                        <a style="margin: 5px;" :href="'/contests'+getURL('categoryFilter','1')+'page=1'" :class="contestQuery.categoryFilter == 1?'teal':''"  class="ui mini basic button">私有比赛</a>
+                        <a style="margin: 5px;" :href="'/contests'+getURL('categoryFilter','2')+'page=1'" :class="contestQuery.categoryFilter == 2?'teal':''" class="ui mini basic button">公开比赛</a>
+                        <a style="margin: 5px;" :href="'/contests'+getURL('categoryFilter','3')+'page=1'" :class="contestQuery.categoryFilter == 3?'red inverted':'basic'" class="ui mini  button">
+                            <i class="icon trophy"></i>Rating
+                        </a>
+                    </div>
+                    <div style="margin: 5px;">
+                        <span style="margin: 5px;">状态</span>
+                        <a style="margin: 5px;" :href="'/contests'+getURL('signUpFilter','-1')+'page=1'" :class="contestQuery == null || contestQuery.signUpFilter == -1 || contestQuery.signUpFilter == null ?'teal':''" class="ui mini basic button"> 全部 </a>
+                        <a style="margin: 5px;" :href="'/contests'+getURL('signUpFilter','1')+'page=1'" :class="contestQuery.signUpFilter == 1?'teal':''" class="ui mini basic button">已报名</a>
+                        <a style="margin: 5px;" :href="'/contests'+getURL('signUpFilter','2')+'page=1'" :class="contestQuery.signUpFilter == 2?'teal':''" class="ui mini basic button">未报名</a>
+                    </div>
+                </div>
+                <!--header-->
+                <div class="ui attached raised segment">
+                    <div class="ui middle aligned two column grid">
+                        <div class="column">
+                            <h3 class="ui teal header">比赛列表</h3>
+                        </div>
+                        <div class="right aligned column">
+                            共 <h2 class="ui orange header m-inline-block m-text-thin"> {{total}} </h2>
+                            场比赛
+                        </div>
+                    </div>
+                </div>
+                <!--content-->
+                <div class="ui">
+                    <div class="ui attached raised segment" v-for="(contest,index) in contests">
+                        <div class="ui padded vertical ">
+                            <div class="ui middle aligned mobile reversed unstackable grid">
+                                <div class="sixteen wide column">
+                                    <div class="ui grid">
+                                        <div class="wide column">
+                                            <h3 class="ui header">
+                                                <a :href="'/contests/'+contest.contestId" class="m-black"
+                                                   style="font-size: 20px;">{{contest.contestName}}</a>
+                                                <span>
+                                                <a style="font-size: 15px; background-color: rgba(255,255,255,0) !important;" :href="'/contests'+getURL('contestTypeId',contest.contestType.contestTypeId)+'page=1'" class="ui teal basic button m-padded-tiny m-text-thin">{{contest.contestType.contestTypeName}}赛制</a>
+                                                <a style="font-size: 15px; background-color: rgba(255,255,255,0) !important;"
+                                                   class="ui teal basic button m-padded-tiny m-text-thin"
+                                                   v-if="contest.contestApplyStatus=='0'">报名未开始</a>
+                                                <a style="font-size: 15px"
+                                                   class="ui teal basic button m-padded-tiny m-text-thin"
+                                                   v-if="contest.contestApplyStatus=='1'">报名中</a>
+                                                <a style="font-size: 15px; background-color: rgba(255,255,255,0) !important;"
+                                                   class="ui basic button m-padded-tiny m-text-thin"
+                                                   v-if="contest.contestApplyStatus=='2'">报名结束</a>
+                                                <a style="font-size: 15px; background-color: rgba(255,255,255,0) !important;"
+                                                   class="ui basic button m-padded-tiny m-text-thin"
+                                                   v-if="contest.contestStatus=='0'">比赛未开始</a>
+                                                <a style="font-size: 15px; background-color: rgba(255,255,255,0) !important;"
+                                                   class="ui teal basic button m-padded-tiny m-text-thin"
+                                                   v-if="contest.contestStatus=='1'">比赛中</a>
+                                                <a style="font-size: 15px; background-color: rgba(255,255,255,0) !important;"
+                                                   class="ui  basic button m-padded-tiny m-text-thin"
+                                                   v-if="contest.contestStatus=='2'">比赛结束</a>
+                                                <a style="font-size: 15px; background-color: rgba(255,255,255,0) !important;"
+                                                   class="ui  basic button m-padded-tiny m-text-thin"
+                                                   v-if="contest.contestPublic=='0'"><i
+                                                        class="unlock alternate icon"></i>私有比赛</a>
+                                                <a style="font-size: 15px; background-color: rgba(255,255,255,0) !important;"
+                                                   class="ui teal basic button m-padded-tiny m-text-thin"
+                                                   v-if="contest.contestPublic=='1'"><i
+                                                        class="unlock icon"></i>公开赛</a>
+                                                <a style="font-size: 15px"
+                                                   class="ui inverted red button m-padded-tiny m-text-thin"
+                                                   v-if="contest.contestIsRank != null && contest.contestIsRank=='1'"><b><i
+                                                        class="icon trophy"></i> Rating </b></a>
+
+                </span>
+
+                                            </h3>
+                                        </div>
+                                    </div>
+
+                                    <div class="ui grid ">
+                                        <div class="wide">
+                                            <div class="ui mini horizontal link list">
+                                                <div class="item" style="font-size: 15px"><i class="calendar icon"></i>报名时间：<span>{{dateFormat(contest.contestApplyStartTime)}}</span>
+                                                    至 <span>{{dateFormat(contest.contestApplyEndTime)}}</span>
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="ui grid ">
+                                        <div class="wide">
+                                            <div class="ui mini horizontal link list">
+                                                <div class="item" style="font-size: 15px"><i class="calendar icon"></i>比赛时间：<span>{{dateFormat(contest.contestStart)}}</span>
+                                                    至 <span>{{dateFormat(contest.contestEnd)}}</span>
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="ui grid ">
+                                        <div class="wide">
+                                            <div class="ui mini horizontal link list">
+                                                <div class="item" style="font-size: 15px"><i
+                                                        class="user icon"></i>报名人数：<span>{{contest.contestApplyCount}}</span>
+                                                </div>
+                                                <div class="item" style="font-size: 15px"><i class="time icon"></i>时长：<span>{{formatDuring(contest.contestTimeLength)}}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="four wide column">
+                                <div class="ui middle grid">
+                                    <div class="right aligned column">
+                                    <span v-if="contest.contestApplyStatus == '1' && contest.contestStatus != '2'">
+                                        <button class="ui mini teal basic button"
+                                                v-on:click="applyContest(index,contest.contestId)"
+                                                v-if="showUserApplyContest(index) != 1">报名比赛</button>
+                                    </span>
+                                        <span v-if="contest.contestStatus!='2'">
+                                        <span v-if="contest.contestStatus=='1'">
+                                            <span><a :href="'/contests/'+contest.contestId"
+                                                     class="ui mini teal basic button"
+                                                     v-if="showUserApplyContest(index) == '1'">进入比赛</a></span>
+                                        </span>
+                                        <span v-if="contest.contestStatus!='1'">
+                                            <span><button class="ui mini basic button"
+                                                          v-if="showUserApplyContest(index) == '1'">已报名</button></span>
+                                        </span>
+                                    </span>
+                                        <span><a class="ui  mini basic button"
+                                                 v-if="contest.contestStatus=='1' && showUserApplyContest(index) == '0' && contest.contestApplyStatus == '2'">未报名</a></span>
+                                        <span><a :href="'/contests/'+contest.contestId" class="ui  mini basic button"
+                                                 v-if="contest.contestStatus=='2'">比赛结束</a></span>
+                                        <span> <a href="#" class="ui mini basic button" v-if="contest.contestStatus=='2'">重现比赛</a></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="ui attached segment">
+                        <div class="ui middle aligned two column grid">
+                            <div class="column">
+                                <a  :href="'/contests'+getURL('','2')+'page='+prePage"
+                                    class="ui mini teal basic button">上一页</a>
+                            </div>
+                            <div class="right aligned column">
+                                <a  :href="'/contests'+getURL('','2')+'page='+nextPage"
+                                    class="ui mini teal basic button">下一页</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!--右边的top-->
+            <div class="five wide column top-hidden">
+                <!--Rating-->
+                <div class="ui segments">
+                    <div class="ui secondary segment">
+                        <div class="ui two column grid">
+                            <div class="column" style="color: #fbbd08!important">
+                                <i class="trophy icon"></i>Rating榜
+                            </div>
+                            <div class="right aligned column">
+                                <a href="/ranking" target="_blank">查看全部</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="ui teal">
+                        <div class="ui fluid vertical menu">
+                            <a :href="'/user/'+ rank.user.userId" class="item" v-for="rank,index in rankList.list"
+                               v-if="index < 8">
+                                <div class="ui two column grid">
+                                    <div class="column"
+                                         v-html="getUserRatingColor(rank.user.username,rank.user.userRating)">Cruiying
+                                    </div>
+                                    <div class="right aligned column" v-html="getRatingColor(rank.user.userRating)">2222
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="ui tiny dimmer modals page hidden">
+                <div id="showPrivacyApplyContest" class="ui tiny test modal hidden" style="margin-top: -112.5px;">
+                    <i class="close icon"></i>
+                    <div class="header" style="text-align: center">报名比赛？</div>
+                    <div class="content">
+                        <div class="ui form">
+                            <div class="field">
+                                <label>比赛密码：</label>
+                                <input type="hidden" id="contestId" name="contestId" value="">
+                                <input type="password" id="contestCode" name="contestCode">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="actions">
+                        <div class="ui negative button">关闭</div>
+                        <button class="ui positive button" v-on:click="SendApplyContest()">报名参加</button>
+                    </div>
+                </div>
+                <div id="showApplySuccess" class="ui tiny test modal hidden" style="margin-top: -112.5px;">
+                    <i class="close icon"></i>
+                    <div class="header" style="text-align: center">
+                        <div style="color: #21BA45">报名成功</div>
+                    </div>
+                    <div class="content">
+
+                    </div>
+                    <div class="actions">
+                        <div class="ui negative button">关闭</div>
+                        <button class="ui positive button">确定</button>
+                    </div>
+                </div>
+                <div id="showApplyError" class="ui tiny test modal hidden" style="margin-top: -112.5px;">
+                    <i class="close icon"></i>
+                    <div class="header" style="text-align: center">
+                        <div style="color: red">报名失败</div>
+                    </div>
+                    <div class="content">
+
+                    </div>
+                    <div class="actions">
+                        <div class="ui negative button">关闭</div>
+                        <button class="ui positive button">确定</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+<!--底部footer-->
+<footer th:replace="fragment::footer"></footer>
+</body>
+<script src="../static/js/jquery.min.js" charset="utf-8" th:src="@{/js/jquery.min.js}"></script>
+<script src="../static/lib/layui/layui.js" charset="utf-8" th:src="@{/lib/layui/layui.js}"></script>
+<script src="../static/js/semantic.js" th:src="@{/js/semantic.js}"></script>
+<script src="../static/js/DateUtils.js" th:src="@{/js/DateUtils.js}"></script>
+<script src="../static/lib/jq-module/zyupload/zyupload-1.0.0.min.js"
+        th:src="@{/lib/jq-module/zyupload/zyupload-1.0.0.min.js}" charset="utf-8"></script>
+<script src="../static/js/mathjax.js" th:src="@{/js/mathjax.js}"></script>
+<script src="../static/js/common.js" th:src="@{/js/common.js}"></script>
+<script th:inline="javascript" type="text/javascript">
+    new Vue({
+        el: '#app',
+        data: {
+            contestQuery: [[${contestQuery}]],
+            prePage: [[${pageInfo.prePage}]],
+            nextPage: [[${pageInfo.nextPage}]],
+            total: [[${pageInfo.total}]],
+            contests: [[${pageInfo.list}]],
+            loginUserId: [[${session.userId}]],
+            contestApplys: [[${contestApplys}]],
+            rankList: [[${rankList}]],
+            contestTypes: [[${contestTypes}]]
+        },
+        methods: {
+            dateFormat: function (time) {
+                return common.getDateFormat(time);
+            },
+            formatDuring: function (mss) {
+                return common.formatDuring(mss);
+            },
+            getUserRatingColor: function (username, rating) {
+                return common.getUserRatingColor(username,rating);
+            },
+            getRatingColor: function (rating) {
+                return common.getRatingColor(rating);
+            },
+            applyContest: function (index, contestId) {
+                if (this.loginUserId == null) {
+                    window.location.href = '/user/login?ReturnUrl=/contests';
+                }
+                $("#contestId").val(contestId);
+                const contest = this.contests[index];
+                if (contest.contestPublic == '0') {
+                    //如果是私有比赛
+                    this.showPrivacyApplyContest();
+                } else {
+                    //如果是公开比赛
+                    this.SendApplyContest();
+                }
+            },
+            showUserApplyContest: function (index) {
+                if (index >= this.contests.length) {
+                    return -1;
+                }
+                const contest = this.contests[index];
+                return (this.contestApplys[index] != null) ? 1 : 0;
+                //比赛报名中
+            },
+            /**
+             * 显示报名错误消息框
+             */
+            showApplyError: function () {
+                $("#showApplyError").modal("show");
+            },
+            /**
+             * 显示报名成功消息框
+             */
+            showApplySuccess: function () {
+                $("#showApplySuccess").modal("show");
+            },
+            /**
+             * 显示私有比赛报名消息框
+             * */
+            showPrivacyApplyContest: function () {
+                $('#showPrivacyApplyContest').modal('show');
+            },
+            /**
+             * 异步发送报名比赛
+             */
+            SendApplyContest: function () {
+                const contestId = $("#contestId").val();
+                const contestCode = $("#contestCode").val();
+                if (this.loginUserId == null) {
+                    this.$router.push({path: '/user/login?ReturnUrl=/contests'})
+                }
+                let params = new URLSearchParams();
+                params.append('contestId', contestId);
+                params.append('contestCode', contestCode);
+
+                axios.post('/apply/contest/' + contestId, params)
+                    .then((data) => { // 正确的回调
+
+                        if (data.data == "success") {
+                            this.showApplySuccess();
+                            location.reload();
+                        } else this.showApplyError();
+                    })
+                    .catch((error) => { // 错误的回调
+                        this.showApplyError();
+                    })
+            },
+            mounted: function () {
+
+            },
+            getURL: function (str, val) {
+                let tmp = JSON.parse(JSON.stringify(this.contestQuery));
+                if (tmp == null) tmp = {};
+                if (str != '') tmp[str] = val;
+                let url = '?';
+                if (tmp.contestTypeId != null) url += 'contestTypeId=' + tmp.contestTypeId + "&";
+                if (tmp.signUpFilter != null) url += 'signUpFilter=' + tmp.signUpFilter + "&";
+                if (tmp.categoryFilter != null) url += 'categoryFilter=' + tmp.categoryFilter + "&";
+                return url;
+            },
+        }
+    });
+</script>
+
+</html>

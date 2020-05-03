@@ -1,9 +1,9 @@
 package com.hqz.hzuoj.service;
 
 import com.github.pagehelper.PageInfo;
-import com.hqz.hzuoj.bean.Rank;
-import com.hqz.hzuoj.bean.RankingQuery;
-import com.hqz.hzuoj.bean.User;
+import com.hqz.hzuoj.bean.user.Rank;
+import com.hqz.hzuoj.bean.user.RankingQuery;
+import com.hqz.hzuoj.bean.user.User;
 
 /**
  * @Author: HQZ
@@ -20,9 +20,8 @@ public interface UserService {
 
     PageInfo<Rank> getRanks(Integer page, RankingQuery rankingQuery);
 
-    User.UserContestInfo getUserContestInfo(Integer page, Integer userId);
-
-    User.UserProblemInfo getUserProblemInfo(Integer page, Integer userId);
-
     User updateUser(User user);
+
+    User updateUserImg(User user);
+
 }

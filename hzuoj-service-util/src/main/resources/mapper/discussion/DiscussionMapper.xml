@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hqz.hzuoj.mapper.discussion.DiscussionMapper">
+    <resultMap id="discussionResultMap" type="com.hqz.hzuoj.bean.discussion.Discussion">
+        <id column="discussion_id" property="discussionId"/>
+        <result column="discussion_content" property="discussionContent"/>
+        <result column="discussion_create_time" property="discussionCreateTime"/>
+        <result column="discussion_modify_time" property="discussionModifyTime"/>
+        <result column="discussion_title" property="discussionTitle"/>
+        <result column="discussion_top" property="discussionTop"/>
+        <result column="discussion_reply_count" property="discussionReplyCount"/>
+        <result column="discussion_commend_count" property="discussionCommendCount"/>
+        <result column="discussion_browse_count" property="discussionBrowseCount"/>
+        <association property="user" javaType="com.hqz.hzuoj.bean.user.User">
+            <id column="user_id" property="userId"/>
+            <result column="username" property="username"/>
+            <result column="email" property="email"/>
+            <result column="register_time" property="registerTime"/>
+            <result column="gender" property="gender"/>
+            <result column="user_img" property="UserImg"/>
+            <result column="user_rating" property="userRating"/>
+            <result column="user_submit_total" property="userSubmitTotal"/>
+            <result column="user_challenge_total" property="userChallengeTotal"/>
+        </association>
+    </resultMap>
+    <resultMap id="discussionCommentResultMap" type="com.hqz.hzuoj.bean.discussion.DiscussionComment">
+        <id column="cu1_comment_id" property="commentId"/>
+        <result column="cu1_comment_content" property="commentContent"/>
+        <result column="cu1_comment_time" property="commentTime"/>
+        <association property="user" javaType="com.hqz.hzuoj.bean.user.User">
+            <id column="cu1_user_id" property="userId"/>
+            <result column="cu1_username" property="username"/>
+            <result column="cu1_user_img" property="UserImg"/>
+            <result column="cu1_user_rating" property="userRating"/>
+        </association>
+        <association property="parentComment" javaType="com.hqz.hzuoj.bean.discussion.DiscussionComment">
+            <id column="cu2_comment_id" property="commentId"/>
+            <result column="cu2_comment_content" property="commentContent"/>
+            <result column="cu2_comment_time" property="commentTime"/>
+            <association property="user" javaType="com.hqz.hzuoj.bean.user.User">
+                <id column="cu2_user_id" property="userId"/>
+                <result column="cu2_username" property="username"/>
+                <result column="cu2_user_img" property="UserImg"/>
+                <result column="cu2_user_rating" property="userRating"/>
+            </association>
+        </association>
+    </resultMap>
+    <insert id="saveDiscussion">
+        <selectKey order="AFTER" keyProperty="discussionId" resultType="int">
+            select LAST_INSERT_ID()
+        </selectKey>
+        INSERT INTO hzuoj_discussions (
+        discussion_content,discussion_create_time,discussion_modify_time,
+        discussion_title,user_id,discussion_top,discussion_reply_count,
+        discussion_commend_count,discussion_browse_count)
+        VALUES(#{discussionContent}, #{discussionCreateTime}, #{discussionModifyTime},
+        #{discussionTitle},#{user.userId}, #{discussionTop}, #{discussionReplyCount},
+        #{discussionCommendCount}, #{discussionBrowseCount})
+    </insert>
+    <select id="getDiscussion" resultMap="discussionResultMap">
+        SELECT * FROM hzuoj_discussions d
+        INNER JOIN hzuoj_users u
+        ON d.user_id = u.user_id
+        WHERE d.discussion_id = #{discussionId}
+    </select>
+    <select id="getDiscussions" resultMap="discussionResultMap">
+        SELECT
+          d.discussion_id, d.discussion_title,
+          d.discussion_browse_count,d.discussion_commend_count,d.discussion_reply_count,
+          d.discussion_create_time,d.discussion_modify_time, d.discussion_top,
+          u.*
+        FROM
+          hzuoj_discussions d
+          INNER JOIN hzuoj_users u
+            ON d.user_id = u.user_id
+            <where>
+                1 = 1
+                <if test="discussionId != null">
+                    and d.discussion_id = #{discussionId}
+                </if>
+                <if test="userId != null">
+                    and u.user_id = #{userId}
+                </if>
+                <if test="discussionTitle != null">
+                    and d.discussion_title like '%${discussionTitle}%'
+                </if>
+            </where>
+
+        ORDER BY d.discussion_top DESC
+            <if test="order != null and order == 1">
+                , d.discussion_create_time desc
+            </if>
+            <if test="order != null and order == 2">
+                , d.discussion_reply_count desc
+            </if>
+            <if test="order != null and order == 3">
+                , d.discussion_browse_count desc
+            </if>
+        ,d.discussion_id DESC
+    </select>
+    <update id="updateDiscussion">
+        update hzuoj_discussions set
+        discussion_content=#{discussionContent},discussion_modify_time=#{discussionModifyTime},
+        discussion_title=#{discussionTitle}
+        where discussion_id = #{discussionId}
+    </update>
+    <insert id="saveDiscussionComment">
+        <selectKey order="AFTER" keyProperty="commentId" resultType="int">
+            select LAST_INSERT_ID()
+        </selectKey>
+        INSERT INTO hzuoj_discussions_comments (
+        comment_content,comment_time,user_id,
+        discussion_id, parent_comment_id)
+        VALUES(#{commentContent}, #{commentTime}, #{user.userId},
+        #{discussion.discussionId}, #{parentComment.commentId})
+    </insert>
+    <select id="getDiscussionComments" resultMap="discussionCommentResultMap">
+       SELECT
+          cu1.`comment_id` cu1_comment_id,
+          cu1.`comment_content` cu1_comment_content,
+          cu1.`comment_time` cu1_comment_time,
+          cu1.`discussion_id` cu1_discussion_id,
+          cu1.`email` cu1_email,
+          cu1.`parent_comment_id` cu1_parent_comment_id,
+          cu1.`username` cu1_username,
+          cu1.`user_id` cu1_user_id,
+          cu1.`user_img` cu1_user_img,
+          cu1.`user_rating` cu1_user_rating,
+          cu2.`comment_id` cu2_comment_id,
+          cu2.`comment_content` cu2_comment_content,
+          cu2.`comment_time` cu2_comment_time,
+          cu2.`discussion_id` cu2_discussion_id,
+          cu2.`email` cu2_email,
+          cu2.`parent_comment_id` cu2_parent_comment_id,
+          cu2.`username` cu2_username,
+          cu2.`user_id` cu2_user_id,
+          cu2.`user_img` cu2_user_img,
+          cu2.`user_rating` cu2_user_rating
+        FROM
+          comment_users cu1
+          LEFT JOIN comment_users cu2
+            ON cu1.parent_comment_id = cu2.comment_id
+        WHERE cu1.discussion_id = #{discussionId}
+
+        ORDER BY cu1.comment_time ASC
+
+    </select>
+    <select id="getDiscussionComment" resultMap="discussionCommentResultMap">
+        SELECT
+          cu1.`comment_id` cu1_comment_id,
+          cu1.`comment_content` cu1_comment_content,
+          cu1.`comment_time` cu1_comment_time,
+          cu1.`discussion_id` cu1_discussion_id,
+          cu1.`email` cu1_email,
+          cu1.`parent_comment_id` cu1_parent_comment_id,
+          cu1.`username` cu1_username,
+          cu1.`user_id` cu1_user_id,
+          cu1.`user_img` cu1_user_img,
+          cu1.`user_rating` cu1_user_rating,
+          cu2.`comment_id` cu2_comment_id,
+          cu2.`comment_content` cu2_comment_content,
+          cu2.`comment_time` cu2_comment_time,
+          cu2.`discussion_id` cu2_discussion_id,
+          cu2.`email` cu2_email,
+          cu2.`parent_comment_id` cu2_parent_comment_id,
+          cu2.`username` cu2_username,
+          cu2.`user_id` cu2_user_id,
+          cu2.`user_img` cu2_user_img,
+          cu2.`user_rating` cu2_user_rating
+        FROM
+          comment_users cu1
+          LEFT JOIN comment_users cu2
+            ON cu1.parent_comment_id = cu2.comment_id
+        WHERE cu1.comment_id = #{commentId}
+    </select>
+    <update id="updateDiscussionCount">
+        update hzuoj_discussions set
+        discussion_reply_count = discussion_reply_count + #{replyCount},
+        discussion_commend_count = discussion_commend_count + #{commendCount},
+        discussion_browse_count = discussion_browse_count + #{browseCount}
+        where discussion_id = #{discussionId}
+    </update>
+</mapper>

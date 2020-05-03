@@ -1,10 +1,10 @@
 package com.hqz.hzuoj.service;
 
 import com.github.pagehelper.PageInfo;
-import com.hqz.hzuoj.bean.Problem;
-import com.hqz.hzuoj.bean.ProblemLevel;
-import com.hqz.hzuoj.bean.ProblemQuery;
-import com.hqz.hzuoj.bean.Tag;
+import com.hqz.hzuoj.bean.problem.Problem;
+import com.hqz.hzuoj.bean.problem.ProblemLevel;
+import com.hqz.hzuoj.bean.problem.ProblemQuery;
+import com.hqz.hzuoj.bean.problem.Tag;
 
 import java.util.List;
 
@@ -111,6 +111,14 @@ public interface ProblemService {
      * @return
      */
     List<ProblemLevel> getProblemLevels();
+
+    PageInfo<ProblemLevel> getProblemLevels(Integer page);
+
+    boolean deleteProblemLevel(Integer ProblemLevelId);
+
+    ProblemLevel saveProblemLevel(ProblemLevel problemLevel);
+
+    ProblemLevel getProblemLevel(Integer ProblemLevelId);
 
     PageInfo<Problem> getProblemQuery(Integer page, Integer userId, ProblemQuery problemQuery);
 }

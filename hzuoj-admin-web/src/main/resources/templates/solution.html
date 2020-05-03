@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>添加等级</title>
+    <link rel="stylesheet" href="../static/lib/layui/css/layui.css" media="all" th:href="@{/lib/layui/css/layui.css}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/semantic-ui/2.2.4/semantic.min.css">
+    <link rel="stylesheet" href="../static/lib/editormd/css/editormd.min.css"
+          th:href="@{/lib/editormd/css/editormd.min.css}">
+    <script type="text/javascript" src="../static/js/xadmin.js" th:src="@{/js/xadmin.js}"></script>
+    <link rel="stylesheet" href="../static/css/me.css" th:href="@{/css/me.css}">
+    <link rel="stylesheet" href="../static/lib/jq-module/zyupload/zyupload-1.0.0.min.css"
+          th:href="@{/lib/jq-module/zyupload/zyupload-1.0.0.min.css}" media="all">
+    <link rel="stylesheet" href="../static/css/public.css" th:href="@{/css/public.css}" media="all">
+    <link rel="stylesheet" type="text/css"
+          href="https://raw.githack.com/hnzzmsf/layui-formSelects/master/dist/formSelects-v4.css"/>
+    <script type="text/javascript" async
+            src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+    </script>
+    <link rel="stylesheet" href="https://apps.bdimg.com/libs/highlight.js/9.1.0/styles/tomorrow.min.css">
+    <link rel="stylesheet" href="../static/lib/editormd/css/editormd.min.css"
+          th:href="@{/lib/editormd/css/editormd.min.css}">
+    <link href="https://cdn.bootcss.com/prism/1.15.0/themes/prism.css" rel="stylesheet">
+</head>
+<body id="app">
+<form class="layui-form" action="" lay-filter="example" id="problemLevel">
+    <div class="layui-form-item" >
+        <input type="hidden" name="solutionId" th:value="${solution.solutionId}">
+        <h1 style="text-align: center; " th:text="${'题目: ' + solution.problem.problemTitle + '的题解'}">蓝桥杯选拔赛</h1>
+    </div>
+    <div class="layui-form-item" style="min-height: 150px;margin: 10px">
+        <div id="solutionContent">
+
+        </div>
+    </div>
+    <div class="layui-form-item" style="text-align: center">
+        <p style="cursor: pointer" onclick="load()" id="load">加载更多</p>
+    </div>
+    <div class="layui-from-item" style="margin: 10px;">
+        <h3>题解状态</h3>
+        <select name="solutionStatusId" lay-filter="aihao">
+            <option value="0" th:each="solutionStatus : ${solutionStatus}" th:value="${solutionStatus.solutionStatusId}" th:text="${solutionStatus.solutionStatusName}" th:selected="${solutionStatus.solutionStatusId == solution.solutionStatus.solutionStatusId}"></option>
+        </select>
+    </div>
+    <div class="layui-form-item" style="text-align: right">
+        <button type="button" class="layui-btn layui-btn-normal" onclick="window.history.go(-1)">返回</button>
+        <button type="button" class="layui-btn layui-btn-normal" id="LAY-component-form-getval">保存</button>
+        <button type="submit" class="layui-btn" lay-submit="" lay-filter="submit">确定</button>
+    </div>
+</form>
+<script src="../static/lib/layui/layui.js" charset="utf-8" th:src="@{/lib/layui/layui.js}"></script>
+<script src="../static/js/jquery.min.js" charset="utf-8" th:src="@{/js/jquery.min.js}"></script>
+<script src="https://cdn.jsdelivr.net/semantic-ui/2.2.4/semantic.min.js"></script>
+<script src="../static/lib/editormd/editormd.min.js" th:src="@{/lib/editormd/editormd.min.js}"></script>
+<script src="https://raw.githack.com/hnzzmsf/layui-formSelects/master/dist/formSelects-v4.min.js" type="text/javascript"
+        charset="utf-8"></script>
+<script src="../static/js/mathjax.js" th:src="@{/js/mathjax.js}"></script>
+<script src="../static/lib/jq-module/zyupload/zyupload-1.0.0.min.js"
+        th:src="@{/lib/jq-module/zyupload/zyupload-1.0.0.min.js}" charset="utf-8"></script>
+<script src="https://cdn.bootcss.com/prism/1.15.0/prism.js"></script>
+<script src="https://cdn.bootcss.com/prism/1.15.0/components/prism-java.js"></script>
+<script src="//cdn.jsdelivr.net/npm/jquery.scrollto@2.1.2/jquery.scrollTo.min.js"></script>
+<script src="../static/js/mathjax.js" th:src="@{/js/mathjax.js}"></script>
+<script src="http://cdn.bootcss.com/highlight.js/8.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/marked/0.3.4/marked.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+<!--添加标签-->
+<script>
+    layui.use(['form', 'layedit', 'laydate'], function () {
+        const form = layui.form, layer = layui.layer;
+        //监听提交
+        form.on('submit(submit)', function (data) {
+            let solution = {};
+            let solutionStatus = {};
+            solution["solutionId"] = data.field.solutionId;
+            solutionStatus["solutionStatusId"]=data.field.solutionStatusId;
+            solution["solutionStatus"] = solutionStatus;
+            $.ajax({
+                //请求格式
+                datatype: 'json',
+                //请求方式
+                type: "POST",
+                //请求的媒体类型
+                contentType: "application/json;charset=UTF-8",
+                //请求地址
+                url: "/admin/solution/status",
+                //数据，json字符串
+                data: JSON.stringify(solution),
+                //请求成功
+                success: function (result) {
+                    if (result != null) {
+                        alert('修改成功')
+                    } else {
+                        alert('修改失败');
+                    }
+                },
+                //请求失败，包含具体的错误信息
+                error: function (e) {
+                    layui.msg("提交失败")
+                }
+            });
+            return false;
+        });
+    });
+</script>
+<script th:inline="javascript">
+    let page = 0;
+    let length = 2000;
+    let text = [[${solution.solutionContent}]];
+    let pageSize = text.length / length;
+
+    function load() {
+        if (page >= pageSize){
+            $("#load").html('');
+            return;
+        }
+        $("#solutionContent").html(text.substring(0, (page + 1) * length));
+        page++;
+        if (page >= pageSize){
+            $("#load").html('');
+            return;
+        }
+    }
+    load();
+</script>
+</body>
+</html>

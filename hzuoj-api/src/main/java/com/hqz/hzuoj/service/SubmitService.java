@@ -1,7 +1,13 @@
 package com.hqz.hzuoj.service;
 
 import com.github.pagehelper.PageInfo;
-import com.hqz.hzuoj.bean.*;
+import com.hqz.hzuoj.bean.contest.Contest;
+import com.hqz.hzuoj.bean.contest.ContestRank;
+import com.hqz.hzuoj.bean.contest.ContestRankQuery;
+import com.hqz.hzuoj.bean.contest.ContestSubmit;
+import com.hqz.hzuoj.bean.submit.Submit;
+import com.hqz.hzuoj.bean.submit.SubmitQuery;
+import com.hqz.hzuoj.bean.submit.TestCode;
 
 import java.util.List;
 
@@ -16,9 +22,13 @@ public interface SubmitService {
 
     Submit saveSubmit(Submit submit);
 
-    TestCode getTestCode(Long testId);
+    String restartSubmit(Integer submitId);
+
+    String restartSubmits();
 
     PageInfo<Submit> getSubmits(Integer page, SubmitQuery submitQuery);
+
+    PageInfo<Submit> getSubmits(Integer page);
 
     TestCode saveTestCode(TestCode testCode);
 
@@ -28,7 +38,7 @@ public interface SubmitService {
 
     PageInfo<ContestSubmit> getContestSubmits(Integer page, Integer contestId, SubmitQuery submitQuery);
 
-    PageInfo<ContestRank> getContestRanks(Integer page, Contest contest);
+    PageInfo<ContestRank> getContestRanks(Integer page, Contest contest, ContestRankQuery contestRankQuery);
 
     List<ContestRank> getContestRanks(Integer contestId);
 

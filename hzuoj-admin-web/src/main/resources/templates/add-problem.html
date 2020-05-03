@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>添加题目</title>
+    <link rel="stylesheet" href="../static/lib/layui/css/layui.css" media="all" th:href="@{/lib/layui/css/layui.css}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/semantic-ui/2.2.4/semantic.min.css">
+    <link rel="stylesheet" href="../static/lib/editormd/css/editormd.min.css"
+          th:href="@{/lib/editormd/css/editormd.min.css}">
+    <script type="text/javascript" src="../static/js/xadmin.js" th:src="@{/js/xadmin.js}"></script>
+    <link rel="stylesheet" href="../static/css/me.css" th:href="@{/css/me.css}">
+    <link rel="stylesheet" href="../static/lib/jq-module/zyupload/zyupload-1.0.0.min.css"
+          th:href="@{/lib/jq-module/zyupload/zyupload-1.0.0.min.css}" media="all">
+    <link rel="stylesheet" href="../static/css/public.css" th:href="@{/css/public.css}" media="all">
+    <link rel="stylesheet" type="text/css" href="https://raw.githack.com/hnzzmsf/layui-formSelects/master/dist/formSelects-v4.css" />
+    <link rel="stylesheet" type="text/css" href="../static/css/Selects.css" th:href="@{/css/Selects.css}">
+    <script type="text/javascript" async
+            src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+    </script>
+
+</head>
+<body id="app">
+<form class="layui-form" action="" lay-filter="example" id="problem">
+    <div class="layui-form-item">
+        <input id="adminId" type="hidden" name="adminId" th:value="${adminId}">
+        <input id="problemId" type="hidden" name="problemId" th:value="${problemId}">
+    </div>
+    <div class="layui-form-item">
+        <h3>题目名称</h3>
+        <input type="text" id="problemTitle" name="problemTitle" class="layui-input">
+    </div>
+    <div class="layui-form-item">
+        <h3>题目背景</h3>
+        <div id="md-background" style="z-index: 1 !important;">
+            <textarea id="problemBackground" name="problemBackground"
+                      class="typo  typo-selection js-toc-content layui-input"></textarea>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <h3>题目内容</h3>
+        <div id="md-content">
+            <textarea id="problemContent" name="problemContent" class="typo  typo-selection js-toc-content layui-input"
+                      style="display: none"></textarea>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <h3>输入格式</h3>
+        <div id="md-input">
+            <textarea id="problemInputFormat" placeholder="输入格式" name="problemInputFormat"
+                      class="typo  typo-selection js-toc-content"></textarea>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <h3>输出格式</h3>
+        <div id="md-output">
+            <textarea id="problemOutputFormat" placeholder="输出格式" name="problemOutputFormat"
+                      class="typo  typo-selection js-toc-content"></textarea>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <div class="layui-container-filed" id="test">
+        </div>
+        <button type="button" class="layui-btn" onclick="add();">添加样例</button>
+    </div>
+    <div class="layui-form-item">
+        <div class="layui-upload">
+            <span><h4>上传压缩包的要求：</h4></span>
+            <p>直接将若干个数据打包成zip压缩包，其他格式不能成功</p>
+            <p>没有任何文件夹或者其他无关文件，压缩后大小不能超过50M</p>
+            <p>测试点顺序及输入输出文件将被系统自动识别，为了保证识别成功，文件名为"game1.in","game1.out" </p>
+            <button type="button" class="layui-btn layui-btn-normal" id="selectFile" onclick="checkUpload()">上传数据
+            </button>
+            <button type="button" class="layui-btn" id="startUploadFile">开始上传</button>
+            <span id="data">
+            </span>
+            <p id="allFileText"></p>
+        </div>
+    </div>
+    <div class="layui-form-item  layui-form-text">
+        <div class="layui-container-filed">
+            <h3>提示说明</h3>
+            <div id="md-explain">
+                <textarea id="problemExplain" placeholder="提示说明" name="problemExplain"
+                          class="typo  typo-selection js-toc-content"
+                          style="display: none"></textarea>
+            </div>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <h3>添加标签</h3>
+        <div>
+            <select name="city" xm-select="select1" value="">
+                <option th:each="userSelectTag : ${userSelectTags}" th:value="${userSelectTag.tag.tagId}" th:text="${userSelectTag.tag.tagName}" th:selected="${userSelectTag.userSelect}"></option>
+            </select>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <h3>题目难度</h3>
+        <select name="problemLevelId" lay-filter="aihao">
+            <option th:each="problemLevel : ${problemLevels}" th:value="${problemLevel.problemLevelId}" th:text="${problemLevel.problemLevelName}" th:selected="${problem.problemLevel != null and problemLevel.problemLevelId == problem.problemLevel.problemLevelId}"></option>
+        </select>
+    </div>
+    <div class="layui-form-item">
+        <h3>是否公开</h3>
+        <div>
+            <input type="radio" id="no" name="problemPublic" value="0" title="否" checked>
+            <input type="radio" id="yes" name="problemPublic" value="1" title="是">
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <button type="button" class="layui-btn layui-btn-normal"
+                onclick="window.history.go(-1)">返回
+        </button>
+        <button type="button" class="layui-btn layui-btn-normal" id="LAY-component-form-getval">保存</button>
+        <button type="submit" class="layui-btn" lay-submit="" lay-filter="submit">确定</button>
+    </div>
+</form>
+<script src="../static/lib/layui/layui.js" charset="utf-8" th:src="@{/lib/layui/layui.js}"></script>
+<script src="../static/js/jquery.min.js" charset="utf-8" th:src="@{/js/jquery.min.js}"></script>
+<script src="https://cdn.jsdelivr.net/semantic-ui/2.2.4/semantic.min.js"></script>
+<script src="../static/lib/editormd/editormd.min.js" th:src="@{/lib/editormd/editormd.min.js}"></script>
+<script src="https://raw.githack.com/hnzzmsf/layui-formSelects/master/dist/formSelects-v4.min.js" type="text/javascript"
+        charset="utf-8"></script>
+<script src="../static/js/Selects.js" th:src="@{/js/Selects.js}"></script>
+<script src="../static/js/mathjax.js" th:src="@{/js/mathjax.js}"></script>
+<script src="../static/lib/jq-module/zyupload/zyupload-1.0.0.min.js"
+        th:src="@{/lib/jq-module/zyupload/zyupload-1.0.0.min.js}" charset="utf-8"></script>
+<!--初始化mathjax-->
+<script th:inline="none">
+    let isMathjaxConfig = false; // 防止重复调用Config，造成性能损耗
+
+    const initMathjaxConfig = () => {
+        if (!window.MathJax) {
+            return;
+        }
+        window.MathJax.Hub.Config({
+            showProcessingMessages: false, //关闭js加载过程信息
+            messageStyle: "none", //不显示信息
+            jax: ["input/TeX", "output/HTML-CSS"],
+            tex2jax: {
+                inlineMath: [["$", "$"], ["\\(", "\\)"]], //行内公式选择符
+                displayMath: [["$$", "$$"], ["\\[", "\\]"]], //段内公式选择符
+                skipTags: ["script", "noscript", "style", "textarea", "pre", "code", "a"] //避开某些标签
+            },
+            "HTML-CSS": {
+                availableFonts: ["STIX", "TeX"], //可选字体
+                showMathMenu: false //关闭右击菜单显示
+            }
+        });
+        isMathjaxConfig = true; //
+    };
+    if (isMathjaxConfig === false) { // 如果：没有配置MathJax
+        initMathjaxConfig();
+    }
+
+    // 如果，不传入第三个参数，则渲染整个document
+    // 因为使用的Vuejs，所以指明#app，以提高速度
+    window.MathJax.Hub.Queue(["Typeset", MathJax.Hub, document.getElementById('app')]);
+</script>
+<!--初始化markdown和加载数据-->
+<script>
+    <!--    添加样例-->
+    let count = 0;
+
+    function add() {
+        addExample("", "");
+    }
+
+    function addExample(exampleInput, exampleOutput) {
+        count++;
+
+        $("#test").append(" <h3>样例#<span>" + count + "</span></h3>\n" +
+            "            <div class=\"layui-col-xs6\" style=\"padding-right: 10px;\">\n" +
+            "                <textarea class=\"layui-textarea\" name=\"exampleInput\" value='" + exampleInput + "'>" + exampleInput + "</textarea>\n" +
+            "            </div>\n" +
+            "            <div class=\"layui-col-xs6\" style=\"padding-right: 10px;\">\n" +
+            "                <textarea class=\"layui-textarea\" name=\"exampleOutput\" value='" + exampleOutput + "' >" + exampleOutput + "</textarea>\n" +
+            "            </div>")
+    }
+
+    //初始化Markdown编辑器
+    var contentEditor;
+    $(function () {
+        contentEditor = editormd("md-background", {
+            toolbar: false,
+            width: "100%",
+            height: 300,
+            watch: false,
+            //markdown : md,
+            codeFold: true,
+            syncScrolling: "single",
+
+            imageUpload: true,//图片上传功能
+            imageFormats: ["jpg", "jpeg", "gif", "png", "bmp", "webp"],
+            imageUploadURL: "../article/uploadImage",
+            emoji: true,
+            taskList: true,
+            tocm: false,         // Using [TOCM]
+            tex: true,                   // 开启科学公式TeX语言支持，默认关闭
+            flowChart: true,             // 开启流程图支持，默认关闭
+            sequenceDiagram: true,       // 开启时序/序列图支持，默认关闭,
+            //这个配置在simple.html中并没有，但是为了能够提交表单，使用这个配置可以让构造出来的HTML代码直接在第二个隐藏的textarea域中，方便post提交表单。
+            saveHTMLToTextarea: false,
+            toolbarIcons: function () {
+                // Or return editormd.toolbarModes[name]; // full, simple, mini
+                // Using "||" set icons align right.
+                return ["undo", "redo", "|", "bold", "italic", "quote", "uppercase", "lowercase", "|", "h1", "h2", "h3", "h4", "|", "list-ul", "list-ol", "hr", "|", "link", "image", "code", "code-block", "table", "html-entities", "|", "watch", "preview", "fullscreen", "clear", "|", "help"]
+            },
+            //你的lib目录的路径
+            path: "/lib/editormd/lib/"
+        });
+        contentEditor = editormd("md-content", {
+            toolbar: true,
+            width: "100%",
+            height: 400,
+            watch: false,
+            //markdown : md,
+            codeFold: true,
+            syncScrolling: "single",
+
+            imageUpload: true,//图片上传功能
+            imageFormats: ["jpg", "jpeg", "gif", "png", "bmp", "webp"],
+            imageUploadURL: "../article/uploadImage",
+            /* theme: "dark",//工具栏主题
+            previewTheme: "dark",//预览主题
+            editorTheme: "pastel-on-dark",//编辑主题  */
+            emoji: true,
+            taskList: true,
+            tocm: true,         // Using [TOCM]
+            tex: true,                   // 开启科学公式TeX语言支持，默认关闭
+            flowChart: true,             // 开启流程图支持，默认关闭
+            sequenceDiagram: true,       // 开启时序/序列图支持，默认关闭,
+            //这个配置在simple.html中并没有，但是为了能够提交表单，使用这个配置可以让构造出来的HTML代码直接在第二个隐藏的textarea域中，方便post提交表单。
+            saveHTMLToTextarea: true,
+            toolbarIcons: function () {
+                // Or return editormd.toolbarModes[name]; // full, simple, mini
+                // Using "||" set icons align right.
+                return ["undo", "redo", "|", "bold", "italic", "quote", "uppercase", "lowercase", "|", "h1", "h2", "h3", "h4", "|", "list-ul", "list-ol", "hr", "|", "link", "image", "code", "code-block", "table", "html-entities", "|", "watch", "preview", "fullscreen", "clear", "|", "help"]
+            },
+            //你的lib目录的路径
+            path: "/lib/editormd/lib/"
+        });
+        contentEditor = editormd("md-input", {
+            toolbar: false,
+            width: "100%",
+            height: 200,
+            watch: false,
+            //markdown : md,
+            codeFold: true,
+            syncScrolling: "single",
+
+            imageUpload: true,//图片上传功能
+            imageFormats: ["jpg", "jpeg", "gif", "png", "bmp", "webp"],
+            imageUploadURL: "../article/uploadImage",
+            /* theme: "dark",//工具栏主题
+            previewTheme: "dark",//预览主题
+            editorTheme: "pastel-on-dark",//编辑主题  */
+            emoji: true,
+            taskList: true,
+            tocm: true,         // Using [TOCM]
+            tex: true,                   // 开启科学公式TeX语言支持，默认关闭
+            flowChart: true,             // 开启流程图支持，默认关闭
+            sequenceDiagram: true,       // 开启时序/序列图支持，默认关闭,
+            //这个配置在simple.html中并没有，但是为了能够提交表单，使用这个配置可以让构造出来的HTML代码直接在第二个隐藏的textarea域中，方便post提交表单。
+            saveHTMLToTextarea: true,
+            toolbarIcons: function () {
+                // Or return editormd.toolbarModes[name]; // full, simple, mini
+                // Using "||" set icons align right.
+                return ["undo", "redo", "|", "bold", "italic", "quote", "uppercase", "lowercase", "|", "h1", "h2", "h3", "h4", "|", "list-ul", "list-ol", "hr", "|", "link", "image", "code", "code-block", "table", "html-entities", "|", "watch", "preview", "fullscreen", "clear", "|", "help"]
+            },
+            //你的lib目录的路径
+            path: "/lib/editormd/lib/"
+        });
+        contentEditor = editormd("md-output", {
+            toolbar: false,
+            width: "100%",
+            height: 200,
+            watch: false,
+            //markdown : md,
+            codeFold: true,
+            syncScrolling: "single",
+
+            imageUpload: true,//图片上传功能
+            imageFormats: ["jpg", "jpeg", "gif", "png", "bmp", "webp"],
+            imageUploadURL: "../article/uploadImage",
+            /* theme: "dark",//工具栏主题
+            previewTheme: "dark",//预览主题
+            editorTheme: "pastel-on-dark",//编辑主题  */
+            emoji: true,
+            taskList: true,
+            tocm: true,         // Using [TOCM]
+            tex: true,                   // 开启科学公式TeX语言支持，默认关闭
+            flowChart: true,             // 开启流程图支持，默认关闭
+            sequenceDiagram: true,       // 开启时序/序列图支持，默认关闭,
+            //这个配置在simple.html中并没有，但是为了能够提交表单，使用这个配置可以让构造出来的HTML代码直接在第二个隐藏的textarea域中，方便post提交表单。
+            saveHTMLToTextarea: true,
+            toolbarIcons: function () {
+                // Or return editormd.toolbarModes[name]; // full, simple, mini
+                // Using "||" set icons align right.
+                return ["undo", "redo", "|", "bold", "italic", "quote", "uppercase", "lowercase", "|", "h1", "h2", "h3", "h4", "|", "list-ul", "list-ol", "hr", "|", "link", "image", "code", "code-block", "table", "html-entities", "|", "watch", "preview", "fullscreen", "clear", "|", "help"]
+            },
+            //你的lib目录的路径
+            path: "/lib/editormd/lib/"
+        });
+        contentEditor = editormd("md-explain", {
+            width: "100%",
+            height: 200,
+            watch: false,
+            //markdown : md,
+            codeFold: true,
+            syncScrolling: "single",
+            toolbar: true,
+            imageUpload: true,//图片上传功能
+            imageFormats: ["jpg", "jpeg", "gif", "png", "bmp", "webp"],
+            imageUploadURL: "../article/uploadImage",
+            /* theme: "dark",//工具栏主题
+            previewTheme: "dark",//预览主题
+            editorTheme: "pastel-on-dark",//编辑主题  */
+            emoji: true,
+            taskList: true,
+            tocm: true,         // Using [TOCM]
+            tex: true,                   // 开启科学公式TeX语言支持，默认关闭
+            flowChart: true,             // 开启流程图支持，默认关闭
+            sequenceDiagram: true,       // 开启时序/序列图支持，默认关闭,
+            //这个配置在simple.html中并没有，但是为了能够提交表单，使用这个配置可以让构造出来的HTML代码直接在第二个隐藏的textarea域中，方便post提交表单。
+            saveHTMLToTextarea: true,
+            toolbarIcons: function () {
+                // Or return editormd.toolbarModes[name]; // full, simple, mini
+                // Using "||" set icons align right.
+                return ["undo", "redo", "|", "bold", "italic", "quote", "uppercase", "lowercase", "|", "h1", "h2", "h3", "h4", "|", "list-ul", "list-ol", "hr", "|", "link", "image", "code", "code-block", "table", "html-entities", "|", "watch", "preview", "fullscreen", "clear", "|", "help"]
+            },
+            //你的lib目录的路径
+            path: "/lib/editormd/lib/"
+        });
+
+        var problemId = $("#problemId").val();
+        if (problemId != null && problemId.length > 0) {
+            let url = "/admin/problem/" + problemId + "/info";
+            $.ajax({
+                dataType: "json",
+                //请求方式
+                type: "POST",
+                //请求的媒体类型
+                contentType: "application/json;charset=UTF-8",
+                //请求地址
+                url: url,
+                //请求成功
+                success: function (result) {
+                    const problem = result.problem;
+                    const examples = problem.examples;
+                    $("#problemContent").val(problem.problemContent);
+                    $("#problemTitle").val(problem.problemTitle);
+                    $("#problemBackground").val(problem.problemBackground);
+                    $("#problemInputFormat").val(problem.problemInputFormat);
+                    $("#problemOutputFormat").val(problem.problemOutputFormat);
+                    $("#problemExplain").val(problem.problemExplain);
+                    $("#data").html("<div class=\"layui-btn\" onclick=\"xadmin.open('数据点设置','/admin/" + problem.problemId + "/dataEdit')\" ><i class=\"layui-icon\">&#xe642;</i>数据点设置</div>")
+                    if (problem.problemPublic == 1) {
+                        $("#yes").prop("checked",true);
+                        $("#no").prop("checked", false);
+                    } else {
+                        $("#yes").prop("checked",false);
+                        $("#no").prop("checked", true);
+                    }
+
+                    for (let i = 0; i < examples.length; i++) {
+                        addExample(examples[i].exampleInput, examples[i].exampleOutput);
+                    }
+                    return false;
+                },
+                //请求失败，包含具体的错误信息
+                error: function (e) {
+                    layui.msg("提交失败")
+                }
+            });
+        }
+    });
+    $('.menu.toggle').click(function () {
+        $('.m-item').toggleClass('m-mobile-hide');
+    });
+
+    $('.ui.dropdown').dropdown({
+        on: 'hover'
+    });
+
+    $('#save-btn').click(function () {
+        $('[name="published"]').val(false);
+        $('#blog-form').submit();
+    });
+
+
+    $('#publish-btn').click(function () {
+        $('[name="published"]').val(true);
+        $('#blog-form').submit();
+    });
+
+    $('.ui.form').form({
+        fields: {
+            title: {
+                identifier: 'title',
+                rules: [{
+                    type: 'empty',
+                    prompt: '标题：请输入题目名称'
+                }]
+            },
+            content: {
+                identifier: 'content',
+                rules: [{
+                    type: 'empty',
+                    prompt: '标题：请输入题目内容'
+                }]
+            }
+        }
+    });
+</script>
+<!--
+上传数据
+-->
+<script type="text/javascript">
+    function checkUpload() {
+        let problemId = $("#problemId").val();
+        if (problemId != null && problemId != "") {
+            layui.use('upload', function () {
+                let upload = layui.upload;
+                //上传文件
+                upload.render({
+                    elem: '#selectFile'
+                    , url: '/admin/upload?problemId=' + problemId
+                    , accept: "file"
+                    , exts: "zip"
+                    , auto: false
+                    , bindAction: '#startUploadFile'
+                    , size: 1024 * 50 //限制文件大小，单位 KB
+                    , done: function (result) {
+                        //上传返回信息
+                        layer.msg(result.msg)
+                    }
+                }, true);
+            });
+        }
+    }
+</script>
+
+
+<!--添加题目-->
+<script>
+    layui.use(['form', 'layedit', 'laydate'], function () {
+        var form = layui.form
+            , layer = layui.layer
+            , layedit = layui.layedit
+            , laydate = layui.laydate;
+        //日期
+        laydate.render({
+            elem: '#date'
+        });
+        laydate.render({
+            elem: '#date1'
+        });
+        //创建一个编辑器
+        var editIndex = layedit.build('LAY_demo_editor');
+
+        //自定义验证规则
+        form.verify({
+            title: function (value) {
+                if (value.length < 5) {
+                    return '标题至少得5个字符啊';
+                }
+            }
+            , pass: [
+                /^[\S]{6,12}$/
+                , '密码必须6到12位，且不能出现空格'
+            ]
+            , content: function (value) {
+                layedit.sync(editIndex);
+            }
+        });
+        //监听提交
+        form.on('submit(submit)', function (data) {
+            const fields = data.field;
+            let problem = {};
+            let admin = {"adminId": fields.adminId};
+            let tags = [];
+            let problemLevel = {};
+            let arr = $(".xm-select-this");
+            for (let i = 0; i < arr.length; i++) {
+                let tagId = $(arr[i]).attr("lay-value");
+                let tag = {};
+                tag["tagId"] = tagId;
+                tags.push(tag);
+            }
+            problemLevel["problemLevelId"] = fields.problemLevelId;
+            problem["tags"] = tags;
+            problem["problemTitle"] = fields.problemTitle;
+            problem["problemBackground"] = fields.problemBackground;
+            problem["problemContent"] = fields.problemContent;
+            problem["problemInputFormat"] = fields.problemInputFormat;
+            problem["problemOutputFormat"] = fields.problemOutputFormat;
+            problem["problemExplain"] = fields.problemExplain;
+            problem["problemId"] = fields.problemId;
+            problem["problemPublic"] = fields.problemPublic;
+
+            let exampleInput = $("[name='exampleInput']");//单引号 的name替换为相应的name
+            let exampleOutput = $("[name='exampleOutput']");//单引号 的name替换为相应的name
+            let examples = new Array(exampleInput.length);
+            for (let i = 0; i < exampleInput.length; i++) {
+                let example = {};
+                example["exampleInput"] = $(exampleInput[i]).val();
+                example["exampleOutput"] = $(exampleOutput[i]).val();
+                examples[i] = example;
+            }
+            problem["examples"] = examples;
+            problem["admin"] = admin;
+            problem["problemLevel"] = problemLevel;
+            $.ajax({
+                //请求格式
+                datatype: 'json',
+                //请求方式
+                type: "POST",
+                //请求的媒体类型
+                contentType: "application/json;charset=UTF-8",
+                //请求地址
+                url: "/admin/add/problem",
+                //数据，json字符串
+                data: JSON.stringify(problem),
+                //请求成功
+                success: function (info) {
+                    layer.alert(info.msg);
+                    if (info.flag) {
+                        $("#problemId").val(info.problemId);
+                        $("#data").html("<div class=\"layui-btn\" onclick=\"xadmin.open('数据点设置','/admin/" + info.problemId + "/dataEdit')\" ><i class=\"layui-icon\">&#xe642;</i>数据点设置</div>")
+                    }
+                    return false;
+                },
+                //请求失败，包含具体的错误信息
+                error: function (e) {
+                    layui.msg("提交失败")
+                }
+            });
+            return false;
+        });
+
+        //表单赋值
+        layui.$('#LAY-component-form-setval').on('click', function () {
+            form.val('example', {
+                "username": "贤心" // "name": "value"
+                , "password": "123456"
+                , "interest": 1
+                , "like[write]": true //复选框选中状态
+                , "close": true //开关状态
+                , "sex": "女"
+                , "desc": "我爱 layui"
+            });
+        });
+        //表单取值
+        layui.$('#LAY-component-form-getval').on('click', function () {
+            var data = form.val('example');
+            var name = $(data.form).serialize();
+            alert(JSON.stringify(name));
+        });
+    });
+</script>
+<script>
+    layui.use(['form'], function () {
+        form = layui.form;
+
+    });
+
+    /*用户-删除*/
+    function member_del(obj, id) {
+        layer.confirm('确认要删除吗？', function (index) {
+            //发异步删除数据
+            $(obj).parents("tr").remove();
+            layer.msg('已删除!', {icon: 1, time: 1000});
+        });
+    }
+
+    // 分类展开收起的分类的逻辑
+    //
+    $(function () {
+        $("tbody.x-cate tr[fid!='0']").hide();
+        // 栏目多级显示效果
+        $('.x-show').click(function () {
+            if ($(this).attr('status') == 'true') {
+                $(this).html('&#xe625;');
+                $(this).attr('status', 'false');
+                cateId = $(this).parents('tr').attr('cate-id');
+                $("tbody tr[fid=" + cateId + "]").show();
+            } else {
+                cateIds = [];
+                $(this).html('&#xe623;');
+                $(this).attr('status', 'true');
+                cateId = $(this).parents('tr').attr('cate-id');
+                getCateId(cateId);
+                for (var i in cateIds) {
+                    $("tbody tr[cate-id=" + cateIds[i] + "]").hide().find('.x-show').html('&#xe623;').attr('status', 'true');
+                }
+            }
+        })
+    })
+
+    var cateIds = [];
+
+    function getCateId(cateId) {
+        $("tbody tr[fid=" + cateId + "]").each(function (index, el) {
+            id = $(el).attr('cate-id');
+            cateIds.push(id);
+            getCateId(id);
+        });
+    }
+
+</script>
+<script>
+    layui.use(['form'], function () {
+        form = layui.form;
+
+    });
+
+    /*用户-删除*/
+    function member_del(obj, id) {
+        layer.confirm('确认要删除吗？', function (index) {
+            //发异步删除数据
+            $(obj).parents("tr").remove();
+            layer.msg('已删除!', {icon: 1, time: 1000});
+        });
+    }
+
+    // 分类展开收起的分类的逻辑
+    //
+    $(function () {
+        $("tbody.x-cate tr[fid!='0']").hide();
+        // 栏目多级显示效果
+        $('.x-show').click(function () {
+            if ($(this).attr('status') == 'true') {
+                $(this).html('&#xe625;');
+                $(this).attr('status', 'false');
+                cateId = $(this).parents('tr').attr('cate-id');
+                $("tbody tr[fid=" + cateId + "]").show();
+            } else {
+                cateIds = [];
+                $(this).html('&#xe623;');
+                $(this).attr('status', 'true');
+                cateId = $(this).parents('tr').attr('cate-id');
+                getCateId(cateId);
+                for (var i in cateIds) {
+                    $("tbody tr[cate-id=" + cateIds[i] + "]").hide().find('.x-show').html('&#xe623;').attr('status', 'true');
+                }
+            }
+        })
+    })
+
+    var cateIds = [];
+
+    function getCateId(cateId) {
+        $("tbody tr[fid=" + cateId + "]").each(function (index, el) {
+            id = $(el).attr('cate-id');
+            cateIds.push(id);
+            getCateId(id);
+        });
+    }
+
+</script>
+</body>
+</html>

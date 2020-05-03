@@ -1,0 +1,338 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hqz.hzuoj.mapper.contest.ContestMapper">
+    <!--    比赛的关系映射-->
+    <resultMap id="contestResultMap" type="com.hqz.hzuoj.bean.contest.Contest">
+        <id column="contest_id" property="contestId"/>
+        <result column="contest_name" property="contestName"/>
+        <result column="contest_start" property="contestStart"/>
+        <result column="contest_end" property="contestEnd"/>
+        <result column="contest_explain" property="contestExplain"/>
+        <result column="contest_create_time" property="contestCreateTime"/>
+        <result column="contest_apply_start_time" property="contestApplyStartTime"/>
+        <result column="contest_apply_end_time" property="contestApplyEndTime"/>
+        <result column="contest_status" property="contestStatus"/>
+        <result column="contest_time_length" property="contestTimeLength"/>
+        <result column="contest_public" property="contestPublic"/>
+        <result column="contest_code" property="contestCode"/>
+        <result column="contest_apply_status" property="contestApplyStatus"/>
+        <result column="contest_apply_count" property="contestApplyCount"/>
+        <result column="contest_is_rank" property="contestIsRank"/>
+        <result column="contest_rank_status" property="contestRankStatus"/>
+        <result column="contest_rank_is_finish" property="contestRankIsFinish"/>
+        <association property="admin" javaType="com.hqz.hzuoj.bean.user.Admin">
+            <id column="admin_id" property="adminId"/>
+            <result column="admin_name" property="adminName"/>
+            <result column="admin_status" property="adminStatus"/>
+            <result column="admin_create_time" property="adminCreateTime"/>
+        </association>
+        <association property="contestType" javaType="com.hqz.hzuoj.bean.contest.ContestType">
+            <id column="contest_type_id" property="contestTypeId"/>
+            <result column="contest_type_name" property="contestTypeName"/>
+            <result column="contest_type_explain" property="contestTypeExplain"/>
+        </association>
+        <collection property="contestProblems" ofType="com.hqz.hzuoj.bean.contest.ContestProblem">
+            <id column="contest_problem_id" property="contestProblemId"/>
+            <result column="contest_problem_score" property="contestProblemScore"/>
+            <association property="problem" javaType="com.hqz.hzuoj.bean.problem.Problem">
+                <id column="problem_id" property="problemId"/>
+                <result column="problem_title" property="problemTitle"/>
+                <result column="problem_background" property="problemBackground"/>
+                <result column="problem_content" property="problemContent"/>
+                <result column="problem_data_address" property="problemDataAddress"/>
+                <result column="problem_explain" property="problemExplain"/>
+                <result column="problem_input_format" property="problemInputFormat"/>
+                <result column="problem_output_format" property="problemOutputFormat"/>
+                <result column="problem_public" property="problemPublic"/>
+                <result column="problem_create_time" property="problemCreateTime"/>
+                <result column="problem_update_time" property="problemUpdateTime"/>
+                <result column="problem_data_versions" property="problemDataVersions"/>
+                <association property="problemLevel" javaType="com.hqz.hzuoj.bean.problem.ProblemLevel">
+                    <id column="problem_level_id" property="problemLevelId"/>
+                    <result column="problem_level_name" property="problemLevelName"/>
+                </association>
+            </association>
+        </collection>
+    </resultMap>
+    <!--    比赛题目列表映射-->
+    <resultMap id="contestProblemResultMap" type="com.hqz.hzuoj.bean.contest.ContestProblem">
+        <id column="contest_problem_id" property="contestProblemId"/>
+        <result column="contest_problem_score" property="contestProblemScore"/>
+        <association property="contest" javaType="com.hqz.hzuoj.bean.contest.Contest">
+            <id column="contest_id" property="contestId"/>
+            <result column="contest_name" property="contestName"/>
+            <result column="contest_start" property="contestStart"/>
+            <result column="contest_end" property="contestEnd"/>
+            <result column="contest_explain" property="contestExplain"/>
+            <result column="contest_create_time" property="contestCreateTime"/>
+            <result column="contest_apply_start_time" property="contestApplyStartTime"/>
+            <result column="contest_apply_end_time" property="contestApplyEndTime"/>
+            <result column="contest_status" property="contestStatus"/>
+            <result column="contest_time_length" property="contestTimeLength"/>
+            <result column="contest_public" property="contestPublic"/>
+            <result column="contest_code" property="contestCode"/>
+            <result column="contest_apply_status" property="contestApplyStatus"/>
+            <result column="contest_apply_count" property="contestApplyCount"/>
+            <result column="contest_is_rank" property="contestIsRank"/>
+            <result column="contest_rank_status" property="contestRankStatus"/>
+            <result column="contest_rank_is_finish" property="contestRankIsFinish"/>
+            <association property="admin" javaType="com.hqz.hzuoj.bean.user.Admin">
+                <id column="admin_id" property="adminId"/>
+                <result column="admin_name" property="adminName"/>
+                <result column="admin_status" property="adminStatus"/>
+                <result column="admin_create_time" property="adminCreateTime"/>
+                <association property="user" javaType="com.hqz.hzuoj.bean.user.User">
+                    <id column="user_id" property="userId"/>
+                    <result column="username" property="username"/>
+                    <result column="register_time" property="registerTime"/>
+                    <result column="user_rating" property="userRating"/>
+                    <result column="gender" property="gender"/>
+                    <result column="user_img" property="userImg"/>
+                    <result column="email" property="email"/>
+                    <result column="user_submit_total" property="userSubmitTotal"/>
+                    <result column="user_challenge_total" property="userChallengeTotal"/>
+                </association>
+            </association>
+            <association property="contestType" javaType="com.hqz.hzuoj.bean.contest.ContestType">
+                <id column="contest_type_id" property="contestTypeId"/>
+                <result column="contest_type_name" property="contestTypeName"/>
+                <result column="contest_type_explain" property="contestTypeExplain"/>
+            </association>
+        </association>
+        <association property="problem" javaType="com.hqz.hzuoj.bean.problem.Problem">
+            <id column="problem_id" property="problemId"/>
+            <result column="problem_title" property="problemTitle"/>
+            <result column="problem_background" property="problemBackground"/>
+            <result column="problem_content" property="problemContent"/>
+            <result column="problem_data_address" property="problemDataAddress"/>
+            <result column="problem_explain" property="problemExplain"/>
+            <result column="problem_input_format" property="problemInputFormat"/>
+            <result column="problem_output_format" property="problemOutputFormat"/>
+            <result column="problem_public" property="problemPublic"/>
+            <result column="problem_create_time" property="problemCreateTime"/>
+            <result column="problem_update_time" property="problemUpdateTime"/>
+            <association property="problemLevel" javaType="com.hqz.hzuoj.bean.problem.ProblemLevel">
+                <id column="problem_level_id" property="problemLevelId"/>
+                <result column="problem_level_name" property="problemLevelName"/>
+            </association>
+        </association>
+    </resultMap>
+    <!--    保存比赛-->
+    <insert id="saveContest" parameterType="com.hqz.hzuoj.bean.contest.Contest">
+        <selectKey keyProperty="contestId" resultType="int" order="AFTER">
+            select LAST_INSERT_ID()
+        </selectKey>
+        INSERT INTO hzuoj_contests (
+        contest_name,contest_type_id ,contest_start,contest_end,
+        contest_explain,admin_id,contest_create_time,contest_apply_start_time,
+        contest_apply_end_time,contest_status,contest_public,contest_code,
+        contest_time_length, contest_is_rank)
+        VALUES( #{contestName},#{contestType.contestTypeId} ,#{contestStart},#{contestEnd},
+        #{contestExplain},#{admin.adminId},#{contestCreateTime},#{contestApplyStartTime},
+        #{contestApplyEndTime},#{contestStatus},#{contestPublic},#{contestCode},
+        #{contestTimeLength}, #{contestIsRank})
+    </insert>
+    <!--    更新比赛状态-->
+    <update id="updateContestStatus">
+        update hzuoj_contests set contest_status = #{contestStatus} where contest_id = #{contestId}
+    </update>
+    <!--    更新比赛 -->
+    <update id="updateContest">
+        update hzuoj_contests set
+        contest_name = #{contestName},contest_type_id =  #{contestType.contestTypeId},
+        contest_start = #{contestStart},contest_end = #{contestEnd},contest_explain = #{contestExplain},
+        contest_apply_start_time = #{contestApplyStartTime},contest_apply_end_time = #{contestApplyEndTime},contest_status = #{contestStatus},
+        contest_public = #{contestPublic},contest_time_length = #{contestTimeLength}, contest_is_rank = #{contestIsRank}
+        where contest_id = #{contestId}
+    </update>
+    <!--    查询比赛的基本信息（不包括比赛的提交记录）-->
+    <select id="getContest" resultMap="contestResultMap">
+        SELECT * FROM hzuoj_contests c
+	    inner JOIN hzuoj_contests_types ct ON c.contest_type_id = ct.contest_type_id
+	    inner JOIN hzuoj_admin a ON c.admin_id = a.admin_id
+	    left join hzuoj_contests_problems cp on cp.contest_id= c.contest_id
+	    left join hzuoj_problems p on p.problem_id = cp.problem_id
+	    where c.contest_id = #{contestId}
+    </select>
+    <!--    保存比赛题目-->
+    <insert id="saveContestProblem">
+        <selectKey keyProperty="contestProblemId" resultType="int" order="AFTER">
+            select LAST_INSERT_ID()
+        </selectKey>
+        insert into hzuoj_contests_problems (problem_id, contest_id,contest_problem_score)
+        values (#{problem.problemId}, #{contest.contestId}, #{contestProblemScore})
+    </insert>
+    <!--    查找比赛题目列表中的题目-->
+    <select id="getContestProblem" resultMap="contestProblemResultMap">
+        SELECT * from hzuoj_contests_problems cp
+        inner JOIN hzuoj_contests c
+        on cp.contest_id = c.contest_id
+        inner join hzuoj_problems p
+        on cp.problem_id = p.problem_id
+        WHERE cp.problem_id = #{problem.problemId} and cp.contest_id = #{contest.contestId}
+    </select>
+    <!--    查询比赛中的所有题目-->
+    <select id="getContestProblemAll" resultMap="contestProblemResultMap">
+        SELECT
+          *
+        FROM
+          hzuoj_contests c
+          INNER JOIN hzuoj_contests_problems cp
+            ON c.contest_id = cp.contest_id
+          INNER JOIN hzuoj_problems p
+            ON cp.problem_id = p.problem_id
+           INNER JOIN hzuoj_problems_level pl
+           ON pl.problem_level_id = p.problem_level_id
+        where c.contest_id = #{contestId}
+    </select>
+    <select id="selectContestProblem" resultMap="contestProblemResultMap">
+        SELECT * FROM hzuoj_contests c
+        INNER JOIN hzuoj_contests_problems cp
+        ON c.contest_id = cp.contest_id
+        INNER JOIN hzuoj_problems p
+        ON cp.problem_id = p.problem_id
+        WHERE c.contest_id = #{contestId} AND p.problem_id = #{problemId}
+    </select>
+    <!--    删除比赛中的问题-->
+    <delete id="delContestProblem">
+        delete from hzuoj_contests_problems where contest_id = #{contestId} and problem_id = #{problemId}
+    </delete>
+    <!--    条件查询-->
+    <select id="getAllContest" resultMap="contestResultMap">
+        SELECT
+        c.contest_id,c.contest_name,
+        c.contest_apply_count,c.contest_apply_end_time,
+        c.contest_apply_start_time,c.contest_apply_status,
+        c.contest_start,c.contest_end,
+        c.contest_time_length,c.contest_status,
+        c.contest_public,c.contest_is_rank,
+        ct.*
+        FROM hzuoj_contests c
+        inner JOIN hzuoj_contests_types ct ON c.contest_type_id = ct.contest_type_id
+        inner JOIN hzuoj_admin a ON c.admin_id = a.admin_id
+        <if test="signUpFilter != null and userId != null">
+            left JOIN hzuoj_contests_applys ca
+            ON ca.`contest_id` = c.contest_id and ca.user_id = #{userId}
+        </if>
+        <where>
+            1 = 1
+            <if test="adminId != null and adminId != ''">
+                and c.admin_id = #{adminId}
+            </if>
+            <if test="contestTypeId != null and contestTypeId != ''">
+                and c.contest_type_id = #{contestTypeId}
+            </if>
+             <if test="contestStatus != null and contestStatus != ''">
+                and c.contest_status = #{contestStatus}
+            </if>
+            <if test="StartTime != null">
+                and c.contest_start &gt;= #{StartTime}
+            </if>
+            <if test="EndTime != null">
+                and #{EndTime} &gt;= c.contest_start
+            </if>
+            <if test="contestPublic != null">
+                and c.contest_public = #{contestPublic}
+            </if>
+            <if test="contestName != null and contestName != ''">
+                and c.contest_name like '%${contestName}%'
+            </if>
+            <if test="signUpFilter == 1 and userId != null">
+                and ca.user_id = #{userId}
+            </if>
+            <if test="signUpFilter == 2 and userId != null">
+                and ca.`user_id` IS NULL
+            </if>
+            <if test="categoryFilter == 1">
+                and c.contest_public = 0
+            </if>
+            <if test="categoryFilter == 2">
+                and c.contest_public = 1
+            </if>
+            <if test="categoryFilter == 3">
+                and c.contest_is_rank = 1
+            </if>
+        </where>
+        order by c.contest_start desc
+    </select>
+<!--    更新全部比赛状态-->
+    <update id="updateAllContestStatus">
+        UPDATE hzuoj_contests c
+        SET contest_time_length = TIMESTAMPDIFF(SECOND, c.contest_start , c.contest_end)*1000,
+         c.contest_status =
+        case
+        when #{date} &lt; c.contest_start then 0
+        when #{date} &lt; c.contest_end then 1
+        when #{date} &gt; c.contest_end then 2
+        end ,
+        c.contest_apply_status =
+        case
+        when #{date} &lt; c.contest_apply_start_time then 0
+		when #{date} &lt; c.contest_apply_end_time then 1
+		when #{date} &gt; c.contest_apply_end_time then 2
+        end
+    </update>
+    <!--    更新比赛报名人数-->
+    <update id="updateContestApplyCount">
+        update hzuoj_contests set contest_apply_count = #{contestApplyCount} where contest_id = #{contestId}
+    </update>
+    <select id="getContestProblemSubmitInfo" resultType="com.hqz.hzuoj.bean.problem.ProblemSubmitInfo">
+        SELECT
+        (SELECT
+          COUNT(*)
+        FROM
+          hzuoj_contests c
+          INNER JOIN hzuoj_contests_submits cs
+            ON cs.contest_id = c.contest_id
+          INNER JOIN hzuoj_submits s
+            ON s.submit_id = cs.submit_id
+          INNER JOIN hzuoj_judge_result jr
+            ON jr.judge_result_id = s.judge_result_id
+        WHERE c.contest_id = #{contestId}
+          AND s.problem_id = #{problemId}
+          AND s.submit_public = #{submitPublic}) AS allTotal,
+        (SELECT
+          COUNT(*)
+        FROM
+          hzuoj_contests c
+          INNER JOIN hzuoj_contests_submits cs
+            ON cs.contest_id = c.contest_id
+          INNER JOIN hzuoj_submits s
+            ON s.submit_id = cs.submit_id
+          INNER JOIN hzuoj_judge_result jr
+            ON jr.judge_result_id = s.judge_result_id
+        WHERE c.contest_id = #{contestId}
+          AND s.problem_id = #{problemId}
+          AND s.submit_public = #{submitPublic}
+          AND jr.judge_name = 'AC') AS allAcceptedTotal,
+        (SELECT
+          COUNT(*)
+        FROM
+          hzuoj_contests c
+          INNER JOIN hzuoj_contests_submits cs
+            ON cs.contest_id = c.contest_id
+          INNER JOIN hzuoj_submits s
+            ON s.submit_id = cs.submit_id
+          INNER JOIN hzuoj_judge_result jr
+            ON jr.judge_result_id = s.judge_result_id
+        WHERE c.contest_id = #{contestId}
+          AND s.problem_id = #{problemId}
+          AND s.submit_public = #{submitPublic}
+          AND s.user_id = #{userId}
+          AND jr.judge_name = 'AC') AS myAcceptedTotal,
+        (SELECT
+          COUNT(*)
+        FROM
+          hzuoj_contests c
+          INNER JOIN hzuoj_contests_submits cs
+            ON cs.contest_id = c.contest_id
+          INNER JOIN hzuoj_submits s
+            ON s.submit_id = cs.submit_id
+          INNER JOIN hzuoj_judge_result jr
+            ON jr.judge_result_id = s.judge_result_id
+        WHERE c.contest_id = #{contestId}
+          AND s.problem_id = #{problemId}
+          AND s.submit_public = #{submitPublic}
+          AND s.user_id = #{userId}) AS myAllTotal
+    </select>
+</mapper>

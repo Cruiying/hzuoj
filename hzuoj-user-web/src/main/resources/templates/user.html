@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:v-on="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${user.username+'个人主页'}">用户</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport"
+          content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi"/>
+    <link rel="stylesheet" href="../static/css/semantic.css" th:href="@{/css/semantic.css}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/semantic-ui/2.2.4/semantic.min.css">
+
+    <link rel="stylesheet" href="../static/css/me.css" th:href="@{/css/me.css}">
+    <!--    <script type="text/javascript" src="../static/js/xadmin.js" th:src="@{/js/xadmin.js}"></script>-->
+    <link rel="stylesheet" href="../static/lib/layui/css/layui.css" media="all" th:href="@{/lib/layui/css/layui.css}">
+    <link rel="stylesheet" href="../static/lib/jq-module/zyupload/zyupload-1.0.0.min.css"
+          th:href="@{/lib/jq-module/zyupload/zyupload-1.0.0.min.css}" media="all">
+    <script src="../static/lib/vue/vue.js" th:src="@{/lib/vue/vue.js}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script type="text/javascript" src="https://cdn.bootcss.com/axios/0.19.0-beta.1/axios.js"></script>
+
+    <script type="text/javascript" async
+            src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+    </script>
+    <!--    <script src="../static/lib/vs/basic-languages/cpp/cpp.js" th:src="@{/lib/vs/basic-languages/cpp/cpp.js}"></script>-->
+    <!--    <script src="../static/lib/vs/basic-languages/**" th:src="@{/lib/vs/basic-languages/}"></script>-->
+    <link rel="stylesheet" type="text/css" href="../static/css/main.css" th:href="@{/css/main.css}">
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+        }
+
+        a {
+            text-decoration: none !important;
+            target: "_blank" !important;
+        }
+
+        .icon {
+            margin: 0 !important;
+        }
+
+        .photo {
+            margin-bottom: 10px;
+            border-radius: 50% !important;
+            display: block !important;
+            float: left !important;
+            margin-right: 10px !important;
+            overflow: hidden !important;
+            width: 90px !important;
+            height: 90px !important;
+        }
+    </style>
+</head>
+<body>
+<!--导航栏-->
+<nav th:replace="fragment::menu('')"></nav>
+<div class="ui" id="app" >
+    <div class="ui tiny dimmer modals page hidden">
+        <div id="showEditorUserInfo" class="ui tiny test modal hidden" style="margin-top: -112.5px;">
+            <i class="close icon"></i>
+            <div class="header" style="text-align: center">编辑个人信息</div>
+            <div class="content">
+                <div class="ui form">
+                    <div class="field">
+                        <label>学校：</label>
+                        <div class="ui dropdown  search selection ">
+                            <input type="hidden" name="school" id="school" :value="user.school">
+                            <i class="dropdown icon"></i>
+                            <div class="default text" v-text="user.school"></div>
+                            <div class="menu">
+                                <div style="cursor: pointer; font-size: 16px;" class="item" :data-value="user.school"
+                                     v-text="user.school"></div>
+                                <div v-for="school in schools" class="item" :data-value="school.name"
+                                     v-text="school.name"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label>个性签名：</label>
+                        <input type="text" name="signature" id="signature" :value="user.signature">
+                    </div>
+                </div>
+            </div>
+            <div class="actions">
+                <div class="ui negative button">关闭</div>
+                <button class="ui positive button" v-on:click="sendEditorUserInfo()">修改</button>
+            </div>
+        </div>
+        <div id="success" class="ui tiny test modal hidden" style="margin-top: -112.5px;">
+            <i class="close icon"></i>
+            <div class="header" style="text-align: center">
+                <div style="color: #21BA45">修改成功</div>
+            </div>
+            <div class="content">
+
+            </div>
+            <div class="actions">
+                <div class="ui negative button">关闭</div>
+                <button class="ui positive button">确定</button>
+            </div>
+        </div>
+        <div id="error" class="ui tiny test modal hidden" style="margin-top: -112.5px;">
+            <i class="close icon"></i>
+            <div class="header" style="text-align: center">
+                <div style="color: red">修改失败</div>
+            </div>
+            <div class="content">
+
+            </div>
+            <div class="actions">
+                <div class="ui negative button">关闭</div>
+                <button class="ui positive button">确定</button>
+            </div>
+        </div>
+    </div>
+    <div style="display: block;height: 80px;" :style="'display: none'"  class="ui active centered inline loader"></div>
+    <div  style="display: none;min-height: 400px;" :style="'display: block'" >
+        <div class="ui">
+            <div class="ui" style="background: #495060; height: 200px;">
+                <div class="ui container" style="padding-top: 15px">
+                    <div class="ui grid">
+                        <div class="two column row">
+                            <div class="column">
+                                <a style="color: white;" href="/">首页</a>
+                                <span style="color: white"> / </span>
+                                <span style="color: #22ae90">个人主页</span>
+                            </div>
+                            <div class="column" style="text-align: right">
+                                <a v-if="loginUserId == user.userId" v-on:click="showEditorUserInfo()"
+                                   style="background: rgba(0,0,0,0); color: white; cursor: pointer" class="ui"><i
+                                        class="write  icon"></i>编辑</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="ui container">
+                    <div class="ui grid">
+                        <div class="sixteen wide column">
+                            <div class="ui header">
+                        <span>
+                            <input type="file" id="photoFile" style="display: none;" v-on:change="upload()">
+                            <a class="photo" v-on:click="uploadPhoto()">
+                                <img style=" width: 90px !important;height: 90px !important;" alt="头像"
+                                     :src="user.userImg != null && user.userImg.length>0 ? user.userImg: '/images/default.png'">
+                            </a>
+                        </span>
+                                <div><h1 style="color: #5ea1f4!important; font-size: 22px;"
+                                         v-html="getUserRatingColor(user.username, user.userRating)"></h1></div>
+                                <div style="color:rgb(37, 187, 155);!important; font-size: 15px"
+                                     v-text="user.signature != null && user.signature!='' ? user.signature : '无'">无
+                                </div>
+                                <div style="color:rgb(37, 187, 155);!important; font-size: 15px">
+                                    <a th:href="@{'/blog/'+${session.username}}" class="ui mini teal button"
+                                       style="background-color: #22ae90;">我的博客</a>
+                                    <span><i class="graduation cap icon"></i> <span v-text="user.school">贺州学院</span></span>
+                                </div>
+                            </div>
+                            <div style="padding-top: 8px;" class="ui middle aligned two column grid">
+                                <div class="left aligned column">
+                                    <div style="color: rgba(33,33,33,0.5);"><span
+                                            style="margin-right: 10px;"></span><span></span></div>
+                                </div>
+                                <div class="right aligned column">
+                                    <div style="color: rgba(33,33,33,0.5)"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+            <div class="ui attached" style="background: #e7eef3; margin-bottom: 20px; margin-top: -1px">
+                <div class="ui grid">
+                    <div class="four column row" style="text-align: center;">
+                        <div v-on:click="onNav(0)" class="column teal active user-nav" style="cursor: pointer"><span>我的比赛</span>
+                        </div>
+                        <div v-on:click="onNav(1)" class="column user-nav" style="cursor: pointer"><span>我的练习</span></div>
+                        <div v-on:click="onNav(2)" class="column user-nav" style="cursor: pointer"><span>我的讨论</span></div>
+                        <div v-on:click="onNav(3)" class="column user-nav" style="cursor: pointer"><span>我的题解</span></div>
+                    </div>
+                </div>
+            </div>
+            <div class="ui container column">
+                <div class="ui user-item" style="display: block">
+                    <div class="ui grid">
+                        <div class="four column row" style="text-align: center">
+                            <div class="column" style="cursor: pointer">
+                                <div style="font-size: 24px; color: #5ea1f4!important" v-text="user.userRating">1403</div>
+                                <div style="color: #ababab">Rating</div>
+                            </div>
+                            <div class="column" style="cursor: pointer">
+                                <div style="font-size: 24px; color: #5ea1f4!important" v-text="user.userRanking">693</div>
+                                <div style="color: #ababab">Rating排名</div>
+                            </div>
+                            <div class="column" style="cursor: pointer">
+                                <div style="font-size: 24px;color: #5ea1f4!important " v-text="user.userAcceptedRanking">693</div>
+                                <div style="color: #ababab">刷题排名</div>
+                            </div>
+                            <div class="column" style="cursor: pointer">
+                                <div style="font-size: 24px; color: #5ea1f4!important" v-text="contestPageInfo.total">45</div>
+                                <div style="color: #ababab">次比赛</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="ui" style="margin-top: 50px;margin-bottom: 10px; border-bottom: 2px solid #25bb9b;">
+                        <div class="row">
+                            <div class="five wide column">
+                                <button class="ui teal button" style="background-color: #22ae90;border-radius: 0">我参加的比赛</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="ui grid stackable">
+                        <div class="two column row">
+                            <div class="column" style="padding: 10px" v-for="contest in contestPageInfo.list">
+                                <div class="ui raised segment">
+                                    <div class="ui padded vertical ">
+                                        <div class="ui middle aligned mobile reversed unstackable grid">
+                                            <div class="sixteen wide column">
+                                                <div class="ui grid">
+                                                    <div class="wide column">
+                                                        <h3 class="ui header">
+                                                            <a :href="'/contests/'+contest.contestId" class="m-black" style="font-size: 20px;" v-text="contest.contestName">HZU蓝桥杯校内第二次选拔赛</a>
+                                                            <span>
+                                                        <button style="font-size: 15px; background-color: rgba(255,255,255,0) !important;" class="ui teal basic label m-padded-tiny m-text-thin" v-text="contest.contestType.contestTypeName + '赛制'">ACM赛制</button></span>
+                                                        </h3>
+                                                    </div>
+                                                </div>
+                                                <div class="ui grid ">
+                                                    <div class="one column row">
+                                                        <div class="column">
+                                                            <div class="ui mini horizontal link list">
+                                                                <div class="item" style="font-size: 15px">
+                                                                    <i class="calendar icon"></i>
+                                                                    报名时间：<span
+                                                                        v-text="dateFormat(contest.contestApplyStartTime)">2020-01-18 20:33</span>
+                                                                    至 <span v-text="dateFormat(contest.contestApplyEndTime)">2020-01-18 20:33</span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="column">
+                                                            <div class="ui mini horizontal link list">
+                                                                <div class="item" style="font-size: 15px"><i
+                                                                        class="calendar icon"></i>比赛时间：<span
+                                                                        v-text="dateFormat(contest.contestStart)">2020-01-18 18:20</span>
+                                                                    至 <span v-text="dateFormat(contest.contestEnd)">2020-01-18 18:20</span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="column">
+                                                            <div class="ui mini horizontal link list">
+                                                                <div class="item" style="font-size: 15px">
+                                                                    <i class="user icon"></i>报名人数：<span
+                                                                        v-text="contest.contestApplyCount">1532</span>
+                                                                </div>
+                                                                <div class="item" style="font-size: 15px"><i
+                                                                        class="time icon"></i>时长：<span
+                                                                        v-text="formatDuring(contest.contestTimeLength)">5小时</span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                    <!--                    分页-->
+                    <div style="margin-top:  30px; " v-if="contestPageInfo != null">
+                        <div style="text-align: center; ">
+                            <div class="ui pagination menu" style="box-shadow: none; ">
+                                <a class="icon item" v-on:click="getUserContests(1)"
+                                   :class="{'disabled':rankPage.page == 1}">首页</a>
+                                <a class="icon item" v-on:click="getUserContests(rankPage.page - 1)"
+                                   :class="{'disabled':rankPage.page == 1}"><i class="left chevron icon"></i></a>
+                                <a v-for="index in rankPage.end" v-if="index>=rankPage.begin"
+                                   v-on:click="getUserContests(index)" class="item"
+                                   :class="{'active':rankPage.page==index}">{{index}}</a>
+                                <a v-on:click="getUserContests(rankPage.page + 1)"
+                                   :class="{'disabled':rankPage.page==rankPage.total}" class=" icon item"><i
+                                        class="right chevron icon"></i></a>
+                                <a v-on:click="getUserContests(rankPage.total)"
+                                   :class="{'disabled':rankPage.page==rankPage.total}" class=" icon item">尾页</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="ui user-item" style="display: none;">
+                    <div class="ui grid">
+                        <div class="four column row" style="text-align: center">
+                            <div class="column" style="cursor: pointer">
+                                <div style="font-size: 24px; color: #5ea1f4!important"
+                                     v-text="user.userChallengeTotal">1403
+                                </div>
+                                <div style="color: #ababab">题已挑战</div>
+                            </div>
+                            <div class="column" style="cursor: pointer">
+                                <div style="font-size: 24px; color: #5ea1f4!important"
+                                     v-text="user.userAcceptedTotal">693
+                                </div>
+                                <div style="color: #ababab">题已通过</div>
+                            </div>
+                            <div class="column" style="cursor: pointer">
+                                <div style="font-size: 24px;color: #5ea1f4!important " v-text="user.userSubmitTotal">
+                                    693
+                                </div>
+                                <div style="color: #ababab">次提交</div>
+                            </div>
+                            <div class="column" style="cursor: pointer">
+                                <div style="font-size: 24px; color: #5ea1f4!important" v-text="Math.ceil(user.userSubmitAcceptedTotal*100/user.userSubmitTotal)+'%'">45%</div>
+                                <div style="color: #ababab">通过率</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="ui" style="margin-top: 50px;margin-bottom: 10px; border-bottom: 2px solid #25bb9b;">
+                        <div class="row">
+                            <div class="five wide column">
+                                <button class="ui teal button" style="background-color: #22ae90;border-radius: 0">我提交的题目
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="overflow-x: auto">
+                        <table class="ui unstackable very basic center aligned table"
+                               style="white-space: nowrap;">
+                            <thead>
+                            <tr>
+                                <th>运行ID</th>
+                                <th>题目</th>
+                                <th>状态</th>
+                                <th>分数</th>
+                                <th>运行时间</th>
+                                <th>内存</th>
+                                <th>使用语言</th>
+                                <th>代码长度</th>
+                                <th>提交时间</th>
+                            </tr>
+                            </thead>
+                            <tbody id="submitList">
+                            <tr v-for="submit in submitPageInfo.list">
+                                <td><a style="color: #4183c4;" :href="'/submit/' + submit.submitId"><b v-text="submit.submitId">#3436</b></a>
+                                </td>
+                                <td>
+                                    <a style="color: #4183c4;" :href="'/problem/' +submit.problem.problemId ">
+                        <span class="textFitted" style="display: inline-block; font-size: 14px;">
+                            <b v-text="submit.problem.problemTitle">[HZU蓝桥杯校内第二次选拔赛] T3</b>
+                        </span>
+                                    </a>
+                                </td>
+                                <td><a style="color: #4183c4;" :href="'/submit/' + submit.submitId">
+                                    <b v-html="getJudgeResult(submit.judgeResult.judgeName)">
+                                <span class="status compile_error" style=" color: rgb(0, 68, 136) !important;"><i
+                                        class="icon code"></i>Compile Error</span>
+                                    </b></a></td>
+                                <td>
+                                    <a style="color: #4183c4;" :href="'/submit/' + submit.submitId"
+                                       v-html="getColorFromScore(submit.submitScore)">
+                                        <span class="score" style="color: #ff0000">0</span>
+                                    </a>
+                                </td>
+                                <td v-text="getRuntimeTime(submit.submitRuntimeTime)">0 ms</td>
+                                <td v-text="getRuntimeMemory(submit.submitRuntimeMemory)">0KB</td>
+                                <td style="color: #4183c4;"><a style="color: #4183c4;" :href="'/submit/' + submit.submitId"><b
+                                        v-text="submit.language.languageName">C++</b></a></td>
+                                <td v-text="submit.submitCodeLength">16</td>
+                                <td v-text="dateFormat(submit.submitTime)">2020-01-14 08:15:08</td> <!----></tr>
+                            </tbody>
+                        </table>
+                        <!--                    分页-->
+                        <div style="margin-top:  30px; " v-if="submitPageInfo != null">
+                            <div style="text-align: center; ">
+                                <div class="ui pagination menu" style="box-shadow: none; ">
+                                    <a class="icon item" v-on:click="getUserProblems(1)" :class="{'disabled':submitPage.page == 1}">首页</a>
+                                    <a class="icon item" v-on:click="getUserProblems(submitPage.page - 1)"
+                                       :class="{'disabled':submitPage.page == 1}"><i class="left chevron icon"></i></a>
+                                    <a v-for="index in submitPage.end" v-if="index>=submitPage.begin"
+                                       v-on:click="getUserProblems(index)" class="item"
+                                       :class="{'active':submitPage.page==index}">{{index}}</a>
+                                    <a v-on:click="getUserProblems(submitPage.page + 1)"
+                                       :class="{'disabled':submitPage.page==submitPage.total}" class=" icon item"><i
+                                            class="right chevron icon"></i></a>
+                                    <a v-on:click="getUserProblems(submitPage.total)"
+                                       :class="{'disabled':submitPage.page==submitPage.total}" class=" icon item">尾页</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="ui user-item" style="display: none; height: 200px"></div>
+                <div class="ui user-item" style="display: none; height: 200px"></div>
+
+            </div>
+            <div style="height: 50px;"></div>
+        </div>
+        <!--页尾-->
+        <footer style=" margin-top: 50px; background: rgba(33,33,33,0.08)!important;"
+                class="ui inverted vertical segment m-padded-tb-large">
+            <div class="content container ui">
+                <div class=" wide column">
+                    <h2 class="m-text-thin m-text-spaced m-opacity-tiny" style="color: black">贺州学院算法竞赛训练平台</h2>
+                </div>
+            </div>
+        </footer>
+    </div>
+</div>
+</body>
+<script src="../static/js/jquery.min.js" charset="utf-8" th:src="@{/js/jquery.min.js}"></script>
+<script src="../static/lib/layui/layui.js" charset="utf-8" th:src="@{/lib/layui/layui.js}"></script>
+<script src="../static/js/semantic.js" th:src="@{/js/semantic.js}"></script>
+<script src="../static/js/DateUtils.js" th:src="@{/js/DateUtils.js}"></script>
+<script src="../static/lib/jq-module/zyupload/zyupload-1.0.0.min.js"
+        th:src="@{/lib/jq-module/zyupload/zyupload-1.0.0.min.js}" charset="utf-8"></script>
+<script src="../static/js/mathjax.js" th:src="@{/js/mathjax.js}"></script>
+<script src="../static/js/chinaUniversityList.js" th:src="@{/js/chinaUniversityList.js}"></script>
+<script src="../static/js/common.js" th:src="@{/js/common.js}"></script>
+<script th:inline="javascript">
+    new Vue({
+        el: '#app',
+        data: {
+            user: [[${user}]],
+            loginUserId: [[${session.userId}]],
+            contestPageInfo: null,
+            submitPageInfo: null,
+            submitPage: null,
+            rankPage: null,
+            schools: [],
+        },
+        methods: {
+            dateFormat: function (time) {
+                return common.getDateFormat(time);
+            },
+            formatDuring: function (mss) {
+                const days = Math.round(mss / (1000 * 60 * 60 * 24));
+                const hours = Math.round((mss % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.round((mss % (1000 * 60 * 60)) / (1000 * 60));
+                let ans = "";
+                if (days > 0) ans += days + " 天 ";
+                if (hours > 0) ans += hours + " 小时 ";
+                if (minutes > 0) ans += minutes + " 分钟 ";
+                return ans;
+            },
+            uploadPhoto: function () {
+                if(this.user.userId != [[${session.userId}]]) return;
+                $("#photoFile").click();
+            },
+            /**
+             * 上传图片
+             */
+            upload: function () {
+                if ($("#photoFile").val() == '') return;
+                if(this.user.userId != [[${session.userId}]]) return;
+                let formData = new FormData();
+                formData.append('file', document.getElementById('photoFile').files[0]);
+                axios.post('/user/img/upload', formData, {
+                    'Content-Type': 'multipart/form-data'
+                }).then((data) => { // 正确的回调
+                    if(data.data != "error") {
+                        alert("上传成功");
+                        this.user.userImg = data.data;
+                    }
+                }).catch((error) => { // 错误的回调
+                    alert("上传失败")
+                });
+            },
+            punishTime: function (mss) {
+                const days = Math.round(mss / (1000 * 60 * 60 * 24));
+                const hours = Math.round((mss % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.round((mss % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.round((mss % (1000 * 60))) / 1000;
+                let ans = "";
+                if (days > 0) ans += days + ":";
+                if (hours < 10) ans += "0";
+                ans += hours + ":";
+                if (minutes < 10) ans += "0";
+                ans += minutes + ":";
+                if (seconds < 10) ans += "0";
+                ans += seconds;
+                return ans;
+            },
+            getColorFromScore: function (score) {
+               return common.getColorFromScore(score);
+            },
+            getRankScore: function (score) {
+                return common.getRankScore(score);
+            },
+            getJudgeResult: function (obj) {
+                return common.getJudgeResult(obj);
+            },
+            getRuntimeTime: function (time) {
+                return common.getRuntimeTime(time);
+            },
+            getRuntimeMemory: function (memory) {
+                return common.getRuntimeMemory(memory);
+            },
+            getUserContests: function (page) {
+                let params = new URLSearchParams();
+                if (page == undefined) page = 1;
+                params.append("page", page);
+                axios.post("/user/contests/" + this.user.userId + "?page=" + page)
+                    .then((data) => { // 正确的回调
+                        if (data.data != null) {
+                            this.contestPageInfo = data.data;
+                            this.rankPage = common.getPage(this.contestPageInfo.pageNum, this.contestPageInfo.pages);
+                        }
+                    })
+                    .catch((error) => { // 错误的回调
+                    });
+
+            },
+            getUserProblems: function (page) {
+                if (page == undefined) page = 1;
+                axios.post("/user/problems/" + this.user.userId + "?page=" + page)
+                    .then((data) => { // 正确的回调
+                        if (data.data != null) {
+                            this.submitPageInfo = data.data;
+                            this.submitPage = common.getPage(this.submitPageInfo.pageNum, this.submitPageInfo.pages);
+
+                        }
+                    })
+                    .catch((error) => { // 错误的回调
+                    });
+            },
+            onNav: function (index) {
+                let nav = document.getElementsByClassName("user-nav");
+                let item = document.getElementsByClassName("user-item");
+                for (let j = 0; j < item.length; j++) {
+                    $(nav[j]).removeClass("active");
+                    $(nav[j]).removeClass("teal");
+                    $(item[j]).css("display", "none");
+                }
+                $(nav[index]).addClass("active");
+                $(nav[index]).addClass("teal");
+                $(item[index]).css("display", "block");
+            },
+            showEditorUserInfo: function () {
+                $("#showEditorUserInfo").modal("show");
+            },
+            sendEditorUserInfo: function () {
+                let tmp = this.user;
+                tmp.school = $("#school").val();
+                tmp.signature = $("#signature").val();
+                tmp.registerTime = null;
+                axios.post('/user/editor', tmp)
+                    .then((data) => { // 正确的回调
+                        this.user = data.data;
+                        $("#success").modal("show");
+                    }).catch((error) => { // 错误的回调
+                    $("#error").modal("show");
+                })
+
+
+            },
+            getUserRatingColor: function (username, rating) {
+                return common.getUserRatingColor(username,rating);
+            }
+        },
+        created: function () {
+            this.rankPage = common.getPage(1,1);
+            this.submitPage = common.getPage(1, 1);
+            this.getUserContests(1);
+            this.getUserProblems(1);
+            for (let i = 0; i < schoolList.length; i++) {
+                for (let j = 0; j < schoolList[i].school.length; j++) {
+                    this.schools.push(schoolList[i].school[j]);
+                }
+            }
+        }
+    });
+</script>
+<script>
+    window.onload = function () {
+        $(".ui.dropdown").dropdown();
+    }
+</script>
+</html>

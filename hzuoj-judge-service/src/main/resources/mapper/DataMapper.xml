@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hqz.hzuoj.judge.mapper.DataMapper">
+<!--    删除所有测试数据-->
+    <delete id="deleteData">
+        delete from hzuoj_datas where problem_id = #{problemId}
+    </delete>
+<!--    插入测试数据-->
+    <insert id="insert">
+        INSERT INTO hzuoj_datas  (data_input,data_output, problem_id) VALUES( #{dataInput},#{dataOutput},#{problem.problemId} )
+    </insert>
+<!--    更新运行内存和运行时间-->
+    <update id="updataTimeAndMemory" >
+        update hzuoj.hzuoj_datas set data_max_runtime_memory = #{dataMaxRuntimeMemory}, data_max_runtime_time = #{dataMaxRuntimeTime} where data_id = #{dataId}
+    </update>
+<!--    根据题目problemId返回测试数据信息-->
+    <select id="getProblemDatas" resultType="com.hqz.hzuoj.bean.problem.Data">
+        SELECT data_id,data_input, data_output, data_max_runtime_time, data_max_runtime_memory from hzuoj_datas WHERE problem_id = #{problemId}
+    </select>
+
+</mapper>

@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hqz.hzuoj.mapper.solution.SolutionMapper">
+    <resultMap id="solutionResultMap" type="com.hqz.hzuoj.bean.solution.Solution">
+        <id column="solution_id" property="solutionId"/>
+        <result column="solution_content" property="solutionContent"/>
+        <result column="solution_create_time" property="solutionCreateTime"/>
+        <result column="solution_modify_time" property="solutionModifyTime"/>
+        <result column="solution_title" property="solutionTitle"/>
+        <association property="user" javaType="com.hqz.hzuoj.bean.user.User">
+            <id column="user_id" property="userId"/>
+            <result column="username" property="username"/>
+            <result column="email" property="email"/>
+            <result column="user_img" property="UserImg"/>
+            <result column="user_rating" property="userRating"/>
+            <result column="user_submit_total" property="userSubmitTotal"/>
+            <result column="user_challenge_total" property="userChallengeTotal"/>
+        </association>
+        <association property="solutionStatus" javaType="com.hqz.hzuoj.bean.solution.SolutionStatus">
+            <id column="solution_status_id" property="solutionStatusId"/>
+            <result column="solution_status_name" property="solutionStatusName"/>
+        </association>
+        <association property="problem" javaType="com.hqz.hzuoj.bean.problem.Problem">
+            <id column="problem_id" property="problemId"/>
+            <id column="problem_title" property="problemTitle"/>
+        </association>
+    </resultMap>
+    <insert id="saveSolution">
+        <selectKey order="AFTER" keyProperty="solutionId" resultType="int">
+            select LAST_INSERT_ID()
+        </selectKey>
+        INSERT INTO hzuoj_solutions (
+        solution_content,solution_create_time,solution_modify_time,
+        solution_title,user_id, problem_id, solution_status_id)
+        VALUES(#{solutionContent}, #{solutionCreateTime}, #{solutionModifyTime},
+        #{solutionTitle},#{user.userId}, #{problem.problemId}, #{solutionStatus.solutionStatusId})
+    </insert>
+    <select id="getSolution" resultMap="solutionResultMap">
+        SELECT
+        *
+        FROM
+        hzuoj_solutions s
+        INNER JOIN hzuoj_users u
+        ON u.user_id = s.user_id
+        INNER JOIN hzuoj_problems p
+        ON p.problem_id = s.`problem_id`
+        INNER JOIN hzuoj_solutions_status ss
+        ON ss.solution_status_id = s.solution_status_id
+        WHERE s.solution_id = #{solutionId}
+    </select>
+    <select id="getSolutions" resultMap="solutionResultMap">
+        SELECT
+        *
+        FROM
+        hzuoj_solutions s
+        INNER JOIN hzuoj_users u
+        ON u.user_id = s.user_id
+        INNER JOIN hzuoj_problems p
+        ON p.problem_id = s.`problem_id`
+        INNER JOIN hzuoj_solutions_status ss
+        ON ss.solution_status_id = s.solution_status_id
+        <where>
+            1 = 1
+            <if test="problem != null and problem.problemId != null">
+                and s.problem_id = #{problem.problemId}
+            </if>
+            <if test="solutionStatus != null and solutionStatus.solutionStatusId != null">
+                and s.solution_status_id = #{solutionStatus.solutionStatusId}
+            </if>
+        </where>
+        order by s.solution_modify_time desc
+    </select>
+    <update id="updateSolution">
+        update hzuoj_solutions set
+        solution_content=#{solutionContent},solution_modify_time=#{solutionModifyTime},
+        solution_title=#{solutionTitle}
+        WHERE solution_id = #{solutionId}
+    </update>
+    <update id="updateSolutionStatus">
+        update hzuoj_solutions set
+        solution_status_id=#{solutionStatus.solutionStatusId}
+        WHERE solution_id = #{solutionId}
+    </update>
+</mapper>

@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hqz.hzuoj.mapper.contest.ContestRankMapper">
+    <resultMap id="contestRankResultMap" type="com.hqz.hzuoj.bean.contest.ContestRank">
+        <id column="contest_rank_id" property="contestRankId"/>
+        <result column="rank" property="rank"/>
+        <result column="accepted_total" property="acceptedTotal"/>
+        <result column="total_score" property="totalScore"/>
+        <result column="punish_time" property="punishTime"/>
+        <result column="contest_id" property="contestId"/>
+        <association property="contestApply" javaType="com.hqz.hzuoj.bean.contest.ContestApply">
+            <id column="contest_apply_id" property="contestApplyId"/>
+            <result column="remark_name" property="remarkName"/>
+            <result column="apply_time" property="applyTime"/>
+            <result column="contest_id" property="contestId"/>
+            <result column="user_id" property="userId"/>
+            <association property="user" javaType="com.hqz.hzuoj.bean.user.User">
+                <id column="user_id" property="userId"/>
+                <result column="username" property="username"/>
+                <result column="user_img" property="UserImg"/>
+                <result column="user_rating" property="userRating"/>
+                <result column="school" property="school"/>
+                <result column="user_submit_total" property="userSubmitTotal"/>
+                <result column="user_challenge_total" property="userChallengeTotal"/>
+            </association>
+        </association>
+    </resultMap>
+    <insert id="saveContestRank">
+        <selectKey order="AFTER" keyProperty="contestRankId" resultType="java.lang.Long">
+            select LAST_INSERT_ID()
+        </selectKey>
+        INSERT INTO hzuoj_contests_rank
+        (rank,accepted_total,total_score,punish_time, contest_apply_id,contest_id)
+        VALUES(#{rank},#{acceptedTotal},#{totalScore},#{punishTime},#{contestApply.contestApplyId},#{contestId})
+    </insert>
+    <select id="getContestRanks" resultMap="contestRankResultMap">
+       SELECT
+          *
+        FROM
+          hzuoj_contests_rank cr
+          INNER JOIN hzuoj_contests_applys ca
+            ON cr.contest_apply_id = ca.contest_apply_id
+          INNER JOIN hzuoj_users u
+            ON ca.user_id = u.user_id
+            <where>
+                cr.contest_id = #{contestId}
+                <if test="param2.userId != null">
+                    and u.user_id = #{param2.userId}
+                </if>
+                <if test="param2.indistinct != null">
+                    and (u.username like '%${param2.indistinct}%' or u.school like '%${param2.indistinct}%')
+                </if>
+            </where>
+        ORDER BY cr.rank
+    </select>
+    <select id="getContestRank" resultMap="contestRankResultMap">
+        SELECT
+          *
+        FROM
+          hzuoj_contests_rank cr
+          INNER JOIN hzuoj_contests_applys ca
+            ON cr.contest_apply_id = ca.contest_apply_id
+          INNER JOIN hzuoj_users u
+            ON ca.user_id = u.user_id
+            WHERE cr.contest_rank_id = #{contestRankId}
+    </select>
+    <delete id="deleteContestRank">
+        DELETE FROM hzuoj_contests_rank WHERE contest_rank_id = #{contestRankId}
+    </delete>
+    <delete id="deleteContestRanks">
+        DELETE FROM hzuoj_contests_rank WHERE contest_id = #{contestId}
+    </delete>
+    <resultMap id="contestRankAndContestRankInfo" type="com.hqz.hzuoj.bean.contest.ContestRank">
+        <id column="contest_rank_id" property="contestRankId"/>
+        <result column="rank" property="rank"/>
+        <result column="accepted_total" property="acceptedTotal"/>
+        <result column="total_score" property="totalScore"/>
+        <result column="punish_time" property="punishTime"/>
+        <result column="contest_id" property="contestId"/>
+        <association property="contestApply" javaType="com.hqz.hzuoj.bean.contest.ContestApply">
+            <id column="contest_apply_id" property="contestApplyId"/>
+            <result column="remark_name" property="remarkName"/>
+            <result column="apply_time" property="applyTime"/>
+            <result column="contest_id" property="contestId"/>
+            <result column="user_id" property="userId"/>
+            <association property="user" javaType="com.hqz.hzuoj.bean.user.User">
+                <id column="user_id" property="userId"/>
+                <result column="username" property="username"/>
+                <result column="user_img" property="UserImg"/>
+                <result column="user_rating" property="userRating"/>
+                <result column="school" property="school"/>
+                <result column="user_submit_total" property="userSubmitTotal"/>
+                <result column="user_challenge_total" property="userChallengeTotal"/>
+            </association>
+        </association>
+        <collection property="contestRankInfos" ofType="com.hqz.hzuoj.bean.contest.ContestRankInfo">
+            <id column="contest_rank_info_id" property="contestRankInfoId"/>
+            <result column="first_accepted" property="firstAccepted"/>
+            <result column="problem_id" property="problemId"/>
+            <result column="submit_total" property="submitTotal"/>
+            <result column="cri_punish_time" property="punishTime"/>
+            <result column="score" property="score"/>
+            <result column="accepted" property="accepted"/>
+        </collection>
+    </resultMap>
+    <select id="getContestRanksAndContestRankInfos" resultMap="contestRankAndContestRankInfo">
+        SELECT
+          *,
+          cri.punish_time AS cri_punish_time
+        FROM
+          hzuoj_contests_rank cr
+          INNER JOIN hzuoj_contests_applys ca
+            ON cr.contest_apply_id = ca.contest_apply_id
+          INNER JOIN hzuoj_users u
+            ON ca.user_id = u.user_id
+          INNER JOIN hzuoj_contests_rank_info cri
+            ON cri.contest_rank_id = cr.contest_rank_id
+             WHERE cr.contest_id = #{contestId}
+             ORDER BY cr.rank
+    </select>
+</mapper>

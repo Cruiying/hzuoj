@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hqz.hzuoj.mapper.contest.ContestRankInfoMapper">
+    <resultMap id="contestRankInfoResultMap" type="com.hqz.hzuoj.bean.contest.ContestRankInfo">
+        <id column="contest_rank_info_id" property="contestRankInfoId"/>
+        <result column="first_accepted" property="firstAccepted"/>
+        <result column="problem_id" property="problemId"/>
+        <result column="submit_total" property="submitTotal"/>
+        <result column="punish_time" property="punishTime"/>
+        <result column="score" property="score"/>
+        <result column="accepted" property="accepted"/>
+    </resultMap>
+    <insert id="saveContestRankInfo">
+        <selectKey order="AFTER" keyProperty="contestRankInfoId" resultType="java.lang.Long">
+            select LAST_INSERT_ID()
+        </selectKey>
+        INSERT INTO hzuoj_contests_rank_info
+        (problem_id,first_accepted,submit_total,punish_time,score,accepted,contest_rank_id)
+        VALUES(#{problemId},#{firstAccepted},#{submitTotal},#{punishTime},#{score},#{accepted},#{contestRankId})
+    </insert>
+    <select id="getContestRankInfos" resultMap="contestRankInfoResultMap">
+        SELECT * FROM hzuoj_contests_rank_info cri
+        WHERE cri.contest_rank_id = #{contestRankId}
+    </select>
+    <select id="getContestRankInfo" resultMap="contestRankInfoResultMap">
+        SELECT * FROM hzuoj_contests_rank_info cri
+        WHERE cri.contest_rank_info_id = #{contestRankInfo}
+    </select>
+    <delete id="deleteContestRankInfo">
+        DELETE FROM hzuoj_contests_rank_info WHERE contest_rank_info_id = #{contestRankInfoId}
+    </delete>
+    <delete id="deleteContestRankInfos">
+        DELETE FROM hzuoj_contests_rank_info WHERE contest_rank_id = #{contestRankId}
+    </delete>
+</mapper>

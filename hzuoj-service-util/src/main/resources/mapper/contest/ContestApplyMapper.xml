@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hqz.hzuoj.mapper.contest.ContestApplyMapper">
+    <resultMap id="contestApplyResultMap" type="com.hqz.hzuoj.bean.contest.ContestApply">
+        <id column="contest_apply_id" property="contestApplyId"/>
+        <result column="remark_name" property="remarkName"/>
+        <result column="contest_id" property="contestId"/>
+        <result column="user_id" property="userId"/>
+        <association property="user" javaType="com.hqz.hzuoj.bean.user.User">
+            <id column="user_id" property="userId"/>
+            <result column="username" property="username"/>
+            <result column="user_img" property="UserImg"/>
+            <result column="user_rating" property="userRating"/>
+        </association>
+    </resultMap>
+    <select id="selectAllByContest" resultMap="contestApplyResultMap">
+        SELECT
+          *
+        FROM
+          hzuoj_contests_applys ca
+          INNER JOIN hzuoj_users u
+          ON u.user_id = ca.user_id
+        WHERE ca.contest_id = #{contestId}
+    </select>
+    <select id="selectContestApplyByUser" resultType="com.hqz.hzuoj.bean.contest.ContestApply">
+         select * from hzuoj_contests_applys ca where ca.contest_id = #{contestId} and ca.user_id = #{userId}
+    </select>
+</mapper>

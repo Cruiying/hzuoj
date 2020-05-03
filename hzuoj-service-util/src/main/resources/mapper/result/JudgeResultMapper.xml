@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hqz.hzuoj.mapper.result.JudgeResultMapper">
+    <select id="selectJudgeName" resultType="com.hqz.hzuoj.bean.submit.JudgeResult">
+       SELECT * from hzuoj_judge_result where judge_name = #{judgeName}
+    </select>
+</mapper>

@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html class="x-admin-sm" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>欢迎页面-X-admin2.2</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport"
+          content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi"/>
+    <link rel="stylesheet" href="../static/css/font.css" th:href="@{/css/font.css}">
+    <link rel="stylesheet" href="../static/css/xadmin.css" th:href="@{/css/xadmin.css}">
+    <script src="../static/lib/layui/layui.js" charset="utf-8" th:src="@{/lib/layui/layui.js}"></script>
+    <script type="text/javascript" src="../static/js/xadmin.js" th:src="@{/js/xadmin.js}"></script>
+    <!--[if lt IE 9]>
+    <script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
+    <script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
+    <link rel="stylesheet" href="../static/lib/layui/css/layui.css" media="all" th:href="@{/lib/layui/css/layui.css}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/semantic-ui/2.2.4/semantic.min.css">
+    <link rel="stylesheet" href="../static/lib/editormd/css/editormd.min.css"
+          th:href="@{/lib/editormd/css/editormd.min.css}">
+    <script type="text/javascript" src="../static/js/xadmin.js" th:src="@{/js/xadmin.js}"></script>
+    <link rel="stylesheet" href="../static/css/me.css" th:href="@{/css/me.css}">
+    <link rel="stylesheet" href="../static/lib/jq-module/zyupload/zyupload-1.0.0.min.css"
+          th:href="@{/lib/jq-module/zyupload/zyupload-1.0.0.min.css}" media="all">
+    <link rel="stylesheet" href="../static/css/public.css" th:href="@{/css/public.css}" media="all">
+    <script type="text/javascript" async
+            src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+    </script>
+    <![endif]-->
+</head>
+<body>
+<div class="layui-card-header">
+    <button class="layui-btn" onclick="xadmin.open('添加比赛','/admin/contest')"><i class="layui-icon"></i>添加
+    </button>
+</div>
+<div class="layui-fluid">
+    <div class="layui-row layui-col-space15">
+        <div class="layui-col-md12">
+            <div class="layui-card">
+                <div class="layui-card-body ">
+                    <div class="layui-collapse" lay-filter="test">
+                        <div class="layui-colla-item">
+                            <h2 class="layui-colla-title">条件筛选<i class="layui-icon layui-colla-icon"></i></h2>
+                            <div class="layui-colla-content">
+                                <form class="layui-form" action="">
+                                    <!--  比赛创建时间，比赛开始时间所在的范围，赛制，比赛状态，是否公开
+                                    -->
+                                    <div class="layui-form-item">
+                                        <div class="layui-inline">
+                                            <label class="layui-form-label">比赛名称</label>
+                                            <div class="layui-input-inline">
+                                                <input type="text" class="layui-input" name="contestName"
+                                                       placeholder="请输入比赛"/>
+                                            </div>
+                                        </div>
+                                        <div class="layui-inline">
+                                            <label class="layui-form-label">比赛创建者</label>
+                                            <div class="layui-input-inline">
+                                                <select name="adminId">
+                                                    <option value="">直接选择或搜索选择</option>
+                                                    <option value="1">Cruiying</option>
+                                                    <option value="2">LyIosing</option>
+                                                    <option value="3">Harada</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="layui-form-item">
+                                        <div class="layui-inline">
+                                            <label class="layui-form-label">开始时间范围:</label>
+                                            <div class="layui-input-inline">
+                                                <input type="text" class="layui-input" name="StartTime" id="StartTime"
+                                                       placeholder="yyyy-MM-dd HH:mm">
+                                            </div>
+                                            <div class="layui-input-inline">
+                                                <input type="text" class="layui-input" name="EndTime" id="EndTime"
+                                                       placeholder="yyyy-MM-dd HH:mm">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="layui-form-item">
+                                        <div class="layui-inline">
+                                            <label class="layui-form-label">赛制</label>
+                                            <div class="layui-input-block">
+                                                <input type="radio" id="ACM" name="contestTypeId" value="1" title="ACM"
+                                                       checked>
+                                                <input type="radio" id="IOI" class="" name="contestTypeId" value="2"
+                                                       title="IOI">
+                                                <input type="radio" id="OI" class="" name="contestTypeId" value="3"
+                                                       title="OI">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="layui-form-item">
+                                        <div class="layui-inline">
+                                            <label class="layui-form-label">比赛状态</label>
+                                            <div class="layui-input-block">
+                                                <input type="radio" name="contestStatus" value="0" title="未开始" checked>
+                                                <input type="radio" name="contestStatus" value="1" title="比赛中">
+                                                <input type="radio" name="contestStatus" value="2" title="已结束">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="layui-form-item">
+                                        <div class="layui-inline">
+                                            <label class="layui-form-label">是否公开</label>
+                                            <div class="layui-input-block">
+                                                <input type="radio" name="contestPublic" value="0" title="私有比赛" checked>
+                                                <input type="radio" name="contestPublic" value="1" title="公开比赛">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="layui-form-item">
+                                        <div class="layui-input-block">
+                                            <button type="submit" class="layui-btn" lay-submit="" lay-filter="submit">
+                                                筛选
+                                            </button>
+                                            <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                                        </div>
+                                    </div>
+
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="layui-card-body layui-table-body layui-table-main">
+                    <table class="layui-table layui-form">
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>比赛名称</th>
+                            <th>比赛开始时间</th>
+                            <th>比赛结束时间</th>
+                            <th>赛制</th>
+                            <th>比赛状态</th>
+                            <th>比赛时长</th>
+                            <th>比赛是否公开</th>
+                            <th>操作</th>
+                        </tr>
+                        </thead>
+                        <tbody id="contests">
+
+                        </tbody>
+                    </table>
+                </div>
+                <div class="layui-card-body ">
+                    <div id="page"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<script src="../static/js/jquery.min.js" charset="utf-8" th:src="@{/js/jquery.min.js}"></script>
+<script src="https://cdn.jsdelivr.net/semantic-ui/2.2.4/semantic.min.js"></script>
+<script src="../static/lib/editormd/editormd.min.js" th:src="@{/lib/editormd/editormd.min.js}"></script>
+
+<script src="../static/js/mathjax.js" th:src="@{/js/mathjax.js}"></script>
+<script src="../static/lib/jq-module/zyupload/zyupload-1.0.0.min.js"
+        th:src="@{/lib/jq-module/zyupload/zyupload-1.0.0.min.js}" charset="utf-8"></script>
+<script src="../static/js/DateUtils.js" th:src="@{/js/DateUtils.js}"></script>
+
+<!--异步加载所有比赛信息-->
+<script>
+
+    layui.use(['laypage', 'layer', 'form'], function () {
+        let lazyPage = layui.laypage,
+            layer = layui.layer,
+            form = layui.form;
+        //监听提交
+        form.on('submit(submit)', function (data) {
+            layer.msg("筛选成功");
+            console.log(JSON.stringify(data.field));
+            loadContests(1, data.field);
+            return false;
+        });
+
+        //自定义每页条数的选择项
+        function loadContests(page, data) {
+            $.ajax({
+                dataType: "json",
+                //请求方式
+                type: "POST",
+                //请求的媒体类型
+                contentType: "application/json;charset=UTF-8",
+                //请求地址
+                url: "/admin/contests/" + page + "/list",
+                data: JSON.stringify(data),
+                //请求成功
+                success: function (result) {
+                    let pageInfo = result.pageInfo;
+                    console.log(pageInfo);
+                    let contests = pageInfo.list;
+                    let list = $("#contests");
+                    list.html("");
+                    for (let i = 0; i < contests.length; i++) {
+                        const contest = contests[i];
+                        //比赛创建时间
+                        const ct = new Date(contest.contestCreateTime).format("yyyy-MM-dd hh:mm");
+                        //比赛开始时间
+                        const s = new Date(contest.contestStart).format("yyyy-MM-dd hh:mm");
+                        //比赛结束时间
+                        const e = new Date(contest.contestEnd).format("yyyy-MM-dd hh:mm");
+                        //比赛报名开始时间
+                        const as = new Date(contest.contestApplyStartTime).format("yyyy-MM-dd hh:mm");
+                        //比赛报名结束时间
+                        const ae = new Date(contest.contestApplyEndTime).format("yyyy-MM-dd hh:mm");
+                        let contestStatus = "";
+                        let contestPublic = "";
+                        let contestLength = (Math.round(contest.contestTimeLength / 3600000)) + "小时" + (Math.round(contest.contestTimeLength / 3600000) % 60) + "分钟";
+                        if (contest.contestStatus == 0) {
+                            contestStatus = "未开始";
+                        } else if (contest.contestStatus == 1) {
+                            contestStatus = "已开始";
+                        } else {
+                            contestStatus = "已结束";
+                        }
+                        if (contest.contestPublic == 0) {
+                            contestPublic = "私有比赛";
+                        } else {
+                            contestPublic = "公开比赛";
+                        }
+                        let isRank = "";
+
+                        isRank = "<a title=\"更新比赛\" onclick=\"updateContestRank(this," + contest.contestId + ")\" href=\"javascript:;\">\n" +
+                            "                                    <i class=\"layui-icon\">&#xe614;</i>\n" +
+                            "                                </a>";
+                        list.append("   <tr>\n" +
+                            "                            <td>" + contest.contestId + "</td>\n" +
+                            "                            <td>" + contest.contestName + "</td>\n" +
+                            "                            <td>" + s + "</td>\n" +
+                            "                            <td>" + e + "</td>\n" +
+                            "                            <td>" + contest.contestType.contestTypeName + "</td>\n" +
+                            "                            <td>" + contestStatus + "</td>\n" +
+                            "                            <td>" + contestLength + "</td>\n" +
+                            "                            <td>" + contestPublic + "</td>\n" +
+                            "                            <td class=\"td-manage\">\n" +
+                            "                                <a title=\"编辑\" onclick=\"xadmin.open('编辑','/admin/contest?contestId=" + contest.contestId + "')\" href=\"javascript:;\">\n" +
+                            "                                    <i class=\"layui-icon\">&#xe642;</i>\n" +
+                            "                                </a>\n" +
+                            "                                <a title=\"删除\" onclick=\"member_del(this,'要删除的id')\" href=\"javascript:;\">\n" +
+                            "                                    <i class=\"layui-icon\">&#xe640;</i>\n" +
+                            "                                </a>" + isRank + "\n" +
+                            "                            </td>\n" +
+                            "                        </tr>");
+                    }
+                    lazyPage.render({
+                        elem: 'page'
+                        , count: pageInfo.total
+                        , limit: pageInfo.pageSize
+                        , curr: page
+                        , done: function () {
+                        }
+                        , jump: function (obj, first) {
+                            if (!first) {
+                                loadContests(obj.curr, data);
+                            }
+                        }
+                    });
+                    return false;
+                },
+                //请求失败，包含具体的错误信息
+                error: function (e) {
+                    layer.msg("页面加载失败")
+                }
+            });
+            return false;
+        }
+
+        //异步加载比赛列表数据
+        const query = {};
+        loadContests(1, query);
+    });
+
+    /*删除问题*/
+    function updateContestRank(obj, contestId) {
+        layer.confirm('确认要更新比赛吗？', function () {
+            //发异步删除数据
+            $.ajax({
+                dataType: "json",
+                //请求方式
+                type: "POST",
+                //请求的媒体类型
+                contentType: "application/json;charset=UTF-8",
+                //请求路径
+                url: "/admin/contest/update/rank/" + contestId,
+                success: function (result) {
+                    if (result != 'fail') {
+                        layer.msg('更新成功!', {icon: 1, time: 1000});
+                    } else {
+                        layer.msg('更新失败!', {icon: 5, time: 1000});
+                    }
+                },
+                error: function (result) {
+                    layer.msg('更新失败!', {icon: 5, time: 1000});
+                }
+            });
+
+        });
+    }
+
+</script>
+<script>
+    layui.use('laydate', function () {
+        var laydate = layui.laydate;
+        //日期时间选择器
+        laydate.render({
+            elem: '#StartTime'
+            , format: 'yyyy-MM-dd HH:mm'
+            , type: "datetime"
+        });
+        //日期时间选择器
+        laydate.render({
+            elem: '#EndTime'
+            , format: 'yyyy-MM-dd HH:mm'
+            , type: "datetime"
+        }); //日期时间选择器
+    });
+</script>
+</html>

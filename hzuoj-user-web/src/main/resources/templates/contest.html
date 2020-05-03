@@ -1,0 +1,1030 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:v-on="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
+<head>
+    <title th:text="${contest.contestName}"></title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport"
+          content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi"/>
+    <link rel="stylesheet" href="../static/css/semantic.css" th:href="@{/css/semantic.css}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/semantic-ui/2.2.4/semantic.min.css">
+
+    <link rel="stylesheet" href="../static/css/me.css" th:href="@{/css/me.css}">
+    <!--    <script type="text/javascript" src="../static/js/xadmin.js" th:src="@{/js/xadmin.js}"></script>-->
+    <link rel="stylesheet" href="../static/lib/layui/css/layui.css" media="all" th:href="@{/lib/layui/css/layui.css}">
+    <link rel="stylesheet" href="../static/lib/jq-module/zyupload/zyupload-1.0.0.min.css"
+          th:href="@{/lib/jq-module/zyupload/zyupload-1.0.0.min.css}" media="all">
+    <script src="../static/lib/vue/vue.js" th:src="@{/lib/vue/vue.js}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script type="text/javascript" src="https://cdn.bootcss.com/axios/0.19.0-beta.1/axios.js"></script>
+
+    <script type="text/javascript" async
+            src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+    </script>
+    <!--    <script src="../static/lib/vs/basic-languages/cpp/cpp.js" th:src="@{/lib/vs/basic-languages/cpp/cpp.js}"></script>-->
+    <!--    <script src="../static/lib/vs/basic-languages/**" th:src="@{/lib/vs/basic-languages/}"></script>-->
+    <link rel="stylesheet" type="text/css" href="../static/css/main.css" th:href="@{/css/main.css}">
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+        }
+
+        a {
+            text-decoration: none !important;
+            target: "_blank" !important;
+        }
+
+        .ui.table td {
+            padding: .78571429em !important;
+            text-align: inherit !important;
+        }
+
+        .icon {
+            margin: 0 !important;
+        }
+
+        .count-down-item {
+            text-align: center;
+            letter-spacing: 0;
+            display: inline-block;
+            margin-right: 10px;
+            padding: 10px 5px;
+            border-radius: 4px;
+            background: #c6c6c6;
+            color: #fff;
+            font-size: 18px;
+            line-height: 1.1;
+        }
+
+        .count-down-num {
+            font-size: 40px;
+            margin-bottom: 12px;
+        }
+
+        .first_ac {
+            background: #9de7c4;
+        }
+
+        .ac {
+            background: #ddf8eb;
+        }
+
+        .wa {
+            background: #fbe3e5;
+        }
+
+        .contest-nav.item {
+            color: #22ae90 !important;
+        }
+
+        .tag {
+            border-radius: 12px;
+            border: 1px solid #ddd;
+            display: inline-block;
+            padding: 2px 10px;
+            color: #333;
+            font-size: 12px;
+            margin-right: 2px;
+            background: #fff;
+            margin-bottom: 5px;
+            line-height: 16px;
+            cursor: pointer;
+        }
+
+        .m-item {
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+    </style>
+    <link rel="stylesheet" type="text/css" data-name="vs/editor/editor.main"
+          href="https://cdn.jsdelivr.net/npm/syzoj-public-cdn@1.0.6/cdnjs/monaco-editor/0.18.1/min/vs/editor/editor.main.css">
+    <!--    <script async="async" type="text/javascript" src="https://cdn.jsdelivr.net/npm/syzoj-public-cdn@1.0.6/self/vendor/tokenizer/definitions/c_cpp.js"></script>-->
+    <!--    <script async="async" type="text/javascript" src="https://cdn.jsdelivr.net/npm/syzoj-public-cdn@1.0.6/self/vendor/tokenizer/definitions/java.js"></script>-->
+    <!--    <script async="async" type="text/javascript" src="https://cdn.jsdelivr.net/npm/syzoj-public-cdn@1.0.6/self/vendor/tokenizer/definitions/python.js"></script>-->
+</head>
+<body>
+<!--导航栏-->
+<nav th:replace="fragment::menu('contests')"></nav>
+<div id="app" style="display: none">
+    <div class="ui" style="background-image: url('/img/banner.jpg'); height: 330px;">
+        <div class="ui container" style="padding-top: 50px;padding-left: 9%; float: left">
+            <div class="ui middle container" style="">
+                <h1 style="color: white; font-size: 32px;">{{contest.contestName}}</h1>
+                <span>
+                    <button style="font-size: 15px; background-color: rgba(255,255,255,0) !important;"
+                            class="ui teal basic button m-padded-tiny m-text-thin">{{contest.contestType.contestTypeName}}赛制</button>
+                    <button style="font-size: 15px; background-color: rgba(255,255,255,0) !important;"
+                            class="ui teal basic button m-padded-tiny m-text-thin"
+                            v-if="contest.contestApplyStatus=='0'">报名未开始</button>
+                    <button style="font-size: 15px;  background-color: rgba(255,255,255,0) !important;"
+                            class="ui teal basic button m-padded-tiny m-text-thin"
+                            v-if="contest.contestApplyStatus=='1'">报名中</button>
+                    <button style="font-size: 15px; background-color: rgba(255,255,255,0) !important;"
+                            class="ui teal basic button m-padded-tiny m-text-thin"
+                            v-if="contest.contestApplyStatus=='2'">报名结束</button>
+                    <button style="font-size: 15px; background-color: rgba(255,255,255,0) !important;"
+                            class="ui teal basic button m-padded-tiny m-text-thin" v-if="contest.contestStatus=='0'">比赛未开始</button>
+                    <button style="font-size: 15px; background-color: rgba(255,255,255,0) !important;"
+                            class="ui teal basic button m-padded-tiny m-text-thin"
+                            v-if="contest.contestStatus=='1'">比赛中</button>
+                    <button style="font-size: 15px; background-color: rgba(255,255,255,0) !important;"
+                            class="ui teal basic button m-padded-tiny m-text-thin"
+                            v-if="contest.contestStatus=='2'">比赛结束</button>
+                    <button style="font-size: 15px; background-color: rgba(255,255,255,0) !important;"
+                            class="ui teal basic button m-padded-tiny m-text-thin" v-if="contest.contestPublic=='0'"><i
+                            class="unlock alternate icon"></i>私有比赛</button>
+                    <button style="font-size: 15px; background-color: rgba(255,255,255,0) !important;"
+                            class="ui teal basic button m-padded-tiny m-text-thin" v-if="contest.contestPublic=='1'"><i
+                            class="unlock icon"></i>公开赛</button>
+                    <button style="font-size: 15px"
+                            class="ui inverted red button m-padded-tiny m-text-thin"
+                            v-if="contest.contestIsRank != null && contest.contestIsRank=='1'"><b><i
+                            class="icon trophy"></i> Rating </b></button>
+                </span>
+                <div style="margin-top: 30px;margin-bottom: 30px;">
+                    <div class="item" style="color: white; font-size: 18px;"><i
+                            class="icon user"></i>比赛创建者：<span>{{contest.admin.adminName}}</span></div>
+                    <div class="item" style="color: white; font-size: 18px;"><i class="calendar icon"></i>时间： <span
+                            v-text="dateFormat(contest.contestStart)"></span>
+                        至 <span v-text="dateFormat(contest.contestEnd)"></span>
+                    </div>
+                    <div class="item" style="color: white; font-size: 18px;"><i
+                            class="time icon"></i>时长：<span v-text="formatDuring(contest.contestTimeLength)"></span>
+                    </div>
+                    <div class="item" style="color: white; font-size: 18px;"><i
+                            class="users icon"></i>人数：<span>{{contest.contestApplyCount}}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="ui">
+        <div class="ui secondary m-item menu"></div>
+    </div>
+    <div class="ui container">
+        <div class="ui"></div>
+        <div class="ui" v-if="contest.contestStatus != 0">
+            <div class="ui secondary m-item menu">
+                <a href="#explain" class="item m-item">
+                    <div style="cursor: pointer;">
+                        <div v-on:click="onClick(0)" style="font-size: 16px!important;" class="contest-nav item">
+                            <i class="home icon"></i>比赛说明
+                        </div>
+                    </div>
+                </a>
+                <a href="#problem" class="item m-item">
+                    <div style="cursor: pointer;">
+                        <div v-on:click="onClick(1)" style="font-size: 16px!important;"
+                             class="contest-nav teal active item">
+                            <i class="mail icon"></i> 题目
+                        </div>
+                    </div>
+                </a>
+                <a href="#submit" class="item m-item">
+                    <div style="cursor: pointer;" v-on:click="getContestSubmits(1)">
+                        <div v-on:click="onClick(2)" style="font-size: 16px!important;" class="contest-nav item">
+                            <i class="user icon"></i>提交
+                        </div>
+                    </div>
+                </a>
+                <a href="#rank" class="item m-item">
+                    <div style="cursor: pointer; " v-on:click="getContestRank(1)">
+                        <div v-on:click="onClick(3)" style="font-size: 16px!important;" class="contest-nav item">
+                            <i class="user icon"></i>排行
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+        <hr class="m-hr" v-if="contest.contestStatus != 0">
+        <div class="ui" v-if="contest.contestStatus == 0">
+            <div class="header" style="text-align: center">距比赛开始还有</div>
+            <div class="content" style="text-align: center; margin-top: 20px; margin-bottom: 30px;">
+                <div class="ui attached">
+                    <div class="ui middle center aligned column grid">
+                        <div class="count-down-item">
+                            <div class="count-down-num">{{day}}</div>
+                            <div> 天</div>
+                        </div>
+                        <div class="count-down-item">
+                            <div class="count-down-num">{{hour}}</div>
+                            <div>小时</div>
+                        </div>
+                        <div class="count-down-item">
+                            <div class="count-down-num">{{min}}</div>
+                            <div>分钟</div>
+                        </div>
+                        <div class="count-down-item">
+                            <div class="count-down-num">{{second}}</div>
+                            <div>秒</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="actions" style="text-align: center">
+                <span v-if="contest.contestApplyStatus == '1' && contest.contestStatus != '2'">
+                    <button class="ui mini teal basic button" v-on:click="applyContest()"
+                            v-if="showUserApplyContest() != 1">报名比赛</button>
+                </span>
+                <span v-if="contest.contestStatus!='1'">
+                    <span><button class="ui mini basic button" v-if="showUserApplyContest() == '1'">已报名</button></span>
+                </span>
+            </div>
+        </div>
+        <div class="ui ">
+            <div class="ui grid" style="margin-top: 1px;">
+                <!--        比赛说明-->
+                <div v-if="contest.contestStatus != 0" class="contest-item sixteen wide column" style="display: none;">
+                    <div class="ui grid">
+                        <div class="sixteen wide column">
+                            <div style="padding: 30px; background-color: rgba(33,33,33,0.1)">
+                                <pre>【比赛简介】
+
+竞赛名称：{{contest.contestName}}
+
+报名时间：<span>{{dateFormat(contest.contestApplyStartTime)}}</span>至<span>{{dateFormat(contest.contestApplyEndTime)}}</span>
+
+比赛时间：<span>{{dateFormat(contest.contestStart)}}</span>至<span>{{dateFormat(contest.contestEnd)}}</span>
+
+主办单位：贺州学院
+
+【比赛说明】
+{{contest.contestExplain}}
+
+【比赛流程】
+
+ 2020年02月02日起，在HzuOJ竞赛网（https://www.hzuoj.com）注册，按要求完善个人基本信息，并报名参赛。
+                                </pre>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+                <div v-if="contest.contestStatus == 0" class="content-item sixteen wide column"
+                     style="display: block;">
+                    <div class="ui grid">
+                        <div class="sixteen wide column">
+                            <div style="padding: 30px; background-color: rgba(33,33,33,0.1)">
+                            <pre>【比赛简介】
+
+竞赛名称：{{contest.contestName}}
+
+报名时间：<span>{{dateFormat(contest.contestApplyStartTime)}}</span>至<span>{{dateFormat(contest.contestApplyEndTime)}}</span>
+
+比赛时间：<span>{{dateFormat(contest.contestStart)}}</span>至<span>{{dateFormat(contest.contestEnd)}}</span>
+
+主办单位：贺州学院
+
+【比赛说明】
+{{contest.contestExplain}}
+
+【比赛流程】
+
+ 2020年02月02日起，在HzuOJ竞赛网（https://www.hzuoj.com）注册，按要求完善个人基本信息，并报名参赛。
+                                </pre>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+                <!--        比赛题目-->
+                <div class="contest-item sixteen wide column"
+                     v-if="contest.contestStatus != 0 && contestApply != null"
+                     style="overflow-x:auto">
+                    <table class="ui unstackable padded center aligned table">
+                        <thead>
+                        <tr>
+                            <th>题号</th>
+                            <th style="text-align: left">题目名称</th>
+                            <th></th>
+                            <th>通过率</th>
+                            <th>我的状态</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr v-for="(contestProblem,index) in contest.contestProblems">
+                            <td v-text="String.fromCharCode(index + 65)"></td>
+                            <td style="text-align: left !important;">
+                                <a target="_blank"
+                                   :href="'/contest/' + contest.contestId + '/' + contestProblem.problem.problemId"
+                                   class="m-problem" v-text="contestProblem.problem.problemTitle"></a>
+                            </td>
+                            <td style="text-align: right">
+                                <a v-if="tag in contestProblem.problem.tags != null" class="tag"
+                                   v-for="tag in contestProblem.problem.tags" v-text="tag.tagName"></a>
+                            </td>
+                            <td>
+                                {{contestProblem.problem.problemSubmitInfo.allAcceptedTotal==null?0:contestProblem.problem.problemSubmitInfo.allAcceptedTotal}}/{{contestProblem.problem.problemSubmitInfo.allTotal==null?0:contestProblem.problem.problemSubmitInfo.allTotal}}
+                            </td>
+                            <td v-html="mySubmitStatus(index)"></td>
+                            <!--                            <td class="m-problem"><i class="icon checkmark m-problem"></i>通过</td>-->
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <!--        比赛提交-->
+                <div class="contest-item sixteen wide column"
+                     v-if="contest.contestStatus != 0 && contestApply != null"
+                     style="display: none;">
+                    <!--            搜索-->
+                    <div>
+
+                        <div class="ui form" role="form"
+                             style="margin-bottom: 25px; text-align: left; ">
+                            <div class="ui icon input inline">
+                                <i class="search icon"></i>
+                                <input :value="submitQuery.username" value="" name="us" id="us" placeholder="用户名回车搜索"
+                                       v-on:keyup.enter="getSubmit('username', 1)">
+                            </div>
+                        </div>
+                    </div>
+                    <div style="overflow-x:auto; ">
+                        <div style="min-height: 300px;">
+                            <table class="ui unstackable segment padded center aligned table">
+                                <thead>
+                                <tr>
+                                    <th>运行ID</th>
+                                    <th>
+                                        <div class="ui pointing dropdown link item" tabindex="0">
+                                            <span>题号</span>
+                                            <input :value="submitQuery.problemId" type="hidden" name="problemId"
+                                                   id="problemId" value="-1"
+                                                   v-on:change="getSubmit('problemId',1)">
+                                            <i class="dropdown icon"></i>
+                                            <div class="menu transition hidden" tabindex="-1"
+                                                 style="max-height: 200px;overflow-y: auto">
+                                                <div class="item" data-value="">全部</div>
+                                                <div class="item"
+                                                     v-for="(contestProblem,index) in contest.contestProblems"
+                                                     :data-value="contestProblem.problem.problemId"
+                                                     v-text="String.fromCharCode(index + 65)">B
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </th>
+                                    <th>
+                                        <div class="ui pointing dropdown link item" tabindex="0">
+                                            <span>运行结果</span>
+                                            <input :value="submitQuery.judgeResultId" type="hidden" name="judgeResultId"
+                                                   id="judgeResultId" value=""
+                                                   v-on:change="getSubmit('judgeResultId',1)">
+                                            <i class="dropdown icon"></i>
+                                            <div tabindex="-1" class="menu transition hidden"
+                                                 style="display: block !important;max-height: 200px;overflow-y: auto">
+                                                <div data-value="" class="item active selected"
+                                                     style="font-size: 12.5px;">
+                                                    <b>不限</b></div>
+                                                <div data-value="1" class="item"><span class="status waiting"
+                                                                                       style=" color: #6cf !important"><i
+                                                        class="icon spinner"></i>Pending </span></div>
+                                                <div data-value="2" class="item"><span class="status accepted"
+                                                                                       style=" color: forestgreen !important;"><i
+                                                        class="icon checkmark"></i>Accepted</span></div>
+                                                <div data-value="3" class="item"><span class="status wrong_answer"
+                                                                                       style=" color: red !important;"><i
+                                                        class="icon remove"></i>Wrong Answer</span></div>
+                                                <div data-value="4" class="item"><span
+                                                        class="status time_limit_exceeded"
+                                                        style="color: sandybrown !important;"><i
+                                                        class="icon clock"></i>Time Limit Exceeded</span>
+                                                </div>
+                                                <div data-value="5" class="item"><span
+                                                        class="status output_limit_exceeded"
+                                                        style="color: sandybrown !important;"><i
+                                                        class="icon print"></i>Output Limit Exceeded</span>
+                                                </div>
+                                                <div data-value="6" class="item"><span
+                                                        class="status memory_limit_exceeded"
+                                                        style="color: sandybrown !important;"><i
+                                                        class="bug icon"></i>Memory Limit Exceeded</span>
+                                                </div>
+                                                <div data-value="7" class="item"><span class="status runtime_error"
+                                                                                       style="color: darkorchid !important"><i
+                                                        class="icon bomb"></i>Runtime Error </span></div>
+                                                <div data-value="9" class="item"><span class="status compile_error"
+                                                                                       style=" color: rgb(0, 68, 136) !important;"><i
+                                                        class="icon code"></i>Compile Error</span></div>
+                                                <div data-value="10" class="item"><span class="status system_error"
+                                                                                        style="color: grey !important;"><i
+                                                        class="icon server"></i>System Error</span></div>
+                                                <div data-value="11" class="item"><span class="status waiting"
+                                                                                        style=" color: #6cf !important"><i
+                                                        class="icon hourglass half"></i>Queue </span></div>
+                                                <div data-value="12" class="item"><span class="status waiting"
+                                                                                        style=" color: #6cf !important"><i
+                                                        class="icon hourglass spinner"></i>Running </span></div>
+                                                <div data-value="13" class="item"><span class="status waiting"
+                                                                                        style=" color: #6cf !important"><i
+                                                        class="icon hourglass spinner"></i>Compile </span></div>
+                                            </div>
+                                        </div>
+                                    </th>
+                                    <th>分数</th>
+                                    <th>运行时间</th>
+                                    <th>内存</th>
+                                    <th>
+                                        <div class="ui pointing dropdown link item" tabindex="0">
+                                            <span>使用语言</span>
+                                            <input :value="submitQuery.languageId" type="hidden" name="languageId"
+                                                   id="languageId" value=""
+                                                   v-on:change="getSubmit('languageId',1)">
+                                            <i class="dropdown icon"></i>
+                                            <div tabindex="-1" class="menu transition hidden"
+                                                 style="max-height: 200px;overflow-y: auto">
+                                                <div data-value="-1" class="item active selected"
+                                                     style="font-size: 12.5px;"><b>不限</b></div>
+                                                <div data-value="1" class="item" style="font-size: 12.5px;"><b>C++</b>
+                                                </div>
+                                                <div data-value="2" class="item" style="font-size: 12.5px;"><b>C++
+                                                    11</b></div>
+                                                <div data-value="3" class="item" style="font-size: 12.5px;"><b>C</b>
+                                                </div>
+                                                <div data-value="4" class="item" style="font-size: 12.5px;"><b>Java</b>
+                                                </div>
+                                                <div data-value="5" class="item" style="font-size: 12.5px;"><b>Python
+                                                    2</b></div>
+                                                <div data-value="6" class="item" style="font-size: 12.5px;"><b>Python
+                                                    3</b></div>
+                                                <div data-value="7" class="item" style="font-size: 12.5px;">
+                                                    <b>golang</b></div>
+                                            </div>
+
+                                        </div>
+                                    </th>
+                                    <th>代码长度</th>
+                                    <th>提交者</th>
+                                    <th>提交时间</th>
+                                </tr>
+                                </thead>
+                                <tbody v-if=" submitPageInfo !=null">
+                                <tr v-for="contestSubmit in submitPageInfo.list">
+                                    <td><a style="color: #4183c4;"
+                                           :href="'/contest/submit/'+contest.contestId +'/'+contestSubmit.submit.submitId"><b>#{{contestSubmit.submit.submitId}}</b></a>
+                                    </td>
+                                    <td><a style="color: #4183c4;"
+                                           :href="'/contest/'+contest.contestId+'/'+contestSubmit.submit.problem.problemId"><b
+                                            v-text="getContestProblemName(contestSubmit.submit.problem.problemId)"></b></a>
+                                    </td>
+                                    <td><a style="color: #4183c4;"
+                                           :href="'/contest/submit/'+contest.contestId +'/'+contestSubmit.submit.submitId"><b
+                                            v-html="getJudgeResult(contestSubmit.submit.judgeResult.judgeName)"></b></a>
+                                    </td>
+                                    <td><a style="color: #4183c4;"
+                                           :href="'/contest/submit/'+contest.contestId +'/'+contestSubmit.submit.submitId"
+                                           v-html="getColorFromScore(contestSubmit.submit.submitScore)"><span
+                                            class="score">{{getColorFromScore(contestSubmit.submit.submitScore)}}</span></a>
+                                    </td>
+                                    <td>{{getRuntimeTime(contestSubmit.submit.submitRuntimeTime)}}</td>
+                                    <td>{{getRuntimeMemory(contestSubmit.submit.submitRuntimeMemory)}}</td>
+                                    <td><a style="color: #4183c4;"
+                                           :href="'/contest/submit/'+contest.contestId +'/'+contestSubmit.submit.submitId"><b>{{contestSubmit.submit.language.languageName}}</b></a>
+                                    </td>
+                                    <td>{{contestSubmit.submit.submitCodeLength}}</td>
+                                    <td><a style="color: #4183c4;" href="/user/3215"
+                                           v-html="getUserRatingColor(contestSubmit.submit.user.username,contestSubmit.submit.user.userRating)"></a>
+                                    </td>
+                                    <td>{{contestSubmit.submit.submitTime}}</td>
+                                </tr>
+                                </tbody>
+                            </table>
+
+                        </div>
+                        <!--                    分页-->
+                        <div style="margin-top:  30px; " v-if="submitPageInfo != null">
+                            <div style="text-align: center; ">
+                                <div class="ui pagination menu" style="box-shadow: none; ">
+                                    <a class="icon item" v-on:click="getSubmit('',1)"
+                                       :class="{'disabled':submitPage.page == 1}">首页</a>
+                                    <a class="icon item" v-on:click="getSubmit('',submitPage.page - 1)"
+                                       :class="{'disabled':submitPage.page == 1}"><i class="left chevron icon"></i></a>
+                                    <a v-for="index in submitPage.end" v-if="index>=submitPage.begin"
+                                       v-on:click="getSubmit('',index)" class="item"
+                                       :class="{'active':submitPage.page==index}">{{index}}</a>
+                                    <a v-on:click="getSubmit('',submitPage.page + 1)"
+                                       :class="{'disabled':submitPage.page==submitPage.total}" class=" icon item"><i
+                                            class="right chevron icon"></i></a>
+                                    <a v-on:click="getSubmit('',submitPage.total)"
+                                       :class="{'disabled':submitPage.page==submitPage.total}" class=" icon item">尾页</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!--        比赛排行-->
+                <div class="contest-item sixteen wide column"
+                     v-if="contest.contestStatus != 0 && contestApply != null"
+                     style="display: none; ">
+
+                    <div class="ui form" role="form"
+                         style="margin-bottom: 25px; text-align: left; ">
+                        <div class="ui icon input inline">
+                            <i class="search icon"></i>
+                            <input :value="contestRankQuery.indistinct" name="indistinct" id="indistinct"
+                                   placeholder="用户名/学校回车搜索"
+                                   v-on:keyup.enter="getRank('indistinct',1)" type="text">
+                        </div>
+                    </div>
+                    <div>
+                        <span>排行榜已在 2019-12-08 17:00:00 比赛结束后正式封榜，比赛时间段之外的提交不计入排行。 <a href="#" style="color: #25bb9b">点击查看计分规则。</a></span>
+                    </div>
+                    <div style="overflow-x:auto;margin-top: 10px;">
+                        <table class="ui segment unstackable  padded center aligned table">
+                            <thead style="background-color: #e8e8e8">
+                            <tr style="font-size: 12px; ">
+                                <th style="font-weight: 500;background-color: #e8e8e8">排名</th>
+                                <th style="font-weight: 500;background-color: #e8e8e8;">参赛者</th>
+                                <th style="font-weight: 500;background-color: #e8e8e8;">学校</th>
+                                <th style="font-weight: 500;background-color: #e8e8e8">通过</th>
+                                <th v-if="contest.contestType.contestTypeName!='ACM'"
+                                    style="font-weight: 500; background-color: #e8e8e8">总分
+                                </th>
+                                <th v-if="contest.contestType.contestTypeName=='ACM'"
+                                    style="font-weight: 500;background-color: #e8e8e8">罚时
+                                </th>
+                                <th v-for="(contestProblem,index) in contest.contestProblems"
+                                    style="font-weight: 500;background-color: #e8e8e8">
+                                    {{String.fromCharCode(index + 65)}}
+                                    ({{contestProblem.problem.problemSubmitInfo.allAcceptedTotal==null?0:contestProblem.problem.problemSubmitInfo.allAcceptedTotal}}
+                                    /{{contestProblem.problem.problemSubmitInfo.allTotal==null?0:contestProblem.problem.problemSubmitInfo.allTotal}})
+                                    <div v-if="contest.contestType.contestTypeName!='ACM'">
+                                        满分:{{contestProblem.contestProblemScore}}分
+                                    </div>
+                                </th>
+                            </tr>
+                            </thead>
+                            <tbody v-if="rankPageInfo !=null" style="background-color: #f4f4f4">
+                            <tr v-for="contestRank in rankPageInfo.list" style="height: 70px">
+                                <td>
+                                    <div v-if="contestRank.rank == 1" class="ui yellow ribbon label"
+                                         v-text="contestRank.rank"></div>
+                                    <div v-if="contestRank.rank == 2" class="ui ribbon label"
+                                         v-text="contestRank.rank"></div>
+                                    <div v-if="contestRank.rank == 3" class="ui brown ribbon label"
+                                         v-text="contestRank.rank"></div>
+                                    <div v-if="contestRank.rank > 3" v-text="contestRank.rank"></div>
+                                </td>
+                                <td style="text-align: left;min-width:120px; max-width: 120px; word-wrap:break-word;word-break:break-all;">
+                                    <img style="width: 35px;height: 35px;border-radius: 50%;" alt="头像"
+                                         :src="contestRank.contestApply.user.userImg != null && contestRank.contestApply.user.userImg.length>0 ? contestRank.contestApply.user.userImg: '/images/default.png'">
+                                    <a :href="'/user/'+contestRank.contestApply.user.userId"
+                                       v-html="getUserRatingColor(contestRank.contestApply.user.username,contestRank.contestApply.user.userRating)"></a>
+                                </td>
+                                <td style="min-width:90px; max-width: 100px; word-wrap:break-word;word-break:break-all;">
+                                    <a style="color: #22ae90 !important;cursor: pointer; font-size: 10px;"><p
+                                            style="table-layout:fixed;"
+                                            v-text="contestRank.contestApply.user.school"></p></a></td>
+                                <td style="max-width: 15px;">{{contestRank.acceptedTotal}}<i
+                                        v-if="contestRank.acceptedTotal==contest.contestProblems.length"
+                                        style="color: #fb7e00;" class="trophy icon"></i>
+                                    <i v-if="contestRank.acceptedTotal!=contest.contestProblems.length"
+                                       class=" icon"></i></td>
+                                <td v-if="contest.contestType.contestTypeName=='ACM'">
+                                    {{punishTime(contestRank.punishTime)}}
+                                </td>
+                                <td v-if="contest.contestType.contestTypeName!='ACM'">{{contestRank.totalScore}}</td>
+                                <td v-if="contest.contestType.contestTypeName=='ACM'"
+                                    v-for="contestRankInfos in contestRank.contestRankInfos"
+                                    :class="{'first_ac':contestRankInfos.firstAccepted ==true, 'wa': contestRankInfos.accepted == false && contestRankInfos.submitTotal > 0,'ac': contestRankInfos.firstAccepted !=true && contestRankInfos.accepted == true}">
+                                    <p v-text="contestRankInfos.accepted == true ? punishTime(contestRankInfos.punishTime) : ''"></p>
+                                    <p v-if="contestRankInfos.accepted == true"
+                                       v-text="contestRankInfos.submitTotal>1?'(-'+contestRankInfos.submitTotal+')':''"></p>
+                                    <p v-if="contestRankInfos.accepted == false && contestRankInfos.submitTotal > 0">
+                                        (-{{contestRankInfos.submitTotal}})</p>
+                                </td>
+                                <td v-if="contest.contestType.contestTypeName!='ACM'"
+                                    v-for="contestRankInfos in contestRank.contestRankInfos">
+                                    <p v-if="contestRankInfos.submitTotal > 0"
+                                       v-html="getRankScore(contestRankInfos.score)"></p>
+                                </td>
+
+                            </tr>
+                            </tbody>
+                        </table>
+                        <div style="overflow-x:auto; ">
+                            <div style="margin-top:  30px; " v-if="rankPageInfo != null">
+                                <div style="text-align: center; ">
+                                    <div class="ui pagination menu" style="box-shadow: none; ">
+                                        <a class="icon item" v-on:click="getRank('',1)"
+                                           :class="{'disabled':rankPage.page == 1}">首页</a>
+                                        <a class="icon item" v-on:click="getRank('',rankPage.page - 1)"
+                                           :class="{'disabled':rankPage.page == 1}"><i
+                                                class="left chevron icon"></i></a>
+                                        <a v-for="index in rankPage.end" v-if="index>=rankPage.begin"
+                                           v-on:click="getRank('',index)" class="item"
+                                           :class="{'active':rankPage.page==index}">{{index}}</a>
+                                        <a v-on:click="getRank('',rankPage.page + 1)"
+                                           :class="{'disabled':rankPage.page==rankPage.total}" class=" icon item"><i
+                                                class="right chevron icon"></i></a>
+                                        <a v-on:click="getRank('',rankPage.total)"
+                                           :class="{'disabled':rankPage.page==rankPage.total}" class=" icon item">尾页</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="ui tiny dimmer modals page hidden">
+            <div id="showPrivacyApplyContest" class="ui tiny test modal hidden" style="margin-top: -112.5px;">
+                <i class="close icon"></i>
+                <div class="header" style="text-align: center">报名比赛？</div>
+                <div class="content">
+                    <div class="ui form">
+                        <div class="field">
+                            <label>比赛密码：</label>
+                            <input type="hidden" id="contestId" name="contestId" value="">
+                            <input type="password" id="contestCode" name="contestCode">
+                        </div>
+                    </div>
+                </div>
+                <div class="actions">
+                    <div class="ui negative button">关闭</div>
+                    <button class="ui positive button" v-on:click="SendApplyContest()">报名参加</button>
+                </div>
+            </div>
+            <div id="showApplySuccess" class="ui tiny test modal hidden" style="margin-top: -112.5px;">
+                <i class="close icon"></i>
+                <div class="header" style="text-align: center">
+                    <div style="color: #21BA45">报名成功</div>
+                </div>
+                <div class="content">
+
+                </div>
+                <div class="actions">
+                    <div class="ui negative button">关闭</div>
+                    <button class="ui positive button">确定</button>
+                </div>
+            </div>
+            <div id="showApplyError" class="ui tiny test modal hidden" style="margin-top: -112.5px;">
+                <i class="close icon"></i>
+                <div class="header" style="text-align: center">
+                    <div style="color: red">报名失败</div>
+                </div>
+                <div class="content">
+
+                </div>
+                <div class="actions">
+                    <div class="ui negative button">关闭</div>
+                    <button class="ui positive button">确定</button>
+                </div>
+            </div>
+            <div id="showApplyEnd" class="ui tiny test modal hidden" style="margin-top: -112.5px;">
+                <i class="close icon"></i>
+                <div class="header" style="text-align: center">
+                    <div style="color: red">报名结束</div>
+                </div>
+                <div class="content" style="text-align: center">
+                    <h2 style="color: red;">报名结束，您未报名参加该比赛！！！</h2>
+                </div>
+                <div class="actions">
+                    <div class="ui negative button">关闭</div>
+                    <button class="ui positive button">确定</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--页尾-->
+    <footer style=" margin-top: 50px; background: rgba(33,33,33,0.08)!important;"
+            class="ui inverted vertical segment m-padded-tb-large">
+        <div class="content container ui">
+            <div class=" wide column">
+                <h2 class="m-text-thin m-text-spaced m-opacity-tiny" style="color: black">贺州学院算法竞赛训练平台</h2>
+            </div>
+        </div>
+    </footer>
+</div>
+</body>
+<script src="../static/js/jquery.min.js" charset="utf-8" th:src="@{/js/jquery.min.js}"></script>
+<script src="../static/lib/layui/layui.js" charset="utf-8" th:src="@{/lib/layui/layui.js}"></script>
+<script src="../static/js/semantic.js" th:src="@{/js/semantic.js}"></script>
+<script src="../static/js/DateUtils.js" th:src="@{/js/DateUtils.js}"></script>
+<script src="../static/lib/jq-module/zyupload/zyupload-1.0.0.min.js"
+        th:src="@{/lib/jq-module/zyupload/zyupload-1.0.0.min.js}" charset="utf-8"></script>
+<script src="../static/js/common.js" th:src="@{/js/common.js}"></script>
+<!--分页-->
+<script th:inline="javascript">
+    let nav = document.getElementsByClassName("contest-nav");
+    let item = document.getElementsByClassName("contest-item");
+    const url = window.location.hash;
+    new Vue({
+        el: '#app',
+        data: {
+            submitPageInfo: null,
+            rankPageInfo: null,
+            contestRankQuery: [[${contestRankQuery}]],
+            submitQuery: [[${submitQuery}]],
+            contest: [[${contest}]],
+            loginUserId: [[${session.userId}]],
+            contestApply: [[${contestApply}]],
+            curStartTime: [[${#dates.format(contest.contestStart, 'yyyy-MM-dd HH:mm:ss')}]],
+            day: '00',
+            hour: '00',
+            min: '00',
+            second: '00',
+            countDownEnd: [[${contest.contestStatus==0}]],
+            submitPage: null,
+            rankPage: null,
+        },
+        methods: {
+            dateFormat: function (time) {
+                return common.getDateFormat(time);
+            },
+            formatDuring: function (mss) {
+                return common.formatDuring(mss);
+            },
+            punishTime: function (mss) {
+                const days = Math.round(mss / (1000 * 60 * 60 * 24));
+                const hours = Math.round((mss % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.round((mss % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.round((mss % (1000 * 60))) / 1000;
+                let ans = "";
+                if (days > 0) ans += days + ":";
+                if (hours < 10) ans += "0";
+                ans += hours + ":";
+                if (minutes < 10) ans += "0";
+                ans += minutes + ":";
+                if (seconds < 10) ans += "0";
+                ans += seconds;
+                return ans;
+            },
+            applyContest: function () {
+                if (this.loginUserId == null) {
+                    window.location.href = '/user/login?ReturnUrl=/contests';
+                }
+                $("#contestId").val(this.contest.contestId);
+                if (this.contest.contestPublic == '0') {
+                    //如果是私有比赛
+                    this.showPrivacyApplyContest();
+                } else {
+                    //如果是公开比赛
+                    this.SendApplyContest();
+                }
+            },
+            showUserApplyContest: function () {
+                return (this.contestApply != null) ? 1 : 0;
+                //比赛报名中
+            },
+            /**
+             * 显示报名错误消息框
+             */
+            showApplyError: function () {
+                $("#showApplyError").modal("show");
+            },
+            /**
+             * 显示报名成功消息框
+             */
+            showApplySuccess: function () {
+                $("#showApplySuccess").modal("show");
+            },
+            /**
+             * 显示报名结束，您未报名消息框
+             *
+             * **/
+            showApplyEnd: function () {
+                if (this.contest.contestStatus == 1 && this.contestApply == null && this.contest.contestApplyStatus == 2) {
+                    $("#showApplyEnd").modal("show");
+                }
+            },
+            /**
+             * 显示私有比赛报名消息框
+             * */
+            showPrivacyApplyContest: function () {
+                $('#showPrivacyApplyContest').modal('show');
+            },
+            /**
+             * 显示我的提交状态
+             */
+            mySubmitStatus: function (index) {
+                const problem = this.contest.contestProblems[index].problem;
+                if (problem.problemSubmitInfo != null) {
+                    if (problem.problemSubmitInfo.myAllTotal == 0) {
+                        return "<span>未提交</span>";
+                    } else if (problem.problemSubmitInfo.showSubmit == false) {
+                        return "<span class='m-problem'>已提交</span>"
+                    } else if (problem.problemSubmitInfo.myAcceptedTotal == 0) {
+                        return "<span style='color: red'><i class=\"icon close\"></i>未通过</span>"
+                    } else {
+                        return "<span class=\"m-problem\"><i class=\"icon checkmark\"></i>通过</span>";
+                    }
+                }
+                return "<span>未提交</span>";
+            },
+            getColorFromScore: function (score) {
+                return common.getColorFromScore(score);
+            },
+            getRankScore: function (score) {
+                return common.getRankScore(score);
+            },
+            /**
+             * 异步发送报名比赛
+             */
+            SendApplyContest: function () {
+                const contestId = $("#contestId").val();
+                const contestCode = $("#contestCode").val();
+                if (this.loginUserId == null) {
+                    this.$router.push({path: '/user/login?ReturnUrl=/contests'})
+                }
+                let params = new URLSearchParams();
+                params.append('contestId', contestId);
+                params.append('contestCode', contestCode);
+
+                axios.post('/apply/contest/' + contestId, params)
+                    .then((data) => { // 正确的回调
+                        if (data.data == "success") {
+                            this.showApplySuccess();
+                            location.reload();
+                        } else this.showApplyError();
+                    })
+                    .catch((error) => { // 错误的回调
+                        this.showApplyError();
+                    })
+            },
+            getJudgeResult: function (obj) {
+                return common.getJudgeResult(obj);
+            },
+            getUserRatingColor: function (username, rating) {
+                return common.getUserRatingColor(username, rating);
+            },
+            getRuntimeTime: function (time) {
+                return common.getRuntimeTime(time);
+            },
+            getRuntimeMemory: function (memory) {
+                return common.getRuntimeMemory(memory);
+            },
+            // 倒计时
+            countTime: function () {
+                // 获取当前时间
+                let date = new Date();
+                let now = date.getTime();
+                // 设置截止时间
+                let endDate = new Date(this.curStartTime); // this.curStartTime需要倒计时的日期
+                let end = endDate.getTime();
+                // 时间差
+                let leftTime = end - now;
+                // 定义变量 d,h,m,s保存倒计时的时间
+                if (leftTime >= 0) {
+                    // 天
+                    let d = Math.floor(leftTime / 1000 / 60 / 60 / 24);
+                    this.day = d < 10 ? '0' + d : d;
+                    // 时
+                    let h = Math.floor(leftTime / 1000 / 60 / 60 % 24);
+                    this.hour = h < 10 ? '0' + h : h;
+                    // 分
+                    let m = Math.floor(leftTime / 1000 / 60 % 60);
+                    this.min = m < 10 ? '0' + m : m;
+                    // 秒
+                    let s = Math.floor(leftTime / 1000 % 60);
+                    this.second = s < 10 ? '0' + s : s
+                } else {
+                    this.day = '00';
+                    this.hour = '00';
+                    this.min = '00';
+                    this.second = '00';
+                }
+                // 等于0的时候不调用
+                if (Number(this.hour) === 0 && Number(this.day) === 0 && Number(this.min) === 0 && Number(this.second) === 0) {
+                    if (this.countDownEnd) {
+                        location.reload();
+                    }
+                    this.countDownEnd = false;
+                    return;
+                } else {
+                    // 递归每秒调用countTime方法，显示动态时间效果,
+                    setTimeout(this.countTime, 1000);
+                }
+            },
+            getContestSubmits: function (page) {
+                if (page == undefined) page = 1;
+                axios.post("/contest/submits/" + this.contest.contestId + "?page=" + page, this.submitQuery)
+                    .then((data) => { // 正确的回调
+                        this.submitPageInfo = data.data;
+                        this.submitPage = common.getPage(this.submitPageInfo.pageNum, this.submitPageInfo.pages);
+                    })
+                    .catch((error) => { // 错误的回调
+
+                    });
+
+            },
+            getContestRank: function (page) {
+                if (page == undefined) page = 1;
+                axios.post("/contest/rank/" + this.contest.contestId + "?page=" + page, this.contestRankQuery)
+                    .then((data) => { // 正确的回调
+                        if (data.data != null && data.data.list.length > 0) {
+                            this.rankPageInfo = data.data;
+                            this.rankPage = common.getPage(this.rankPageInfo.pageNum, this.rankPageInfo.pages)
+                        }
+
+                        //this.getBeginAndEnd();
+                    })
+                    .catch((error) => { // 错误的回调
+                    });
+            },
+            getContestProblemName: function (problemId) {
+                for (let i = 0; i < this.contest.contestProblems.length; i++) {
+                    if (this.contest.contestProblems[i].problem.problemId == problemId) {
+                        return String.fromCharCode(i + 65);
+                    }
+                }
+            },
+            getRank: function (key, page) {
+                if (key != '') {
+                    this.contestRankQuery[key] = $("#" + key).val();
+                }
+                let str = "?";
+                if (this.contestRankQuery.userId != null) str += "userId=" + this.contestRankQuery.userId + "&"
+                if (this.contestRankQuery.indistinct != null) str += "indistinct=" + this.contestRankQuery.indistinct + "&"
+                str += "page=" + page;
+                str += "#rank";
+                let url = "/contests/" + this.contest.contestId;
+                history.pushState("", "Title", url + str);
+                this.getContestRank(page);
+                this.getUserContestRank();
+            },
+            getSubmit: function (key, page) {
+                if (key != '') {
+                    let id = "#" + key;
+                    if (key == 'username') id = "#us";
+                    this.submitQuery[key] = $(id).val();
+                }
+                let str = "?";
+                if (this.submitQuery.problemId != null) str += "problemId=" + this.submitQuery.problemId + "&";
+                if (this.submitQuery.languageId != null) str += "languageId=" + this.submitQuery.languageId + "&";
+                if (this.submitQuery.judgeResultId != null) str += "judgeResultId=" + this.submitQuery.judgeResultId + "&";
+                if (this.submitQuery.username != null) str += "username=" + this.submitQuery.username + "&";
+                str += "page=" + page;
+                str += "#submit";
+                let url = "/contests/" + this.contest.contestId;
+                history.pushState("", "Title", url + str);
+                this.getContestSubmits(page);
+            },
+            onClick: function (index) {
+                this.hidden();
+                this.show(index);
+                let url = "/contests/" + this.contest.contestId;
+                this.submitQuery = {};
+                this.contestRankQuery = {};
+                history.pushState("", "Title", url);
+            },
+            hidden: function () {
+                for (let j = 0; j < nav.length; j++) {
+                    $(nav[j]).removeClass("active");
+                    $(nav[j]).removeClass("teal");
+                    $(item[j]).css("display", "none");
+                }
+            },
+            show: function (index) {
+                $(nav[index]).addClass("active");
+                $(nav[index]).addClass("teal");
+                $(item[index]).css("display", "block");
+            },
+            check: function () {
+                if (url.indexOf("#explain") != -1) {
+                    return "#explain";
+                } else if (url.indexOf("#problem") != -1) {
+                    return "#problem";
+                } else if (url.indexOf("#submit") != -1) {
+                    return "#submit";
+                } else if (url.indexOf("#rank") != -1) {
+                    return "#rank";
+                }
+                return "";
+            },
+            showId: function () {
+                if (url.indexOf("#explain") != -1) {
+                    this.hidden();
+                    this.show(0);
+                } else if (url.indexOf("#problem") != -1) {
+                    this.hidden();
+                    this.show(1);
+                } else if (url.indexOf("#submit") != -1) {
+                    this.hidden();
+                    this.show(2);
+                } else if (url.indexOf("#rank") != -1) {
+                    this.hidden();
+                    this.show(3);
+                }
+            }
+
+        },
+        created: function () {
+            this.submitPage = common.getPage(this.submitPageInfo.pageNum, this.submitPageInfo.pages);
+            this.rankPage = common.getPage(this.rankPageInfo.pageNum, this.rankPageInfo.pages);
+            this.getContestRank([[${param.page}]]);
+            this.countTime();
+            this.showApplyEnd();
+            this.getContestSubmits([[${param.page}]]);
+            setInterval(this.getContestSubmits, 15000);
+            this.showId();
+        }
+    });
+    window.onload = function () {
+        $(".ui.dropdown").dropdown();
+        document.getElementById('app').style.display = 'block';
+    }
+</script>
+</html>

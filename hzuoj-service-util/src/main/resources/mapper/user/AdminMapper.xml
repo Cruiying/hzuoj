@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hqz.hzuoj.mapper.user.AdminMapper">
+    <resultMap id="adminAndUser" type="com.hqz.hzuoj.bean.user.Admin">
+        <id column="admin_id" property="adminId"/>
+        <result column="admin_name" property="adminName"/>
+        <result column="admin_status" property="adminStatus"/>
+        <result column="admin_create_time" property="adminCreateTime"/>
+        <association property="user" javaType="com.hqz.hzuoj.bean.user.User">
+            <id column="user_id" property="userId"/>
+            <result column="username" property="username"/>
+            <result column="register_time" property="registerTime"/>
+            <result column="user_rating" property="userRating"/>
+            <result column="gender" property="gender"/>
+            <result column="user_img" property="userImg"/>
+            <result column="email" property="email"/>
+            <result column="user_submit_total" property="userSubmitTotal"/>
+            <result column="user_challenge_total" property="userChallengeTotal"/>
+        </association>
+    </resultMap>
+    <select id="loginAdmin" resultMap="adminAndUser">
+        select a.admin_id,a.admin_name,a.admin_create_time, a.admin_status, u.* from hzuoj_admin a
+        left JOIN hzuoj_users u
+        ON a.user_id = u.user_id
+        where a.admin_name = #{adminName} and a.password = #{password}
+    </select>
+    <select id="selectAdmin" resultMap="adminAndUser">
+        select a.admin_id,a.admin_name,a.admin_create_time, a.admin_status, u.* from hzuoj_admin a
+        left JOIN hzuoj_users u
+        ON a.user_id = u.user_id
+        where admin_id = 1
+    </select>
+    <select id = "getAll" resultMap="adminAndUser">
+        select a.admin_id,a.admin_name,a.admin_create_time, a.admin_status, u.* from hzuoj_admin a
+        left JOIN hzuoj_users u
+        ON a.user_id = u.user_id
+    </select>
+</mapper>

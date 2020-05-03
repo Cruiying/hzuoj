@@ -1,10 +1,9 @@
 package com.hqz.hzuoj.service;
 
 import com.github.pagehelper.PageInfo;
-import com.hqz.hzuoj.bean.Discussion;
-import com.hqz.hzuoj.bean.DiscussionComment;
-import com.hqz.hzuoj.bean.DiscussionQuery;
-import com.hqz.hzuoj.bean.DiscussionReply;
+import com.hqz.hzuoj.bean.discussion.Discussion;
+import com.hqz.hzuoj.bean.discussion.DiscussionComment;
+import com.hqz.hzuoj.bean.discussion.DiscussionQuery;
 
 import java.util.List;
 
@@ -25,4 +24,7 @@ public interface DiscussionService {
 
     DiscussionComment saveDiscussionComment(DiscussionComment comment);
 
+    Discussion updateDiscussionTop(Discussion discussion);
+
+    boolean deleteDiscussion(Integer discussionId);
 }

@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:v-on="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
+<head>
+    <title th:text="${problem.problemTitle}">题目</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport"
+          content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi"/>
+    <link rel="stylesheet" href="../static/css/semantic.css" th:href="@{/css/semantic.css}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/semantic-ui/2.2.4/semantic.min.css">
+    <link rel="stylesheet" href="../static/lib/editormd/css/editormd.min.css"
+          th:href="@{/lib/editormd/css/editormd.min.css}">
+    <link rel="stylesheet" href="../static/css/me.css" th:href="@{/css/me.css}">
+    <link rel="stylesheet" href="../static/lib/layui/css/layui.css" media="all" th:href="@{/lib/layui/css/layui.css}">
+    <link rel="stylesheet" href="../static/lib/jq-module/zyupload/zyupload-1.0.0.min.css"
+          th:href="@{/lib/jq-module/zyupload/zyupload-1.0.0.min.css}" media="all">
+    <link rel="stylesheet" href="https://apps.bdimg.com/libs/highlight.js/9.1.0/styles/tomorrow.min.css">
+    <link rel="stylesheet" href="../static/lib/layui/css/layui.css" media="all" th:href="@{/lib/layui/css/layui.css}">
+    <link rel="stylesheet" href="../static/lib/jq-module/zyupload/zyupload-1.0.0.min.css"
+          th:href="@{/lib/jq-module/zyupload/zyupload-1.0.0.min.css}" media="all">
+    <link href="https://cdn.bootcss.com/prism/1.15.0/themes/prism.css" rel="stylesheet">
+    <script src="../static/lib/vue/vue.js" th:src="@{/lib/vue/vue.js}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script type="text/javascript" src="https://cdn.bootcss.com/axios/0.19.0-beta.1/axios.js"></script>
+    <link rel="stylesheet" href="../static/lib/jq-module/zyupload/zyupload-1.0.0.min.css"
+          th:href="@{/lib/jq-module/zyupload/zyupload-1.0.0.min.css}" media="all">
+    <script type="text/javascript" async
+            src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+    <link rel="stylesheet" type="text/css" href="../static/css/main.css" th:href="@{/css/main.css}">
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+    <link rel="stylesheet" type="text/css" data-name="vs/editor/editor.main"
+          href="https://cdn.jsdelivr.net/npm/syzoj-public-cdn@1.0.6/cdnjs/monaco-editor/0.18.1/min/vs/editor/editor.main.css">
+</head>
+<body>
+<!--导航栏-->
+<nav th:replace="fragment::menu('problems')"></nav>
+<div style="height: 20px;"></div>
+<!--题目内容-->
+<div class="ui container" id="apps">
+    <div class="ui center aligned grid">
+        <div class="row">
+            <h1 class="ui header" id="problemTitle" v-text="problem.problemTitle"></h1>
+        </div>
+        <div class="row" style="margin-top: -15px">
+            <span class="ui label">内存限制：<span v-text="'128MB'"></span></span>
+            <span class="ui label">时间限制：<span v-text="'1000ms'"></span></span>
+        </div>
+        <div class="row" style="margin-top: -23px;">
+            <a class="ui teal button" href="#submit">提交</a>
+            <a v-if="contestId==null" class="ui purple button" :href="'/problem/solutions/'+problem.problemId">查看题解</a>
+            <a :href="'/submits?problemId='+problem.problemId" class="ui positive button">提交记录</a>
+        </div>
+    </div>
+    <div class="ui grid">
+        <!--        题目背景-->
+        <div class="row" v-if="problem.problemBackground!=null && problem.problemBackground.length>0">
+            <div class="column">
+                <h4 class="ui top attached block header">题目背景</h4>
+                <div class="ui bottom attached segment font-content">
+                    <div id="problemBackground" class="typo typo-selection js-toc-content"
+                         v-html="problem.problemBackground"></div>
+                </div>
+            </div>
+        </div>
+        <!--        题目描述-->
+        <div class="row">
+            <div class="column">
+                <h4 class="ui top attached block header">题目描述</h4>
+                <div class="ui bottom attached segment font-content">
+                    <div id="problemContent" class="typo  typo-selection js-toc-content"
+                         v-html="problem.problemContent"></div>
+                </div>
+            </div>
+        </div>
+        <!--        题目输入格式-->
+        <div class="row">
+            <div class="column">
+                <h4 class="ui top attached block header">输入格式</h4>
+                <div class="ui bottom attached segment font-content">
+                    <div id="problemInputFormat" v-html="problem.problemInputFormat"></div>
+                </div>
+            </div>
+        </div>
+        <!--        题目输出格式-->
+        <div class="row">
+            <div class="column">
+                <h4 class="ui top attached block header">输出格式</h4>
+                <div class="ui bottom attached segment font-content">
+                    <div id="problemOutputFormat" v-html="problem.problemOutputFormat"></div>
+                </div>
+            </div>
+        </div>
+        <!--        题目样例-->
+        <div class="row">
+            <div class="column">
+                <h4 class="ui top attached block header">样例</h4>
+                <div class="ui bottom attached segment font-content">
+                    <div style="position: relative; overflow: hidden; ">
+                        <div class="ui grid">
+                            <div v-if="problem.examples != null && problem.examples.length>0"
+                                 v-for="example in problem.examples" class="row">
+                                <div class="eight wide column">
+                                    <h4>样例输入 #1</h4>
+                                    <div class="ui existing segment">
+                                        <pre style="margin-top: 0; margin-bottom: 0; "><code
+                                                v-text="example.exampleInput"></code></pre>
+                                    </div>
+                                </div>
+                                <div class="eight wide column">
+                                    <h4>样例输出 #1</h4>
+                                    <div class="ui existing segment">
+                                        <pre style="margin-top: 0; margin-bottom: 0; "><code
+                                                v-text="example.exampleOutput"></code></pre>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--        题目提示说明-->
+        <div class="row">
+            <div class="column">
+                <h4 class="ui top attached block header">提示说明</h4>
+                <div class="ui bottom attached segment">
+                    <div id="problemExplain" class="typo  typo-selection js-toc-content"
+                         v-html="problem.problemExplain"></div>
+                </div>
+            </div>
+        </div>
+        <!--        题目提交编辑器-->
+        <div class="row">
+            <div class="column">
+                <h4 class="ui top attached block header">提交</h4>
+                <div class="ui bottom attached segment">
+                    <div class="field">
+                        <div class="ui fluid selection dropdown">
+                            <input type="hidden" name="language" value="1">
+                            <i class="dropdown icon"></i>
+                            <div class="text" style="font-size: 20px;" id="languageSelect">C++</div>
+                            <div class="menu hidden">
+                                <div v-for="language,index in languages" v-on:click="selectLanguage(index)"
+                                     :data-value="language.languageId" class="item" style="font-size: 20px;"
+                                     v-text="language.languageName">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="ui grid">
+                        <div class="sixteen wide stretched column"
+                             style="height: 370px;position: relative; padding-left: 0; margin-left: calc(1rem - 1px); margin-right: calc(1rem - 1px); width: calc(100%) !important; ">
+                            <div id="editor"
+                                 style="position: absolute; width: 100%; height: calc(100% - 28px); border: 1px solid #D4D4D5; overflow: hidden; "
+                                 class="editor showUnused">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="ui attached segment">
+                        <div class="ui middle aligned column grid">
+                            <div class="right aligned column">
+                                <button class="ui teal button" id="submit" v-on:click="submitCode()" :class="flag?'':'disabled'">
+                                    提交
+                                </button>
+                                <button class="ui teal button" v-on:click="showTest()" id="test" href="#">自测</button>
+                            </div>
+                        </div>
+                        <div class="ui message" style="display: none" :style="submitSuccess?'display:block':''">
+                            <i class="close icon"></i>
+                            <div class="header green ui">提交成功</div>
+                        </div>
+                        <!--                        测试消息框-->
+                        <div class="" style="margin-top: 20px;">
+                            <div class="ui floating  message" id="message" style="display: none">
+                                <i class="close icon"></i>
+                                <div class="header">
+                                    <h2>测试</h2>
+                                    <div class="ui container">
+                                        <div class="ui grid">
+                                            <div class="sixteen wide column">
+                                                <div class="ui segment">
+                                                    <h3>输入:</h3>
+                                                    <textarea
+                                                            style="background-color: rgb(248, 248, 248); border-radius: 5px; resize: none; font-family: monospace; overflow: hidden; min-height: 40px; height: 100px;"
+                                                            class="layui-textarea" id="testInput"
+                                                            v-model="testCode.testInput"></textarea>
+                                                </div>
+                                            </div>
+                                            <div class="sixteen wide column">
+                                                <div class="ui segment">
+                                                    <h3>输出:</h3>
+                                                    <textarea
+                                                            style="background-color: rgb(248, 248, 248); border-radius: 5px; resize: none; font-family: monospace; overflow: hidden; min-height: 40px; height: 100px;"
+                                                            class="layui-textarea" id="testOutput"
+                                                            v-model="testCode.testOutput"></textarea>
+                                                </div>
+                                            </div>
+                                            <div class="sixteen wide column" v-if="testCode.judgeResult != null">
+                                                <div class="ui segment">
+                                                    <div class="sixteen wide column">
+                                                        <h3>运行状态：
+                                                            <span class="ui loading search">
+                                                            <span class="ui icon input" style="font-size: 20px">
+                                                                <div class="ui green" id="judgeResult"
+                                                                     v-html="getJudgeResult(testCode.judgeResult.judgeName)">Accepted</div>
+                                                            </span>
+                                                        </span>
+                                                        </h3>
+                                                    </div>
+                                                </div>
+                                                <div class="ui segment"
+                                                     v-if="testCode.compileInfo != null && testCode.compileInfo.length>0">
+                                                    <div class="sixteen wide column">
+                                                        <h3>编译信息：</h3>
+                                                        <textarea
+                                                                style="background-color: rgb(248, 248, 248); border-radius: 5px; resize: none; font-family: monospace; overflow: hidden; min-height: 40px; height: 100px; "
+                                                                class="layui-textarea" disabled
+                                                                v-text="testCode.compileInfo"></textarea>
+                                                    </div>
+                                                </div>
+                                                <div class="ui segment" v-if="testCode.testPoint != null">
+                                                    <div class="sixteen wide column">
+                                                        运行时间：<span
+                                                            v-html="getRuntimeTime(testCode.testPoint.testPointTime)">0ms</span>
+                                                        运行内存：<span
+                                                            v-html="getRuntimeMemory(testCode.testPoint.testPointMemory)">0MB</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="sixteen wide column">
+                                                <div class="ui middle aligned column grid">
+                                                    <div class="right aligned column">
+                                                        <button class="ui teal button" v-on:click="submitTestCode()"
+                                                                :class="flag?'':'disabled'"
+                                                                id="testSubmit"
+                                                                href="#">提交测试
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--页尾-->
+<footer style="margin-top: 50px; background: rgba(33,33,33,0.1)!important;"
+        class="ui inverted vertical segment m-padded-tb-large">
+    <div class="content container ui">
+        <div class=" wide column">
+            <h2 class="m-text-thin m-text-spaced m-opacity-tiny" style="color: black">贺州学院算法竞赛训练平台</h2>
+        </div>
+    </div>
+</footer>
+<script src="../static/js/mathjax.js" th:src="@{/js/mathjax.js}"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.2/dist/jquery.min.js"></script>
+<script async="async" type="text/javascript"
+        src="https://cdn.jsdelivr.net/npm/syzoj-public-cdn@1.0.6/cdnjs/monaco-editor/0.18.1/min/vs/editor/editor.main.nls.js"></script>
+<script async="async" type="text/javascript"
+        src="https://cdn.jsdelivr.net/npm/syzoj-public-cdn@1.0.6/self/vendor/tokenizer/monaco-tokenizer.js"></script>
+<script src="https://cdn.jsdelivr.net/semantic-ui/2.2.4/semantic.min.js"></script>
+<script src="../static/lib/layui/layui.js" charset="utf-8" th:src="@{/lib/layui/layui.js}"></script>
+<script src="../static/js/DateUtils.js" th:src="@{/js/DateUtils.js}"></script>
+<script src="../static/lib/jq-module/zyupload/zyupload-1.0.0.min.js"
+        th:src="@{/lib/jq-module/zyupload/zyupload-1.0.0.min.js}" charset="utf-8"></script>
+<script src="../static/lib/vs/loader.js" th:src="@{/lib/vs/loader.js}"></script>
+<script src="../static/js/common.js" th:src="@{/js/common.js}"></script>
+<!--选择语言 提交代码-->
+<!--初始化mathjax-->
+<script th:inline="none">
+    let isMathjaxConfig = false; // 防止重复调用Config，造成性能损耗
+    const initMathjaxConfig = () => {
+        if (!window.MathJax) {
+            return;
+        }
+        window.MathJax.Hub.Config({
+            showProcessingMessages: false, //关闭js加载过程信息
+            messageStyle: "none", //不显示信息
+            jax: ["input/TeX", "output/HTML-CSS"],
+            tex2jax: {
+                inlineMath: [["$", "$"], ["\\(", "\\)"]], //行内公式选择符
+                displayMath: [["$$", "$$"], ["\\[", "\\]"]], //段内公式选择符
+                skipTags: ["script", "noscript", "style", "textarea", "pre", "code", "a"] //避开某些标签
+            },
+            "HTML-CSS": {
+                availableFonts: ["STIX", "TeX"], //可选字体
+                showMathMenu: false //关闭右击菜单显示
+            }
+        });
+        isMathjaxConfig = true; //
+    };
+    if (isMathjaxConfig === false) { // 如果：没有配置MathJax
+        initMathjaxConfig();
+    }
+
+    // 如果，不传入第三个参数，则渲染整个document
+    // 因为使用的Vuejs，所以指明#app，以提高速度
+    window.MathJax.Hub.Queue(["Typeset", MathJax.Hub, document.getElementById('app')]);
+</script>
+<script type="text/javascript" th:inline="javascript">
+    let monacoEditor;
+
+    /**
+     * 初始化代码编辑器
+     */
+    function initEditor(model) {
+        require.config({//设置插件引用路径
+            paths: {'vs': '/lib/vs'},
+            'vs/nls': {
+                availableLanguages: {'*': 'zh-cn'}
+            }
+        });
+        require(['vs/editor/editor.main'], function () {
+            monacoEditor = monaco.editor.create(document.getElementById('editor'), {
+                value: "",//初始化赋值
+                language: model,//编写的语言类型
+                autoIndent: true, // 自动缩进
+                wordWrap: "on", //自动换行，注意大小写
+                wrappingIndent: "indent",
+                theme: "vs-dark", //皮肤设置  vs vs-dark hc-black
+                lineNumbers: "off",
+                roundedSelection: false,
+                scrollBeyondLastLine: false,
+                readOnly: false,
+            });
+        });
+    }
+
+    /**
+     * 设置编辑器语言
+     */
+    function editorLanguage(model) {
+        monaco.editor.setModelLanguage(monacoEditor.getModel(), model);
+    }
+
+    /**
+     * 获取编辑器中的值
+     * @returns {*}
+     */
+    function getEditorValue() {
+        return monacoEditor.getValue();
+    }
+
+    new Vue({
+        el: "#apps",
+        data: {
+            loginUserId: [[${session.userId}]],
+            problem: [[${problem}]],
+            contestId: [[${contestId}]],
+            languages: [[${languages}]],
+            problemId: [[${problemId}]],
+            language: [[${languages[0]}]],
+            contest: [[${contest}]],
+            submit: {
+                problem: {
+                    problemId: [[${problemId}]]
+                },
+                language: [[${languages[0]}]],
+                submitCode: null,
+            },
+            testCode: [[${testCode}]],
+            judgeResult: {
+                judgeResultId: 1,
+                judgeName: "queue",
+                judgeAbbreviation: "queue",
+            },
+            flag: true,
+            source: null,
+            submitSuccess: false,
+        },
+        methods: {
+            /**
+             * 选择语言
+             */
+            selectLanguage: function (index) {
+                const model = this.languages[index].languageModel;
+                this.language = this.languages[index];
+                editorLanguage(model);
+            },
+            /**
+             * 显示自测框
+             */
+            showTest: function () {
+                $("#message").css('display', 'block');
+            },
+            /**
+             * 获取运行时间
+             * @param time
+             * @returns {string}
+             */
+            getRuntimeTime: function (time) {
+                return common.getRuntimeTime(time);
+            },
+            /**
+             * 获取运行内存
+             * @param memory
+             * @returns {string}
+             */
+            getRuntimeMemory: function (memory) {
+                return common.getRuntimeMemory(memory);
+            },
+            /**
+             * 获取运行结果
+             */
+            getJudgeResult: function (obj) {
+                return common.getJudgeResult(obj);
+            },
+            connectTest: function (testId) {
+                const tmp = this;
+                if (this.source != null) {
+                    this.source.close();
+                    this.source = null;
+                }
+                if (!!window.EventSource) {
+                    source = new EventSource("/test/" + testId + "/latest");
+                    source.addEventListener('message', function (e) {
+                        const messageEvent = JSON.parse(e.data);
+                        tmp.testCode = JSON.parse(messageEvent["judgeInfo"]);
+                        if (messageEvent["completed"] == true) {
+                            source.close();
+                            source = null;
+                        }
+                    });
+                    source.addEventListener('open', function (e) {
+                        console.log("Connection is open");
+                    }, false);
+
+                    source.addEventListener('error', function (e) {
+                    }, false);
+                }
+            },
+            /**
+             * 提交测试路径
+             */
+            getSubmitURL: function () {
+                let url = "/submit";
+                if (this.contestId != null) {
+                    url = "/contest/submit/" + this.contestId;
+                }
+                return url;
+            },
+            /**
+             * 跳转路径
+             */
+            getSubmitHref: function () {
+                let href = "/submit/";
+                if (this.contestId != null) {
+                    href = "/contest/submit/" + this.contestId + "/";
+                }
+                return href;
+            },
+            /**
+             * 提交测评
+             */
+            submitCode: function () {
+                if (this.loginUserId == null) {
+                    window.location.href = "/user/login";
+                }
+                this.submit.submitCode = getEditorValue();
+                this.submit.language = this.language;
+                const url = this.getSubmitURL();
+                const href = this.getSubmitHref();
+                this.submitSuccess = true;
+                axios.post(url, this.submit)
+                    .then((data) => { // 正确的回调
+                        let id = data.data;
+                        if (id.length > 20) {
+                            window.location.href = "/user/login";
+                        } else {
+                            window.location.href = href + id;
+                        }
+
+                    })
+                    .catch((error) => { // 错误的回调
+
+                    })
+            },
+            /**
+             * 提交自测
+             */
+            submitTestCode: function () {
+                const tmp = this;
+                this.flag = false;
+                setTimeout(function () {
+                    tmp.flag = true;
+                }, 5000);
+                this.testCode.testCode = getEditorValue();
+                this.testCode.language = this.language;
+                this.testCode.judgeResult = this.judgeResult;
+                this.testCode.compileInfo = null;
+                axios.post("/test", this.testCode)
+                    .then((data) => { // 正确的回调
+                        this.testCode.testId = data.data.testId;
+                        this.connectTest(this.testCode.testId);
+                    })
+                    .catch((error) => { // 错误的回调
+
+                    })
+            }
+        },
+        created: function () {
+            const model = this.languages[0].languageModel;
+            initEditor(model);
+        }
+    });
+    window.onload = function () {
+        $(".ui.dropdown").dropdown();
+        //测试框的关闭与开启
+        $('.message .close').on('click', function () {
+            $(this).closest('.message').fadeOut();
+        });
+    };
+</script>
+</body>
+</html>

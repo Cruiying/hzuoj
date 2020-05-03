@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hqz.hzuoj.judge.mapper.TestPointMapper">
+    <insert id="saveTestPoint">
+        <selectKey order="AFTER" keyProperty="testPointId" resultType="int">
+            select LAST_INSERT_ID()
+        </selectKey>
+        INSERT INTO
+        hzuoj_test_points
+        (test_point_time,test_point_memory,test_point_score,submit_id, judge_result_id)
+        VALUES( #{testPointTime},#{testPointMemory},#{testPointScore},#{submitId},#{judgeResult.judgeResultId} )
+    </insert>
+    <delete id="deleteSubmitTestPoint">
+        delete from hzuoj_test_points where submit_id = #{submitId}
+    </delete>
+</mapper>

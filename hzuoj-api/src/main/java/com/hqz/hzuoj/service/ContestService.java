@@ -1,7 +1,7 @@
 package com.hqz.hzuoj.service;
 
 import com.github.pagehelper.PageInfo;
-import com.hqz.hzuoj.bean.*;
+import com.hqz.hzuoj.bean.contest.*;
 
 import java.util.List;
 

@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html class="x-admin-sm" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>欢迎页面-X-admin2.2</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport"
+          content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi"/>
+    <link rel="stylesheet" href="../static/css/font.css" th:href="@{/css/font.css}">
+    <link rel="stylesheet" href="../static/css/xadmin.css" th:href="@{/css/xadmin.css}">
+    <script src="../static/lib/layui/layui.js" charset="utf-8" th:src="@{/lib/layui/layui.js}"></script>
+    <script type="text/javascript" src="../static/js/xadmin.js" th:src="@{/js/xadmin.js}"></script>
+    <!--[if lt IE 9]>
+    <script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
+    <script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
+    <link rel="stylesheet" href="../static/lib/layui/css/layui.css" media="all" th:href="@{/lib/layui/css/layui.css}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/semantic-ui/2.2.4/semantic.min.css">
+    <link rel="stylesheet" href="../static/lib/editormd/css/editormd.min.css"
+          th:href="@{/lib/editormd/css/editormd.min.css}">
+    <script type="text/javascript" src="../static/js/xadmin.js" th:src="@{/js/xadmin.js}"></script>
+    <link rel="stylesheet" href="../static/css/me.css" th:href="@{/css/me.css}">
+    <link rel="stylesheet" href="../static/lib/jq-module/zyupload/zyupload-1.0.0.min.css"
+          th:href="@{/lib/jq-module/zyupload/zyupload-1.0.0.min.css}" media="all">
+    <link rel="stylesheet" href="../static/css/public.css" th:href="@{/css/public.css}" media="all">
+    <script type="text/javascript" async
+            src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+    </script>
+    <![endif]-->
+</head>
+<body>
+<div class="layui-card-header">
+    <button class="layui-btn" onclick="xadmin.open('添加题目','/admin/addProblem')"><i class="layui-icon"></i>添加</button>
+</div>
+<div class="layui-fluid">
+    <div class="layui-row layui-col-space15">
+        <div class="layui-col-md12">
+            <div class="layui-card">
+                <div class="layui-card-body layui-table-body layui-table-main">
+                    <table class="layui-table layui-form">
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>题目名称</th>
+                            <th>题目创建者</th>
+                            <th>创建时间</th>
+                            <th>修改时间</th>
+                            <th>用户是否可见</th>
+                            <th>操作</th>
+                        </tr>
+                        </thead>
+                        <tbody id="problems">
+                        </tbody>
+                    </table>
+                </div>
+                <div class="layui-card-body ">
+                    <div id="page"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<script src="../static/lib/layui/layui.js" charset="utf-8" th:src="@{/lib/layui/layui.js}"></script>
+<script src="../static/js/jquery.min.js" charset="utf-8" th:src="@{/js/jquery.min.js}"></script>
+<script src="https://cdn.jsdelivr.net/semantic-ui/2.2.4/semantic.min.js"></script>
+<script src="../static/lib/editormd/editormd.min.js" th:src="@{/lib/editormd/editormd.min.js}"></script>
+
+<script src="../static/js/mathjax.js" th:src="@{/js/mathjax.js}"></script>
+<script src="../static/lib/jq-module/zyupload/zyupload-1.0.0.min.js"
+        th:src="@{/lib/jq-module/zyupload/zyupload-1.0.0.min.js}" charset="utf-8"></script>
+<script src="../static/js/DateUtils.js" th:src="@{/js/DateUtils.js}"></script>
+
+<!--异步加载所有题目信息-->
+<script>
+    layui.use(['laypage', 'layer'], function () {
+        var laypage = layui.laypage
+            , layer = layui.layer;
+
+        //自定义每页条数的选择项
+        function loadData(page) {
+            $.ajax({
+                dataType: "json",
+                //请求方式
+                type: "POST",
+                //请求的媒体类型
+                contentType: "application/json;charset=UTF-8",
+                //请求地址
+                url: "/admin/problems/list?page=" + page,
+                //请求成功
+                success: function (result) {
+                    let pageInfo = result.pageInfo;
+                    let problems = pageInfo.list;
+                    let problemList = "";
+
+                    for (let i = 0; i < problems.length; i++) {
+                        let problemCreateTime = new Date(problems[i].problemCreateTime).format("yyyy-MM-dd hh:mm:ss");
+                        let problemUpdateTime = new Date(problems[i].problemUpdateTime).format("yyyy-MM-dd hh:mm:ss");
+                        let problemPublic;
+                        let disabled = "";
+                        if (problems[i].problemPublic == 1) {
+                            problemPublic = "可见";
+                        } else {
+                            problemPublic = "不可见";
+                            disabled = "layui-btn-disabled"
+                        }
+                        problemList += " <tr>\n" +
+                            "                            <td>" + problems[i].problemId + "</td>\n" +
+                            "                            <td>" + problems[i].problemTitle + "</td>\n" +
+                            "                            <td>" + problems[i].admin.adminName + "</td>\n" +
+                            "                            <td>" + problemCreateTime + "</td>\n" +
+                            "                            <td>" + problemUpdateTime + "</td>\n" +
+                            "                            <td class=\"td-status\">\n" +
+                            "                                <span class=\"layui-btn layui-btn-normal layui-btn-mini " + disabled + "\">" + problemPublic + "</span></td>\n" +
+                            "                            <td class=\"td-manage\">\n" +
+                            "                                <a onclick=\"member_stop(this," + problems[i].problemId + ")\" href=\"javascript:;\" title=\"" + problemPublic + "\">\n" +
+                            "                                    <i class=\"layui-icon\">&#xe601;</i>\n" +
+                            "                                </a>\n" +
+                            "                                <a title=\"编辑\" onclick=\"xadmin.open('编辑','/admin/addProblem?problemId=" + problems[i].problemId + "')\"\n" +
+                            "                                   href=\"javascript:;\">\n" +
+                            "                                    <i class=\"layui-icon\">&#xe642;</i>\n" +
+                            "                                </a>\n" +
+                            "                                <a title=\"删除\" onclick=\"member_del(this," + problems[i].problemId + ")\" href=\"javascript:;\">\n" +
+                            "                                    <i class=\"layui-icon\">&#xe640;</i>\n" +
+                            "                                </a>\n" +
+                            "                            </td>\n" +
+                            "                        </tr>"
+                    }
+                    $("#problems").html(problemList);
+
+                    laypage.render({
+                        elem: 'page'
+                        , count: pageInfo.total
+                        , limit: pageInfo.pageSize
+                        , curr: page
+                        , done: function () {
+
+                        }
+                        , jump: function (obj, first) {
+                            if (!first) {
+                                loadData(obj.curr);
+                            }
+                        }
+                    });
+
+                    return false;
+                },
+                //请求失败，包含具体的错误信息
+                error: function (e) {
+                    layui.msg("提交失败")
+                }
+            });
+
+            return false;
+        };
+        window.onload = function () {
+            loadData(1);
+        }
+    });
+
+</script>
+<script>
+    layui.use(['laydate', 'form'], function () {
+        var laydate = layui.laydate;
+        var form = layui.form;
+        // 监听全选
+        form.on('checkbox(checkall)', function (data) {
+            if (data.elem.checked) {
+                $('tbody input').prop('checked', true);
+            } else {
+                $('tbody input').prop('checked', false);
+            }
+            form.render('checkbox');
+        });
+        //执行一个laydate实例
+        laydate.render({
+            elem: '#start' //指定元素
+        });
+        //执行一个laydate实例
+        laydate.render({
+            elem: '#end' //指定元素
+        });
+    });
+
+    /*修改题目是否显示*/
+    function member_stop(obj, id) {
+        layer.confirm('确认要修改？', function (index) {
+            let problemPublic = 1;
+            let title = "";
+            if ($(obj).attr('title') == '可见') {
+                problemPublic = 0;
+            } else {
+                problemPublic = 1;
+            }
+            $.ajax({
+                dataType: "json",
+                //请求方式
+                type: "POST",
+                //请求的媒体类型
+                contentType: "application/json;charset=UTF-8",
+                //请求路径
+                url: "/admin/update/" + id + "/public?problemPublic=" + problemPublic,
+                success: function (result) {
+                    if (result.flag) {
+                        if (problemPublic == 1) {
+                            $(obj).attr('title', '可见');
+                            $(obj).find('i').html('&#xe601;');
+                            $(obj).parents("tr").find(".td-status").find('span').removeClass('layui-btn-disabled').html('可见');
+                            layer.msg('已可见!', {icon: 1, time: 1000});
+                        } else {
+                            $(obj).attr('title', '不可见');
+                            $(obj).find('i').html('&#xe62f;');
+                            $(obj).parents("tr").find(".td-status").find('span').addClass('layui-btn-disabled').html('不可见');
+                            layer.msg('已不可见!', {icon: 5, time: 1000});
+                        }
+                    }
+                },
+                error: function (result) {
+                    alert(result.msg);
+                }
+            });
+        });
+    }
+
+    /*删除问题*/
+    function member_del(obj, id) {
+        layer.confirm('确认要删除吗？', function (index) {
+            //发异步删除数据
+            $.ajax({
+                dataType: "json",
+                //请求方式
+                type: "POST",
+                //请求的媒体类型
+                contentType: "application/json;charset=UTF-8",
+                //请求路径
+                url: "/admin/delete/problem/" + id,
+                success: function (result) {
+                    if (result.flag) {
+                        $(obj).parents("tr").remove();
+                        layer.msg('已删除!', {icon: 1, time: 1000});
+                    } else {
+                        layer.msg('删除失败!', {icon: 5, time: 1000});
+                    }
+
+                },
+                error: function (result) {
+                    layer.msg('删除失败!', {icon: 5, time: 1000});
+                }
+            });
+
+        });
+    }
+</script>
+</html>

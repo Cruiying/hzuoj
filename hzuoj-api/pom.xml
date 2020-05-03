@@ -7,6 +7,16 @@
     <artifactId>hzuoj-api</artifactId>
     <version>1.0-SNAPSHOT</version>
     <dependencies>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.16.10</version>
+        </dependency>
+        <dependency>
+            <groupId>net.lingala.zip4j</groupId>
+            <artifactId>zip4j</artifactId>
+            <version>1.3.2</version>
+        </dependency>
         <!--        Mybatis分页插件-->
         <dependency>
             <groupId>com.github.pagehelper</groupId>
@@ -45,6 +55,4 @@
             </exclusions>
         </dependency>
     </dependencies>
-
-
 </project>

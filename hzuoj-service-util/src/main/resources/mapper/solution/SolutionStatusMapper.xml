@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hqz.hzuoj.mapper.solution.SolutionStatusMapper">
+    <select id="getSolutionStatusByStatusName" resultType="com.hqz.hzuoj.bean.solution.SolutionStatus">
+       SELECT * from hzuoj_solutions_status where solution_status_name = #{stautsName}
+    </select>
+</mapper>

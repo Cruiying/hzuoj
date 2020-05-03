@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hqz.hzuoj.mapper.problem.ProblemMapper">
+    <!--    添加问题 -->
+    <insert id="saveProblem" parameterType="com.hqz.hzuoj.bean.problem.Problem">
+        <selectKey keyProperty="problemId" resultType="int" order="AFTER">
+            select LAST_INSERT_ID()
+        </selectKey>
+        insert into hzuoj_problems (problem_public,problem_title,problem_content,
+        problem_explain, problem_input_format,problem_output_format,problem_background,
+        admin_id, problem_create_time, problem_update_time,problem_level_id)
+        values (#{problemPublic},#{problemTitle},#{problemContent},#{problemExplain},
+        #{problemInputFormat},#{problemOutputFormat},#{problemBackground},
+        #{admin.adminId}, #{problemCreateTime}, #{problemUpdateTime},#{problemLevel.problemLevelId})
+    </insert>
+    <!--    根据问题problemId返回Problem实体类-->
+    <select id="selectOne" resultType="com.hqz.hzuoj.bean.problem.Problem"
+            parameterType="com.hqz.hzuoj.bean.problem.Problem">
+        select * from hzuoj_problems where problem_id = #{problemId}
+    </select>
+    <!--更新问题的数据地址-->
+    <update id="updateProblemData">
+        update hzuoj_problems set problem_data_address = #{path},problem_data_versions = problem_data_versions + 1 where problem_id = #{problemId}
+    </update>
+    <!--    映射关系-->
+    <resultMap id="problemResultMap" type="com.hqz.hzuoj.bean.problem.Problem">
+        <id column="problem_id" property="problemId"/>
+        <result column="problem_title" property="problemTitle"/>
+        <result column="problem_background" property="problemBackground"/>
+        <result column="problem_content" property="problemContent"/>
+        <result column="problem_data_address" property="problemDataAddress"/>
+        <result column="problem_explain" property="problemExplain"/>
+        <result column="problem_input_format" property="problemInputFormat"/>
+        <result column="problem_output_format" property="problemOutputFormat"/>
+        <result column="problem_public" property="problemPublic"/>
+        <result column="problem_create_time" property="problemCreateTime"/>
+        <result column="problem_update_time" property="problemUpdateTime"/>
+        <result column="problem_data_versions" property="problemDataVersions"/>
+        <association property="admin" javaType="com.hqz.hzuoj.bean.user.Admin">
+            <id column="admin_id" property="adminId"/>
+            <result column="admin_name" property="adminName"/>
+        </association>
+        <association property="problemLevel" javaType="com.hqz.hzuoj.bean.problem.ProblemLevel">
+            <id column="problem_level_id" property="problemLevelId"/>
+            <result column="problem_level_name" property="problemLevelName"/>
+        </association>
+        <collection property="examples" ofType="com.hqz.hzuoj.bean.problem.Example">
+            <id column="example_id" property="exampleId"/>
+            <result column="example_input" property="exampleInput"/>
+            <result column="example_output" property="exampleOutput"/>
+        </collection>
+    </resultMap>
+    <!--    返回所有问题信息，-->
+    <select id="getAllProblem" resultMap="problemResultMap">
+        SELECT
+        a.admin_id,a.admin_name,
+        p.problem_title,p.problem_id,p.problem_public,p.problem_create_time,p.problem_update_time,
+        pl.*
+        FROM
+        hzuoj_problems p
+        INNER JOIN hzuoj_admin a
+        ON a.admin_id = p.admin_id
+        INNER JOIN hzuoj_problems_level pl
+        ON pl.problem_level_id = p.problem_level_id
+        <if test="problemQuery != null and problemQuery.tagId != null">
+            INNER JOIN hzuoj_problems_tags pt
+            ON pt.problem_id = p.problem_id
+            INNER JOIN hzuoj_tags t
+            ON t.tag_id = pt.tag_id
+        </if>
+        <where>
+            1 = 1
+            <if test="problemPublic != null">
+                and p.problem_public = #{problemPublic}
+            </if>
+            <if test="problemQuery != null">
+                <if test="problemQuery.problemId != null">
+                    and p.problem_id = #{problemQuery.problemId}
+                </if>
+                <if test="problemQuery.problemTitle != null">
+                    and p.problem_title like '%${problemQuery.problemTitle}%'
+                </if>
+                <if test="problemQuery.problemLevelId != null">
+                    and p.problem_level_id = #{problemQuery.problemLevelId}
+                </if>
+                <if test="problemQuery.tagId != null">
+                    and t.tag_id = #{problemQuery.tagId}
+                </if>
+            </if>
+        </where>
+    </select>
+    <!--    根据problemId返回问题的信息-->
+    <select id="getProblem" resultMap="problemResultMap">
+        SELECT
+        a.admin_id, a.admin_name,
+        p.*,
+        e.example_input, e.example_id, e.example_output,
+        pl.*
+        FROM
+        hzuoj_problems p
+        INNER JOIN hzuoj_admin a
+        ON a.admin_id = p.admin_id
+        INNER JOIN hzuoj_problems_level pl
+        ON pl.problem_level_id = p.problem_level_id
+        LEFT JOIN hzuoj_examples e
+        ON p.problem_id = e.problem_id
+        WHERE p.problem_id = #{problemId}
+    </select>
+    <!--    更新问题的用户可见性-->
+    <update id="updateProblemPublic">
+        UPDATE hzuoj_problems set problem_public = #{problemPublic} where problem_id = #{problemId}
+    </update>
+    <!--    删除问题-->
+    <delete id="deleteProblem">
+        DELETE from hzuoj_problems p where p.problem_id = #{problemId}
+    </delete>
+    <!--    获取题目problemId通过提交数量-->
+    <select id="getAllAcceptedTotal" resultType="java.lang.Integer">
+       SELECT
+            COUNT(*)
+          FROM
+            hzuoj_problems p
+            INNER JOIN hzuoj_submits s
+              ON p.problem_id = s.problem_id
+            INNER JOIN hzuoj_judge_result jr
+              ON jr.judge_result_id = s.judge_result_id
+          WHERE p.problem_id = #{problemId}
+            AND jr.judge_name = 'AC'
+             AND s.submit_public = 1
+   </select>
+    <!--    获取题目problemId提交数量-->
+    <select id="getAllTotal" resultType="java.lang.Integer">
+        SELECT
+            COUNT(*)
+          FROM
+            hzuoj_problems p
+            INNER JOIN hzuoj_submits s
+              ON p.problem_id = s.problem_id
+            INNER JOIN hzuoj_judge_result jr
+              ON jr.judge_result_id = s.judge_result_id
+          WHERE p.problem_id = #{problemId}
+            and s.submit_public = 1
+    </select>
+    <!--    获取我在题目problemId通过提交数量-->
+    <select id="getMyAcceptedTotal" resultType="java.lang.Integer">
+        SELECT
+            COUNT(*)
+          FROM
+            hzuoj_problems p
+            INNER JOIN hzuoj_submits s
+              ON p.problem_id = s.problem_id
+            INNER JOIN hzuoj_judge_result jr
+              ON jr.judge_result_id = s.judge_result_id
+          WHERE p.problem_id = #{problemId}
+            AND s.user_id = #{userId}
+            AND jr.judge_name = 'AC'
+            AND s.submit_public = 1
+    </select>
+    <!--    获取我在ProblemId提交数量-->
+    <select id="getMyAllTotal" resultType="java.lang.Integer">
+       SELECT
+            COUNT(*)
+          FROM
+            hzuoj_problems p
+            INNER JOIN hzuoj_submits s
+              ON p.problem_id = s.problem_id
+            INNER JOIN hzuoj_judge_result jr
+              ON jr.judge_result_id = s.judge_result_id
+          WHERE p.problem_id = #{problemId}
+            AND s.user_id = #{userId}
+            AND s.submit_public = 1
+    </select>
+    <!--    删除题目标签-->
+    <delete id="deleteProblemTags">
+        DELETE FROM hzuoj_problems_tags WHERE problem_id = #{problemId}
+    </delete>
+    <!--    保存题目标签-->
+    <insert id="saveProblemTag">
+        insert into hzuoj_problems_tags (problem_id,tag_id) values (#{problemId}, #{tagId})
+    </insert>
+    <resultMap id="tagResultMap" type="com.hqz.hzuoj.bean.problem.Tag">
+        <id column="tag_id" property="tagId"/>
+        <result column="tag_name" property="tagName"/>
+    </resultMap>
+    <!--    获取题目标签-->
+    <select id="getProblemTags" resultMap="tagResultMap">
+        SELECT * FROM hzuoj_problems_tags AS pt
+        INNER JOIN hzuoj_tags AS t
+        ON pt.tag_id = t.tag_id
+        WHERE pt.problem_id = #{problemId}
+    </select>
+    <!--    更新题目难度-->
+    <update id="updateProblemLevel">
+        UPDATE hzuoj_problems set problem_level_id = #{problemLevel.problemLevelId} where problem_id = #{problemId}
+    </update>
+</mapper>

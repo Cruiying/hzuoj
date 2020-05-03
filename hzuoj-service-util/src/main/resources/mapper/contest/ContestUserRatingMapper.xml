@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hqz.hzuoj.mapper.contest.ContestUserRatingMapper">
+    <insert id="saveContestUserRating">
+        INSERT INTO hzuoj_contests_users_rating (user_id, contest_id, rank)
+        VALUES(#{userId}, #{contestId}, #{rank})
+    </insert>
+    <select id="getContestUserRatings" resultType="com.hqz.hzuoj.bean.contest.ContestUserRating">
+        SELECT * FROM hzuoj_contests_users_rating cur WHERE cur.contest_id = #{contestId}
+    </select>
+    <update id="updateUserRating">
+        UPDATE hzuoj_users u SET u.user_rating = u.user_rating + #{rank} WHERE u.user_id = #{userId}
+    </update>
+    <delete id="deleteContestUserRating">
+        DELETE FROM hzuoj_contests_users_rating WHERE id = #{Id}
+    </delete>
+    <update id="updateContestUserRatingStatus">
+        UPDATE hzuoj_contests c SET c.contest_rank_status = #{status} WHERE c.contest_id = #{contestId}
+    </update>
+</mapper>

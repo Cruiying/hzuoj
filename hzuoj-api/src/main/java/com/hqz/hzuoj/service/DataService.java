@@ -1,6 +1,6 @@
 package com.hqz.hzuoj.service;
 
-import com.hqz.hzuoj.bean.Data;
+import com.hqz.hzuoj.bean.problem.Data;
 
 import java.util.List;
 
@@ -10,7 +10,7 @@ import java.util.List;
  * @Description: TODO
  */
 public interface DataService {
-    String saveData(String path, Integer problemId);
+    void saveData(Integer problemId, List<Data> data, String uploadPath);
 
     List<Data> getProblemDatas(Integer problemId);
 

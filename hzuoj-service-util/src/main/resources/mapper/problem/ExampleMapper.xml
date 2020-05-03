@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hqz.hzuoj.mapper.problem.ExampleMapper">
+<!--    插入测试样例-->
+    <insert id="saveExamples" parameterType="java.util.List" useGeneratedKeys="false">
+        insert into hzuoj_examples
+    			(example_input, example_output, problem_id)
+    			values
+        <foreach collection="examples" item="example" index="index" separator=",">
+            (
+            #{example.exampleInput},
+            #{example.exampleOutput},
+            #{problemId}
+            )
+        </foreach>
+    </insert>
+<!--    删除样例-->
+    <delete id="deleteExamples">
+        delete from hzuoj_examples where problem_id = #{problemId}
+    </delete>
+    <select id="selectProblem" resultType="com.hqz.hzuoj.bean.problem.Example">
+        SELECT * FROM hzuoj_examples WHERE problem_id = #{problemId}
+    </select>
+</mapper>

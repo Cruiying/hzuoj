@@ -1,7 +1,7 @@
 package com.hqz.hzuoj.service;
 
 import com.github.pagehelper.PageInfo;
-import com.hqz.hzuoj.bean.Admin;
+import com.hqz.hzuoj.bean.user.Admin;
 
 /**
  * @Author: HQZ
