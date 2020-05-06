@@ -7,7 +7,7 @@
         <groupId>com.hqz.hzuoj</groupId>
         <artifactId>hzuoj-parent</artifactId>
         <version>1.0-SNAPSHOT</version>
-        <relativePath>pom.xml</relativePath>
+        <relativePath>../hzuoj-parent/pom.xml</relativePath>
     </parent>
     <groupId>com.hqz.hzuoj</groupId>
     <artifactId>hzuoj-common-util</artifactId>
