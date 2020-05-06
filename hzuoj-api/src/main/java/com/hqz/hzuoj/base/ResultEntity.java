@@ -2,6 +2,8 @@ package com.hqz.hzuoj.base;
 import com.hqz.hzuoj.common.Constants;
 import lombok.*;
 
+import java.io.Serializable;
+
 /**
  * @Author: HQZ
  * @CreateTime: 2020/5/2 22:14
@@ -12,7 +14,7 @@ import lombok.*;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class ResultEntity {
+public class ResultEntity implements Serializable {
 
     /**
      * 请求状态码
@@ -26,6 +28,30 @@ public class ResultEntity {
      * 请求数据
      */
     private Object data;
+
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    public Object getData() {
+        return data;
+    }
+
+    public void setData(Object data) {
+        this.data = data;
+    }
 
     public static ResultEntity success(String code, String message, Object data) {
         ResultEntity resultEntity = new ResultEntity();
