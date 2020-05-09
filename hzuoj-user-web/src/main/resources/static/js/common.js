@@ -1,4 +1,10 @@
 class Common {
+    /**
+     * 返回用户等级对应颜色
+     * @param username
+     * @param rating
+     * @returns {string}
+     */
     getUserRatingColor(username, rating) {
         if (rating == null || rating == undefined) return " ";
         if (rating >= 3000) return "<span style='color: red !important;'><b>" + username + "</b></span>";
@@ -12,12 +18,16 @@ class Common {
         if (rating < 1200) return "<span style='color: gray !important'><b>" + username + "</b></span>";
     }
 
+    /**
+     * 格式化日期
+     * @param time
+     * @returns {string}
+     */
     getDateFormat(time) {
         let date = new Date(time);
+        date = date.format("yyyy-MM-dd hh:mm:ss");
+        date = new Date(date);
         let year = date.getFullYear();
-        /* 在日期格式中，月份是从0开始的，因此要加0
-         * 使用三元表达式在小于10的前面加0，以达到格式统一  如 09:11:05
-         * */
         let month = date.getMonth() + 1 < 10 ? "0" + (date.getMonth() + 1) : date.getMonth() + 1;
         let day = date.getDate() < 10 ? "0" + date.getDate() : date.getDate();
         let hours = date.getHours() < 10 ? "0" + date.getHours() : date.getHours();
@@ -27,6 +37,11 @@ class Common {
         return year + "-" + month + "-" + day + " " + hours + ":" + minutes + ":" + seconds;
     }
 
+    /**
+     * 根据分数返回分数对应的颜色
+     * @param score
+     * @returns {string}
+     */
     getColorFromScore(score) {
         if (score == undefined || score == null) score = 0;
         try {
@@ -54,6 +69,11 @@ class Common {
         }
     }
 
+    /**
+     * 根据测评结果返回对于的颜色
+     * @param obj
+     * @returns {string}
+     */
     getJudgeResult(obj) {
         if (obj == 'TLE') {
             return "<span class=\"status time_limit_exceeded\" style=\"color: sandybrown !important;\"><i class=\"icon clock\"></i>Time Limit Exceeded</span>\n";
@@ -94,6 +114,11 @@ class Common {
         return "<span class=\"status\" style='color:#25bb9b;'>已提交</span>";
     }
 
+    /**
+     *
+     * @param mss
+     * @returns {string}
+     */
     formatDuring(mss) {
         const days = Math.round(mss / (1000 * 60 * 60 * 24));
         const hours = Math.round((mss % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));

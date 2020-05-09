@@ -45,13 +45,13 @@
 <div style="height: 20px;"></div>
 <!--题目内容-->
 <div class="ui container" id="apps">
-    <div class="ui center aligned grid">
+    <div class="ui center aligned grid" v-if="problem != null">
         <div class="row">
             <h1 class="ui header" id="problemTitle" v-text="problem.problemTitle"></h1>
         </div>
         <div class="row" style="margin-top: -15px">
-            <span class="ui label">内存限制：<span v-text="'128MB'"></span></span>
-            <span class="ui label">时间限制：<span v-text="'1000ms'"></span></span>
+            <span class="ui label">内存限制：<span v-text="getMaxRuntimeMemory()"></span></span>
+            <span class="ui label">时间限制：<span v-text="getMaxRuntimeTime()"></span></span>
         </div>
         <div class="row" style="margin-top: -23px;">
             <a class="ui teal button" href="#submit">提交</a>
@@ -59,7 +59,7 @@
             <a :href="'/submits?problemId='+problem.problemId" class="ui positive button">提交记录</a>
         </div>
     </div>
-    <div class="ui grid">
+    <div class="ui grid" v-if="problem != null">
         <!--        题目背景-->
         <div class="row" v-if="problem.problemBackground!=null && problem.problemBackground.length>0">
             <div class="column">
@@ -390,6 +390,25 @@
                 const model = this.languages[index].languageModel;
                 this.language = this.languages[index];
                 editorLanguage(model);
+            },
+            getMaxRuntimeTime: function() {
+
+                if (null == this.problem || null == this.problem.datas) return ;
+                let time = 0;
+                const datas = this.problem.datas;
+                for (let i = 0; i < datas.length; i++) {
+                    if (time < datas[i].dataMaxRuntimeTime) time = datas[i].dataMaxRuntimeTime;
+                }
+                return common.getRuntimeTime(time);
+            },
+            getMaxRuntimeMemory: function() {
+                if (null == this.problem || null == this.problem.datas) return ;
+                let memory = 0;
+                const datas = this.problem.datas;
+                for (let i = 0; i < datas.length; i++) {
+                    if (memory < datas[i].dataMaxRuntimeMemory) memory = datas[i].dataMaxRuntimeMemory;
+                }
+                return common.getRuntimeMemory(memory);
             },
             /**
              * 显示自测框
