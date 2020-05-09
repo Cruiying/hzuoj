@@ -219,6 +219,12 @@ public class ContestController {
             map.put("flag", false);
             return map;
         }
+        int contestProblemScore = contestProblem.getContestProblemScore();
+        if(contestProblemScore <= 0) {
+            map.put("msg", "添加失败！！比赛题目分数必须大于0");
+            map.put("flag", false);
+            return map;
+        }
         ContestProblem saveContestProblem = contestService.saveContestProblem(contestProblem);
         saveContestProblem.setProblem(problem);
         map.put("contestProblem", saveContestProblem);
@@ -259,9 +265,13 @@ public class ContestController {
     @RequestMapping("/contest/update/rank/{contestId}")
     @ResponseBody
     public String updateContestRank(@PathVariable Integer contestId) {
-        if (contestId == null) return JSON.toJSONString("fail");
+        if (contestId == null) {
+            return JSON.toJSONString("fail");
+        }
         Contest contest = contestService.getContest(contestId);
-        if (contest == null) return JSON.toJSONString("fail");
+        if (contest == null) {
+            return JSON.toJSONString("fail");
+        }
         if (contest.getContestIsRank() == null || contest.getContestIsRank() != 1) {
             return JSON.toJSONString("fail");
         }

@@ -62,7 +62,9 @@ public class UserServiceImpl implements UserService {
             user = JSON.parseObject(json, User.class);
         } else {
             user = userMapper.getUser(userId);
-            if (user == null) return null;
+            if (user == null) {
+                return null;
+            }
             JudgeResult judgeResult = judgeResultMapper.selectJudgeName("AC");
             Integer userRanking = userMapper.getUserRanking(userId);
             Integer userAcceptedRanking = userMapper.getUserAcceptedRanking(userId);
@@ -114,8 +116,11 @@ public class UserServiceImpl implements UserService {
      * @return
      */
 
+    @Override
     public PageInfo<Rank> getRanks(Integer page, RankingQuery rankingQuery) {
-        if (rankingQuery == null) rankingQuery = new RankingQuery();
+        if (rankingQuery == null) {
+            rankingQuery = new RankingQuery();
+        }
         int size = 20;
         PageHelper.startPage(page, size, true);
         List<Rank> ranks = userMapper.getRanks(rankingQuery);

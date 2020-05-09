@@ -108,7 +108,9 @@ public class AdminController {
     @ResponseBody
     @AdminLoginCheck
     public Map<String, Object> getAllAdmin(Integer page) {
-        if (page == null) page = 1;
+        if (page == null) {
+            page = 1;
+        }
         Map<String, Object> map = new HashMap<>();
         map.put("pageInfo", adminService.getAll(page));
         return map;

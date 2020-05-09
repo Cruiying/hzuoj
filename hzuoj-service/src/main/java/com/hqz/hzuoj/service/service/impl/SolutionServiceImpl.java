@@ -86,7 +86,9 @@ public class SolutionServiceImpl implements SolutionService {
      */
     @Override
     public PageInfo<Solution> getSolutions(Integer page) {
-        if (page == null || page <= 0) page = 1;
+        if (page == null || page <= 0) {
+            page = 1;
+        }
         PageHelper.startPage(page, 20, true);
         List<Solution> solutions = solutionMapper.getSolutions(null);
         return new PageInfo<>(solutions, 20);
@@ -121,9 +123,13 @@ public class SolutionServiceImpl implements SolutionService {
 
     @Override
     public Solution updateSolutionStatus(Solution solution) {
-        if (solution == null || solution.getSolutionStatus() == null || solution.getSolutionStatus().getSolutionStatusId() == null) return null;
+        if (solution == null || solution.getSolutionStatus() == null || solution.getSolutionStatus().getSolutionStatusId() == null) {
+            return null;
+        }
         SolutionStatus solutionStatus = solutionStatusMapper.selectByPrimaryKey(solution.getSolutionStatus());
-        if (solutionStatus == null) return null;
+        if (solutionStatus == null) {
+            return null;
+        }
         solutionMapper.updateSolutionStatus(solution);
         return  getSolution(solution.getSolutionId());
     }

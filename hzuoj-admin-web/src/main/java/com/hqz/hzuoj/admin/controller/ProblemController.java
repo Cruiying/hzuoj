@@ -89,7 +89,9 @@ public class ProblemController {
             return "add-level";
         }
         problemLevel = problemService.getProblemLevel(levelId);
-        if (problemLevel == null) problemLevel = new ProblemLevel();
+        if (problemLevel == null) {
+            problemLevel = new ProblemLevel();
+        }
         modelMap.put("problemLevel", problemLevel);
         return "add-level";
     }
@@ -161,7 +163,9 @@ public class ProblemController {
             return "add-tag";
         }
         tag = problemService.getTag(tagId);
-        if (tag == null) tag = new Tag();
+        if (tag == null) {
+            tag = new Tag();
+        }
         modelMap.put("tag", tag);
         return "add-tag";
     }

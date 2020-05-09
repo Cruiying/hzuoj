@@ -82,8 +82,12 @@ public class DiscussionServiceImpl implements DiscussionService {
      */
     @Override
     public PageInfo<Discussion> getDiscussions(Integer page, DiscussionQuery discussionQuery) {
-        if (page == null || page <= 0) page = 1;
-        if (discussionQuery == null) discussionQuery = new DiscussionQuery();
+        if (page == null || page <= 0) {
+            page = 1;
+        }
+        if (discussionQuery == null) {
+            discussionQuery = new DiscussionQuery();
+        }
         PageHelper.startPage(page, 20, true);
         List<Discussion> discussions = discussionMapper.getDiscussions(discussionQuery);
         return new PageInfo<>(discussions, 20);
@@ -154,7 +158,9 @@ public class DiscussionServiceImpl implements DiscussionService {
      */
     @Override
     public Discussion updateDiscussionTop(Discussion discussion) {
-        if (discussion.getDiscussionTop() == null || discussion.getDiscussionTop() < 0) return null;
+        if (discussion.getDiscussionTop() == null || discussion.getDiscussionTop() < 0) {
+            return null;
+        }
         Discussion d = discussionMapper.getDiscussion(discussion.getDiscussionId());
         d.setDiscussionTop(discussion.getDiscussionTop());
         discussionMapper.updateByPrimaryKey(d);

@@ -112,7 +112,9 @@ public class ProblemServiceImpl implements ProblemService {
      */
     @Override
     public PageInfo<Problem> getAllProblem(Integer page, Integer userId) {
-        if (page == null || page <= 0) page = 1;
+        if (page == null || page <= 0) {
+            page = 1;
+        }
         return getAllProblem(page, 1, userId, null);
     }
 
@@ -123,7 +125,9 @@ public class ProblemServiceImpl implements ProblemService {
      */
     @Override
     public PageInfo<Problem> getAllProblem(Integer page) {
-        if (page == null || page <= 0) page = 1;
+        if (page == null || page <= 0) {
+            page = 1;
+        }
         return getAllProblem(page, null, null, null);
     }
 
@@ -274,7 +278,9 @@ public class ProblemServiceImpl implements ProblemService {
      */
     @Override
     public PageInfo<ProblemLevel> getProblemLevels(Integer page) {
-        if (page == null || page <= 0) page = 1;
+        if (page == null || page <= 0) {
+            page = 1;
+        }
         PageHelper.startPage(page, 10, true);
         List<ProblemLevel> problemLevels = problemLevelMapper.selectAll();
         return new PageInfo<>(problemLevels, 10);
@@ -317,7 +323,9 @@ public class ProblemServiceImpl implements ProblemService {
      */
     @Override
     public PageInfo<Problem> getProblemQuery(Integer page, Integer userId, ProblemQuery problemQuery) {
-        if (page == null || page <= 0) page = 1;
+        if (page == null || page <= 0) {
+            page = 1;
+        }
         return getAllProblem(page, 1, userId, problemQuery);
     }
 
@@ -331,9 +339,12 @@ public class ProblemServiceImpl implements ProblemService {
      * @return
      */
     private PageInfo<Problem> getAllProblem(Integer page, Integer problemPublic, Integer userId, ProblemQuery problemQuery) {
-        if (problemQuery == null) problemQuery = new ProblemQuery();
+        if (problemQuery == null) {
+            problemQuery = new ProblemQuery();
+        }
         PageHelper.startPage(page, 20, true);
-        List<Problem> allProblem = problemMapper.getAllProblem(problemPublic, problemQuery); //0 是私有题目，1是公开题目，null:是管理员查看所有题目
+        //0 是私有题目，1是公开题目，null:是管理员查看所有题目
+        List<Problem> allProblem = problemMapper.getAllProblem(problemPublic, problemQuery);
         for (Problem problem : allProblem) {
             Integer problemId = problem.getProblemId();
             ProblemSubmitInfo problemSubmitInfo = getProblemSubmitInfo(userId, problemId);

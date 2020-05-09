@@ -53,7 +53,9 @@ public class AdminServiceImpl implements AdminService {
      */
     @Override
     public PageInfo<Admin> getAll(Integer page) {
-        if (page == null || page <= 0) page = 1;
+        if (page == null || page <= 0) {
+            page = 1;
+        }
         PageHelper.startPage(page, 20, true);
         List<Admin> admins = adminMapper.getAll();
         return new PageInfo<>(admins, 20);

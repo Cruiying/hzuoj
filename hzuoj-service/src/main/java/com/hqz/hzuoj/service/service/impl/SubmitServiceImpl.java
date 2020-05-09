@@ -34,6 +34,7 @@ import java.util.*;
  * @CreateTime: 2019/12/30 14:24
  * @Description: TODO
  */
+@SuppressWarnings("AlibabaAvoidNewDateGetTime")
 @Service
 @Transactional
 public class SubmitServiceImpl implements SubmitService {
@@ -106,7 +107,9 @@ public class SubmitServiceImpl implements SubmitService {
     @Override
     public String restartSubmit(Integer submitId) {
         Submit submit = submitMapper.getSubmit(submitId);
-        if (submit == null) return "error";
+        if (submit == null) {
+            return "error";
+        }
         Map<String, Object> map = new HashMap<>();
         map.put("submitId", submitId);
         JudgeResult judgeResult = judgeResultMapper.selectJudgeName("queue");
@@ -179,6 +182,7 @@ public class SubmitServiceImpl implements SubmitService {
      * @param submit
      * @return
      */
+    @Override
     public Submit saveSubmit(Submit submit) {
         JudgeResult judgeResult = judgeResultMapper.selectJudgeName("queue");
         if (judgeResult == null) {
@@ -212,9 +216,14 @@ public class SubmitServiceImpl implements SubmitService {
      * @param submitQuery
      * @return
      */
+    @Override
     public PageInfo<Submit> getSubmits(Integer page, SubmitQuery submitQuery) {
-        if (page == null || page <= 0) page = 1;
-        if (submitQuery == null) submitQuery = new SubmitQuery();
+        if (page == null || page <= 0) {
+            page = 1;
+        }
+        if (submitQuery == null) {
+            submitQuery = new SubmitQuery();
+        }
         int size = 20;
         PageHelper.startPage(page, size, true);
         List<Submit> submits = submitMapper.getSubmits(submitQuery);
@@ -229,7 +238,9 @@ public class SubmitServiceImpl implements SubmitService {
      */
     @Override
     public PageInfo<Submit> getSubmits(Integer page) {
-        if (page == null || page <= 0) page = 1;
+        if (page == null || page <= 0) {
+            page = 1;
+        }
         int size = 20;
         PageHelper.startPage(page, size, true);
         List<Submit> submits = submitMapper.selectAll();
@@ -262,7 +273,9 @@ public class SubmitServiceImpl implements SubmitService {
     @Override
     public ContestSubmit saveContestSubmit(ContestSubmit contestSubmit) {
         Submit saveSubmit = saveSubmit(contestSubmit.getSubmit());
-        if (saveSubmit == null) return null;
+        if (saveSubmit == null) {
+            return null;
+        }
         contestSubmit.setSubmit(saveSubmit);
         contestSubmitMapper.saveContestSubmit(contestSubmit);
         return contestSubmit;
@@ -277,7 +290,9 @@ public class SubmitServiceImpl implements SubmitService {
     @Override
     public ContestSubmit getContestSubmit(ContestSubmit contestSubmit) {
         ContestSubmit saveContestSubmit = contestSubmitMapper.getContestSubmit(contestSubmit);
-        if (saveContestSubmit == null) return null;
+        if (saveContestSubmit == null) {
+            return null;
+        }
         Contest contest = saveContestSubmit.getContest();
         if (contest.getContestStatus() == 1) {
             saveContestSubmit.getSubmit().setSubmitRuntimeMemory(0);
@@ -300,8 +315,11 @@ public class SubmitServiceImpl implements SubmitService {
      * @param contestId
      * @return
      */
+    @Override
     public PageInfo<ContestSubmit> getContestSubmits(Integer page, Integer contestId, SubmitQuery submitQuery) {
-        if (submitQuery == null) submitQuery = new SubmitQuery();
+        if (submitQuery == null) {
+            submitQuery = new SubmitQuery();
+        }
         PageHelper.startPage(page, 20, true);
         List<ContestSubmit> contestSubmits = contestSubmitMapper.getContestSubmits(contestId, submitQuery);
         if (contestSubmits != null) {
@@ -331,7 +349,9 @@ public class SubmitServiceImpl implements SubmitService {
      */
     @Override
     public PageInfo<ContestRank> getContestRanks(Integer page, Contest contest, ContestRankQuery contestRankQuery) {
-        if (contest == null) return null;
+        if (contest == null) {
+            return null;
+        }
         Integer contestId = contest.getContestId();
         if (contest.getContestRankIsFinish()) {
             //比赛排名更新结束
@@ -377,8 +397,12 @@ public class SubmitServiceImpl implements SubmitService {
      */
     private PageInfo<ContestRank> getContestRank(Integer page, Integer contestId, ContestRankQuery contestRankQuery) {
         int size = 20;
-        if (page == null || page <= 0) page = 1;
-        if (contestRankQuery == null) contestRankQuery = new ContestRankQuery();
+        if (page == null || page <= 0) {
+            page = 1;
+        }
+        if (contestRankQuery == null) {
+            contestRankQuery = new ContestRankQuery();
+        }
         PageHelper.startPage(page, size, true);
         List<ContestRank> contestRanks = contestRankMapper.getContestRanks(contestId, contestRankQuery);
         if (contestRanks != null) {
@@ -523,7 +547,9 @@ public class SubmitServiceImpl implements SubmitService {
      */
     private Map<Integer, ContestRank> getContestRankMap(List<ContestRank> contestRanks) {
         Map<Integer, ContestRank> contestRankMap = new HashMap<>();
-        if (contestRanks == null) return contestRankMap;
+        if (contestRanks == null) {
+            return contestRankMap;
+        }
         for (ContestRank contestRank : contestRanks) {
             contestRankMap.put(contestRank.getContestApply().getContestApplyId(), contestRank);
         }
@@ -541,7 +567,9 @@ public class SubmitServiceImpl implements SubmitService {
         List<ContestApply> contestApplyList = contestApplyMapper.selectAllByContest(contestId);
         List<ContestProblem> contestProblems = contestSubmitMapper.getContestProblemAll(contestId);
         List<ContestSubmit> contestSubmits = contestSubmitMapper.getRankContestSubmits(contestId);
-        if (contestSubmits == null || contestApplyList == null || contestProblems == null) return null;
+        if (contestSubmits == null || contestApplyList == null || contestProblems == null) {
+            return null;
+        }
         if (contestSubmits.size() <= 0) {
             return null;
         }
@@ -566,10 +594,14 @@ public class SubmitServiceImpl implements SubmitService {
      */
     @Override
     public synchronized String calculateContestRating(Contest contest) {
-        if (contest == null || contest.getContestId() == null || contest.getContestStatus() != 2) return "fail";
+        if (contest == null || contest.getContestId() == null || contest.getContestStatus() != 2) {
+            return "fail";
+        }
         Integer contestId = contest.getContestId();
         List<ContestRank> contestRanks = getContestRanks(contestId);
-        if (contestRanks == null || contestRanks.size() <= 1) return "fail";
+        if (contestRanks == null || contestRanks.size() <= 1) {
+            return "fail";
+        }
         List<ContestUserRating> contestUserRatings = contestUserRatingMapper.getContestUserRatings(contestId);
         contestUserRatingMapper.updateContestUserRatingStatus(contestId, 1);
         if (contestUserRatings != null) {
@@ -840,12 +872,16 @@ public class SubmitServiceImpl implements SubmitService {
         contestRanks.sort(new Comparator<ContestRank>() {
             @Override
             public int compare(ContestRank o1, ContestRank o2) {
-                if (o1.getAcceptedTotal() != o2.getAcceptedTotal()) {
+                if (!o1.getAcceptedTotal().equals(o2.getAcceptedTotal())) {
                     return o2.getAcceptedTotal() - o1.getAcceptedTotal();
                 } else {
                     long punishTime = o1.getPunishTime() - o2.getPunishTime();
-                    if (punishTime > 0L) return 1;
-                    if (punishTime < 0L) return -1;
+                    if (punishTime > 0L) {
+                        return 1;
+                    }
+                    if (punishTime < 0L) {
+                        return -1;
+                    }
                     return 0;
                 }
             }
@@ -854,7 +890,7 @@ public class SubmitServiceImpl implements SubmitService {
         for (int i = 1; i < contestRanks.size(); i++) {
             ContestRank now = contestRanks.get(i);
             ContestRank prv = contestRanks.get(i - 1);
-            if (now.getAcceptedTotal() != prv.getAcceptedTotal() || now.getPunishTime() != prv.getPunishTime()) {
+            if (!now.getAcceptedTotal().equals(prv.getAcceptedTotal()) || !now.getPunishTime().equals(prv.getPunishTime())) {
                 now.setRank(prv.getRank() + 1);
             } else {
                 now.setRank(prv.getRank());
@@ -900,7 +936,7 @@ public class SubmitServiceImpl implements SubmitService {
         for (int i = 1; i < contestRanks.size(); i++) {
             ContestRank now = contestRanks.get(i);
             ContestRank prv = contestRanks.get(i - 1);
-            if (now.getTotalScore() != prv.getTotalScore()) {
+            if (!now.getTotalScore().equals(prv.getTotalScore())) {
                 now.setRank(prv.getRank() + 1);
             } else {
                 now.setRank(prv.getRank());

@@ -4,12 +4,14 @@ import com.alibaba.dubbo.config.annotation.Service;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.hqz.hzuoj.bean.contest.*;
+import com.hqz.hzuoj.bean.problem.Data;
 import com.hqz.hzuoj.bean.problem.Example;
 import com.hqz.hzuoj.bean.problem.ProblemSubmitInfo;
 import com.hqz.hzuoj.bean.problem.Tag;
 import com.hqz.hzuoj.mapper.contest.ContestApplyMapper;
 import com.hqz.hzuoj.mapper.contest.ContestMapper;
 import com.hqz.hzuoj.mapper.contest.ContestTypeMapper;
+import com.hqz.hzuoj.mapper.problem.DataMapper;
 import com.hqz.hzuoj.mapper.problem.ExampleMapper;
 import com.hqz.hzuoj.mapper.problem.ProblemMapper;
 import com.hqz.hzuoj.service.ContestService;
@@ -41,12 +43,16 @@ public class ContestServiceImpl implements ContestService {
     @Autowired
     private ProblemMapper problemMapper;
 
+    @Autowired
+    private DataMapper dataMapper;
+
     /**
      * 根据比赛contestId获取一个比赛
      *
      * @param contestId
      * @return
      */
+    @Override
     public synchronized Contest getContest(Integer contestId) {
         return getContestStatus(contestId);
     }
@@ -57,6 +63,7 @@ public class ContestServiceImpl implements ContestService {
      * @param contestId
      * @return
      */
+    @Override
     public Contest getContestStatus(Integer contestId) {
         contestMapper.updateAllContestStatus(new Date());
         Contest contest = contestMapper.getContest(contestId);
@@ -98,7 +105,9 @@ public class ContestServiceImpl implements ContestService {
      */
     @Override
     public Contest saveContest(Contest contest) {
-        if (contest == null) return  null;
+        if (contest == null) {
+            return  null;
+        }
         if (contest.getContestId() != null) {
             Contest c = getContestStatus(contest.getContestId());
             //比赛还未开始，可以修改除了比赛的邀请码和比赛的contestId和比赛的创建者任何属性
@@ -181,9 +190,11 @@ public class ContestServiceImpl implements ContestService {
     public ContestProblem getContestProblem(Integer contestId, Integer problemId) {
         ContestProblem contestProblem = contestMapper.selectContestProblem(contestId, problemId);
         if (contestProblem != null) {
-            List<Example> examples = exampleMapper.selectProblem(problemId);
             if (null != contestProblem.getProblem()) {
+                List<Example> examples = exampleMapper.selectProblem(problemId);
+                List<Data> problemDatas = dataMapper.getProblemDatas(problemId);
                 contestProblem.getProblem().setExamples(examples);
+                contestProblem.getProblem().setDatas(problemDatas);
             }
         }
         return contestProblem;
@@ -216,10 +227,15 @@ public class ContestServiceImpl implements ContestService {
      */
     @Override
     public PageInfo<Contest> getAllContest(Integer page, ContestQuery contestQuery) {
-        if (contestQuery == null) contestQuery = new ContestQuery();
-        if (page == null) page = 1;
-        if (contestQuery.getContestTypeId() != null && contestQuery.getContestTypeId() == -1)
+        if (contestQuery == null) {
+            contestQuery = new ContestQuery();
+        }
+        if (page == null) {
+            page = 1;
+        }
+        if (contestQuery.getContestTypeId() != null && contestQuery.getContestTypeId() == -1) {
             contestQuery.setContestTypeId(null);
+        }
         //先更新全部比赛的状态,再查询
         contestMapper.updateAllContestStatus(new Date());
         PageHelper.startPage(page, 20, true);
@@ -243,7 +259,9 @@ public class ContestServiceImpl implements ContestService {
 
     @Override
     public ContestApply getContestApplyUser(Integer contestId, Integer userId) {
-        if (userId == null || contestId == null) return null;
+        if (userId == null || contestId == null) {
+            return null;
+        }
         try {
             return contestApplyMapper.selectContestApplyByUser(contestId, userId);
         } catch (Exception e) {
@@ -264,7 +282,9 @@ public class ContestServiceImpl implements ContestService {
         contestMapper.updateAllContestStatus(new Date());
         Integer contestId = contestApply.getContestId();
         Integer userId = contestApply.getUserId();
-        if (contestId == null || userId == null) return null;
+        if (contestId == null || userId == null) {
+            return null;
+        }
         Contest contest = contestMapper.getContest(contestId);
         if (contest == null || contest.getContestStatus() == 2 || contest.getContestApplyStatus() != 1) {
             //比赛不存在，比赛结束，不是比赛报名时间

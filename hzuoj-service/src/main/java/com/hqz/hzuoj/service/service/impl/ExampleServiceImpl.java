@@ -29,7 +29,9 @@ public class ExampleServiceImpl implements ExampleService {
      */
     @Override
     public void saveExamples(List<Example> examples, Integer problemId) {
-        if (examples == null || examples.size() == 0) return;
+        if (examples == null || examples.size() == 0) {
+            return;
+        }
         //先删除原测试样例
         exampleMapper.deleteExamples(problemId);
         //插入现在的测试数据
