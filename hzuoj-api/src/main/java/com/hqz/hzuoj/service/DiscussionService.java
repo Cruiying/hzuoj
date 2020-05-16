@@ -27,4 +27,6 @@ public interface DiscussionService {
     Discussion updateDiscussionTop(Discussion discussion);
 
     boolean deleteDiscussion(Integer discussionId);
+
+    boolean discussionDelete(Integer userId, Integer discussionId);
 }

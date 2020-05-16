@@ -49,7 +49,6 @@ public class SubmitMessageReceiver {
      */
     @JmsListener(destination = "${submitQueue}", concurrency = "5", containerFactory = "jmsQueueListenerContainerFactory")
     public void submitReceiver(Message message) throws JMSException, InterruptedException {
-        Thread.sleep(1500);
         MapMessage mapMessage = (MapMessage) message;
         Integer submitId = mapMessage.getInt("submitId");
         createSubmit(submitId);

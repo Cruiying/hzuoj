@@ -6,9 +6,11 @@ import com.github.pagehelper.PageInfo;
 import com.hqz.hzuoj.bean.discussion.Discussion;
 import com.hqz.hzuoj.bean.discussion.DiscussionComment;
 import com.hqz.hzuoj.bean.discussion.DiscussionQuery;
+import com.hqz.hzuoj.bean.user.User;
 import com.hqz.hzuoj.mapper.discussion.DiscussionMapper;
 import com.hqz.hzuoj.service.DiscussionService;
 import com.hqz.hzuoj.util.util.RedisUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.*;
@@ -177,6 +179,26 @@ public class DiscussionServiceImpl implements DiscussionService {
         Discussion discussion = new Discussion();
         discussion.setDiscussionId(discussionId);
         discussionMapper.deleteByPrimaryKey(discussion);
+        return true;
+    }
+
+    /**
+     * 删除用户讨论
+     * @param userId
+     * @param discussionId
+     * @return
+     */
+    @Override
+    public boolean discussionDelete(Integer userId, Integer discussionId) {
+        Discussion discussion = discussionMapper.getDiscussion(discussionId);
+        if (null == discussion) {
+            throw new RuntimeException("讨论不存在");
+        }
+        User user = discussion.getUser();
+        if (!user.getUserId().equals(userId)) {
+            throw new RuntimeException("不能删除别人的讨论");
+        }
+        discussionMapper.deleteByPrimaryKey(discussionId);
         return true;
     }
 }

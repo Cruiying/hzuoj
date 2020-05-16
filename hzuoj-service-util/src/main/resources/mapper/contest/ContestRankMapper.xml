@@ -48,7 +48,7 @@
                     and u.user_id = #{param2.userId}
                 </if>
                 <if test="param2.indistinct != null">
-                    and (u.username like '%${param2.indistinct}%' or u.school like '%${param2.indistinct}%')
+                    and (u.username like CONCAT('%',#{param2.indistinct},'%')  or u.school like CONCAT('%',#{param2.indistinct},'%'))
                 </if>
             </where>
         ORDER BY cr.rank

@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSON;
 import com.github.pagehelper.PageInfo;
 import com.hqz.hzuoj.annotations.LoginWeb;
 import com.hqz.hzuoj.annotations.UserLoginCheck;
+import com.hqz.hzuoj.base.ResultEntity;
 import com.hqz.hzuoj.bean.language.Language;
 import com.hqz.hzuoj.bean.submit.JudgeResult;
 import com.hqz.hzuoj.bean.submit.Submit;
@@ -23,6 +24,7 @@ import javassist.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Description;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
@@ -30,7 +32,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
 
 /**
@@ -92,7 +94,13 @@ public class SubmitController {
         return "submission";
     }
 
-
+    /**
+     * 获取提交信息
+     *
+     * @param submitId
+     * @return
+     * @throws NotFoundException
+     */
     @RequestMapping("/submit/{submitId}/info")
     @ResponseBody
     public Map<String, Object> getSubmit(@PathVariable Integer submitId) throws NotFoundException {
@@ -105,7 +113,12 @@ public class SubmitController {
         return map;
     }
 
-
+    /**
+     * 用户自测提交
+     *
+     * @param testCode
+     * @return
+     */
     @RequestMapping(value = "/test")
     @ResponseBody
     public Map<String, Object> test(@RequestBody TestCode testCode) {
@@ -185,7 +198,10 @@ public class SubmitController {
         if (submit == null) {
             throw new RuntimeException("该提交不存在");
         }
-        if ("PD".equals(submit.getJudgeResult().getJudgeName()) || "queue".equals(submit.getJudgeResult().getJudgeName()) || "Running".equals(submit.getJudgeResult().getJudgeName())) {
+        if ("PD".equals(submit.getJudgeResult().getJudgeName())
+                || "queue".equals(submit.getJudgeResult().getJudgeName())
+                || "Running".equals(submit.getJudgeResult().getJudgeName())
+                || "compile".equals(submit.getJudgeResult().getJudgeName())) {
             try {
                 submitResultMessageListener.addSseEmitters(submitId, emitter);
             } catch (Exception e) {
@@ -223,6 +239,62 @@ public class SubmitController {
         modelMap.put("judgeResults", judgeResults);
         modelMap.put("submitQuery", submitQuery);
         return "submissions";
+    }
+
+    @RequestMapping("/contest/{contestId}/excel")
+    @ResponseBody
+    public ResultEntity getContestExcel(@PathVariable Integer contestId) {
+        try {
+            return ResultEntity.success("获取成功", submitService.getContestExcel(contestId));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResultEntity.success(e.getMessage(), null);
+        }
+    }
+
+    @Description("模板下载")
+    @RequestMapping("/downloadOnlineLearnMaterials")
+    public String downloadFile(HttpServletRequest request, HttpServletResponse response, String fileName) {
+        if (fileName != null) {
+            //设置文件路径
+            //这里使用配置类配置文件路径
+            File file = new File(fileName);
+            if (file.exists()) {
+                response.setContentType("application/force-download");// 设置强制下载不打开
+                response.addHeader("Content-Disposition", "attachment;fileName=" + fileName);// 设置文件名
+                byte[] buffer = new byte[1024];
+                FileInputStream fis = null;
+                BufferedInputStream bis = null;
+                try {
+                    fis = new FileInputStream(file);
+                    bis = new BufferedInputStream(fis);
+                    OutputStream os = response.getOutputStream();
+                    int i = bis.read(buffer);
+                    while (i != -1) {
+                        os.write(buffer, 0, i);
+                        i = bis.read(buffer);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                } finally {
+                    if (bis != null) {
+                        try {
+                            bis.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    if (fis != null) {
+                        try {
+                            fis.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }
+        }
+        return null;
     }
 
 }

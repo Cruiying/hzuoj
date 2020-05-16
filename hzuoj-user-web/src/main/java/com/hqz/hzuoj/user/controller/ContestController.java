@@ -144,13 +144,14 @@ public class ContestController {
         modelMap.put("pageInfo", pageInfo);
         modelMap.put("contestApplys", contestApplys);
         modelMap.put("rankList", userService.getRanks(1, new RankingQuery()));
-        modelMap.put("contestQuery",contestQuery);
+        modelMap.put("contestQuery", contestQuery);
         modelMap.put("contestTypes", contestTypes);
         return "contests";
     }
 
     /**
      * 获取比赛列表
+     *
      * @param contestQuery
      * @return
      */
@@ -162,6 +163,7 @@ public class ContestController {
 
     /**
      * 获取比赛类型
+     *
      * @return
      */
     @RequestMapping("/contest/types")
@@ -404,10 +406,20 @@ public class ContestController {
         if (page == null || page <= 0) page = 1;
         Contest contest = contestService.getContest(contestId);
         if (contest == null) return null;
+
         PageInfo<ContestSubmit> contestSubmits = submitService.getContestSubmits(page, contestId, submitQuery);
         return contestSubmits;
     }
 
+    /**
+     * 获取比赛排名
+     *
+     * @param request
+     * @param contestId
+     * @param page
+     * @param contestRankQuery
+     * @return
+     */
     @RequestMapping("/contest/rank/{contestId}")
     @ResponseBody
     public PageInfo<ContestRank> getContestRank(HttpServletRequest request, @PathVariable Integer contestId, Integer page, @RequestBody ContestRankQuery contestRankQuery) {
@@ -416,18 +428,15 @@ public class ContestController {
         if ("OI".equals(contest.getContestType().getContestTypeName()) && contest.getContestStatus() == 1) {
             return null;
         }
-        PageInfo<ContestRank> pageInfo= submitService.getContestRanks(page, contest,contestRankQuery);
-        String str = (String)request.getSession().getAttribute("userId");
-        if (pageInfo != null && str != null &&  pageInfo.getPageNum() == 1 && pageInfo.getList().size() != 1) {
+        PageInfo<ContestRank> pageInfo = submitService.getContestRanks(page, contest, contestRankQuery);
+        String str = (String) request.getSession().getAttribute("userId");
+        if (pageInfo != null && str != null && pageInfo.getPageNum() == 1 && pageInfo.getList().size() != 1) {
             Integer userId = Integer.parseInt(str);
             ContestRankQuery contestRankQuery1 = new ContestRankQuery();
             contestRankQuery1.setUserId(userId);
             PageInfo<ContestRank> contestRanks = submitService.getContestRanks(1, contest, contestRankQuery1);
-            if(contestRanks != null && contestRanks.getList() != null && contestRanks.getList().size() == 1) {
-
-                    pageInfo.getList().add(0, contestRanks.getList().get(0));
-
-
+            if (contestRanks != null && contestRanks.getList() != null && contestRanks.getList().size() == 1) {
+                pageInfo.getList().add(0, contestRanks.getList().get(0));
             }
 
         }

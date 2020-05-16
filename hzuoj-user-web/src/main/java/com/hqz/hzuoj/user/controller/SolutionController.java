@@ -102,7 +102,6 @@ public class SolutionController {
         User user = new User();
         user.setUserId(userId);
         solution.setUser(user);
-        System.out.println("solution:" + solution);
         Solution saveSolution = solutionService.saveSolution(solution);
         if (saveSolution == null) return null;
         return JSON.toJSONString(saveSolution);

@@ -19,7 +19,8 @@
           th:href="@{/lib/jq-module/zyupload/zyupload-1.0.0.min.css}" media="all">
     <link href="https://cdn.bootcss.com/prism/1.15.0/themes/prism.css" rel="stylesheet">
     <link href="https://cdn.bootcss.com/prism/1.15.0/plugins/line-numbers/prism-line-numbers.css" rel="stylesheet">
-    <script type="text/javascript" async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+    <script type="text/javascript" async
+            src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
     </script>
     <script src="../static/lib/vue/vue.js" th:src="@{/lib/vue/vue.js}"></script>
     <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
@@ -36,10 +37,12 @@
         a {
             text-decoration: none !important;
         }
+
         .modify:hover {
             color: #009c95;
         }
-        body{
+
+        body {
             background-color: rgb(239, 239, 239);
         }
     </style>
@@ -51,21 +54,22 @@
 <nav th:replace="fragment::menu('discussions')"></nav>
 <div style="height: 15px;"></div>
 <div class="ui container" id="app" style="min-height: 380px;">
-    <div style="display: block;height: 80px;" :style="'display: none'"  class="ui active centered inline loader"></div>
+    <div style="display: block;height: 80px;" :style="'display: none'" class="ui active centered inline loader"></div>
     <div style="display: none;" :style="'display: block'">
         <div style="margin-bottom: 15px">
             <a href="/discussions">全部讨论</a>
             <span> > </span>
             <span v-text="discussion.discussionTitle"></span>
         </div>
-        <div  class="ui grid stackable" v-if="discussion != null">
+        <div class="ui grid stackable" v-if="discussion != null">
             <div class="eleven wide column">
                 <div class="ui segment grid">
                     <div class="sixteen wide column">
                         <div class="ui header">
                             <h1 style="margin: 15px;" v-text="discussion.discussionTitle"></h1>
                             <a :href="'/user/'+discussion.user.userId" class="head-pic" style="margin-bottom: 10px; ">
-                                <img alt="头像" class="head-pic" :src="discussion.user.userImg != null && discussion.user.userImg.length>0 ? discussion.user.userImg: '/images/default.png'">
+                                <img alt="头像" class="head-pic"
+                                     :src="discussion.user.userImg != null && discussion.user.userImg.length>0 ? discussion.user.userImg: '/images/default.png'">
                             </a>
                         </div>
                         <div style="padding-top: 8px;" class="ui middle aligned two column grid">
@@ -74,8 +78,14 @@
                                     <a :href="'/user/'+discussion.user.userId" style="margin-right: 10px;"
                                        v-html="getUserRatingColor(discussion.user.username,discussion.user.userRating)"></a>
                                     <div style="margin-top: 5px;">
-                                        <span  v-text="'发表于 '+dateFormat(discussion.discussionCreateTime)"></span>
-                                        <span v-if="discussion.user.userId == loginUserId"><a  class="modify" :href="'/discussion/editor?discussionId=' + discussion.discussionId" v-text="'修改'"></a></span>
+                                        <span v-text="'发表于 '+dateFormat(discussion.discussionCreateTime)"></span>
+                                        <span v-if="discussion.user.userId == loginUserId">
+                                            <a class="modify" style="cursor: pointer"
+                                               :href="'/discussion/editor?discussionId=' + discussion.discussionId"
+                                               v-text="'修改'"></a>
+                                            <a class="delete" style="cursor: pointer" v-on:click="deleteDiscussion(discussion.discussionId)"
+                                               v-text="'删除'"></a>
+                                        </span>
                                     </div>
 
                                 </div>
@@ -111,7 +121,8 @@
                             <div class="ui threaded comments" style="max-width: 100%; padding: 0">
                                 <div class="comment" v-for="comment,index in comments">
                                     <a class="avatar">
-                                        <img src="../static/images/default.png" :src="comment.user.userImg != null && comment.user.userImg.length>0 ? comment.user.userImg: '/images/default.png'">
+                                        <img src="../static/images/default.png"
+                                             :src="comment.user.userImg != null && comment.user.userImg.length>0 ? comment.user.userImg: '/images/default.png'">
                                     </a>
                                     <div class="content" style="padding-top: 0!important;">
                                         <a class="author">
@@ -130,7 +141,7 @@
                                             <span v-text="comment.commentContent"></span>
                                             <span class="actions">
                                             <div class="ui accordion field">
-                                                <a  class="title">回复</a>
+                                                <a class="title">回复</a>
                                                 <div class="content field">
                                                     <div class="ui form">
                                                         <div class="field">
@@ -152,7 +163,8 @@
                                     <div style="padding: 2px" class="comments" v-for="reply in comment.comments">
                                         <div class="comment">
                                             <a class="avatar">
-                                                <img src="../static/images/default.png" :src="reply.user.userImg != null && reply.user.userImg.length>0 ? reply.user.userImg: '/images/default.png'">
+                                                <img src="../static/images/default.png"
+                                                     :src="reply.user.userImg != null && reply.user.userImg.length>0 ? reply.user.userImg: '/images/default.png'">
                                             </a>
                                             <div class="content" style="padding-top: 0!important;">
                                                 <div class="author">
@@ -160,9 +172,11 @@
                                                        v-html="getUserRatingColor(reply.user.username,reply.user.userRating)"></a>
                                                     <div v-if="reply.user.userId==discussion.user.userId"
                                                          class="ui mini basic teal left pointing label m-padded-mini"
-                                                         v-text="'楼主'"></div><span style=" color: #009c95;font-weight: 400" > 回复 </span><a :href="'/user/'+reply.parentComment.user.userId"
-                                                                                                                     class="m-teal"
-                                                                                                                     v-html="getUserRatingColor(reply.parentComment.user.username,reply.parentComment.user.userRating)"> </a>
+                                                         v-text="'楼主'"></div>
+                                                    <span style=" color: #009c95;font-weight: 400"> 回复 </span><a
+                                                        :href="'/user/'+reply.parentComment.user.userId"
+                                                        class="m-teal"
+                                                        v-html="getUserRatingColor(reply.parentComment.user.username,reply.parentComment.user.userRating)"> </a>
                                                 </div>
                                                 <div class="metadata">
                                                     <span class="date" v-text="dateFormat(reply.commentTime)"></span>
@@ -201,7 +215,8 @@
                         <div class="ui form">
                             <div class="field">
                                 <div id="replyVale">
-                                    <textarea id="commentContent" class="typo  typo-selection js-toc-content"></textarea>
+                                    <textarea id="commentContent"
+                                              class="typo  typo-selection js-toc-content"></textarea>
                                 </div>
                             </div>
                             <div class="field">
@@ -217,7 +232,8 @@
             </div>
             <div class="five wide column m-mobile-hide">
                 <div style="min-width: 300px;">
-                    <a href="/discussions" class="ui teal button" style="background-color: #22ae90; width: 100%">返回全部帖子</a>
+                    <a href="/discussions" class="ui teal button"
+                       style="background-color: #22ae90; width: 100%">返回全部帖子</a>
                     <div class="ui segments">
                         <div class="ui secondary segment">
                             <div class="ui two column grid">
@@ -230,12 +246,14 @@
                                 <div class="item" v-for="discussion,index in discussions" v-if="index < 8">
                                     <div style="padding: 5px;">
                                         <a class="m-black" :href="'/discussion/'+discussion.discussionId"
-                                           style="color: #333;line-height: 25px" v-text="discussion.discussionTitle"></a>
+                                           style="color: #333;line-height: 25px"
+                                           v-text="discussion.discussionTitle"></a>
                                     </div>
                                     <div style="padding: 5px;color: #888">
                                     <span style="float: left"
                                           v-text="'发表于 ' + dateFormat(discussion.discussionCreateTime)"></span>
-                                        <span style="float: right" v-text="'回复('+discussion.discussionReplyCount+')'"></span>
+                                        <span style="float: right"
+                                              v-text="'回复('+discussion.discussionReplyCount+')'"></span>
                                     </div>
                                 </div>
                             </div>
@@ -258,6 +276,7 @@
 </footer>
 </body>
 <script th:replace="fragment::script"></script>
+<script src="../static/js/common.js" th:src="@{/js/common.js}"></script>
 <!--初始化mathjax-->
 <script th:inline="none">
     let isMathjaxConfig = false; // 防止重复调用Config，造成性能损耗
@@ -329,16 +348,19 @@
                     });
             },
             getUserRatingColor: function (username, rating) {
-                if (rating == null || rating == undefined) return " ";
-                if (rating >= 3000) return "<span style='color: red !important;'><b>" + username + "</b></span>";
-                if (rating >= 2600) return "<span style='color: rgb(254, 76, 97)!important;'><b>" + username + "</b></span>";
-                if (rating >= 2300) return "<span style='color: #FF8C00 !important;'><b>" + username + "</b></span>";
-                if (rating >= 2100) return "<span style='color: #FBBD08 !important;'><b>" + username + "</b></span>";
-                if (rating >= 1900) return "<span style='color: #a0a !important;'><b>" + username + "</b></span>";
-                if (rating >= 1600) return "<span style='color: blue !important;'><b>" + username + "</b></span>";
-                if (rating >= 1400) return "<span style='color: #03A89E !important'><b>" + username + "</b></span>";
-                if (rating >= 1200) return "<span style='color: green !important'><b>" + username + "</b></span>";
-                if (rating < 1200) return "<span style='color: gray !important'><b>" + username + "</b></span>";
+                return common.getUserRatingColor(username, rating);
+            },
+            deleteDiscussion: function (discussionId) {
+                axios.post('/discussion/delete?discussionId=' + discussionId)
+                    .then((data) => {
+                        const result = data.data;
+                        if (result["code"] == "1") {
+                            alert(result["message"]);
+                            window.location.href = "/discussions";
+                        } else {
+                            alert(result["message"]);
+                        }
+                    })
             },
             onComment: function () {
                 let comment = {};
@@ -360,18 +382,7 @@
 
             },
             dateFormat: function (time) {
-                let date = new Date(time);
-                let year = date.getFullYear();
-                /* 在日期格式中，月份是从0开始的，因此要加0
-                 * 使用三元表达式在小于10的前面加0，以达到格式统一  如 09:11:05
-                 * */
-                let month = date.getMonth() + 1 < 10 ? "0" + (date.getMonth() + 1) : date.getMonth() + 1;
-                let day = date.getDate() < 10 ? "0" + date.getDate() : date.getDate();
-                let hours = date.getHours() < 10 ? "0" + date.getHours() : date.getHours();
-                let minutes = date.getMinutes() < 10 ? "0" + date.getMinutes() : date.getMinutes();
-                let seconds = date.getSeconds() < 10 ? "0" + date.getSeconds() : date.getSeconds();
-                // 拼接
-                return year + "-" + month + "-" + day + " " + hours + ":" + minutes;
+                return common.getDateFormat(time);
             },
         },
         created: function () {

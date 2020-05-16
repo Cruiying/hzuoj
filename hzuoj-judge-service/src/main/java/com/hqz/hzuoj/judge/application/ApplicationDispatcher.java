@@ -78,16 +78,8 @@ public class ApplicationDispatcher {
      * @param submitId - 评测记录的唯一标识符
      */
     public void createSubmit(Integer submitId) {
-        System.out.println("题目本地测评机");
-        while(true) {
-            judgeDispatcher.RunningSubmit(submitId);
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-
+        System.out.println("题目本地测评机运行");
+        judgeDispatcher.RunningSubmit(submitId);
     }
 
     /**

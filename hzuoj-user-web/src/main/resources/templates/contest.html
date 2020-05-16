@@ -257,7 +257,7 @@
 
 【比赛流程】
 
- 2020年02月02日起，在HzuOJ竞赛网（https://www.hzuoj.com）注册，按要求完善个人基本信息，并报名参赛。
+ 2020年02月02日起，在HzuOJ竞赛网（http://www.hzuoj.com）注册，按要求完善个人基本信息，并报名参赛。
                                 </pre>
                             </div>
 
@@ -284,7 +284,7 @@
 
 【比赛流程】
 
- 2020年02月02日起，在HzuOJ竞赛网（https://www.hzuoj.com）注册，按要求完善个人基本信息，并报名参赛。
+ 2020年02月02日起，在HzuOJ竞赛网（http://www.hzuoj.com）注册，按要求完善个人基本信息，并报名参赛。
                                 </pre>
                             </div>
 
@@ -476,18 +476,18 @@
                                     <td><a style="color: #4183c4;"
                                            :href="'/contest/submit/'+contest.contestId +'/'+contestSubmit.submit.submitId"
                                            v-html="getColorFromScore(contestSubmit.submit.submitScore)"><span
-                                            class="score">{{getColorFromScore(contestSubmit.submit.submitScore)}}</span></a>
+                                            class="score" v-html="getColorFromScore(contestSubmit.submit.submitScore)"></span></a>
                                     </td>
-                                    <td>{{getRuntimeTime(contestSubmit.submit.submitRuntimeTime)}}</td>
-                                    <td>{{getRuntimeMemory(contestSubmit.submit.submitRuntimeMemory)}}</td>
+                                    <td v-text="getRuntimeTime(contestSubmit.submit.submitRuntimeTime)"></td>
+                                    <td v-text="getRuntimeMemory(contestSubmit.submit.submitRuntimeMemory)"></td>
                                     <td><a style="color: #4183c4;"
-                                           :href="'/contest/submit/'+contest.contestId +'/'+contestSubmit.submit.submitId"><b>{{contestSubmit.submit.language.languageName}}</b></a>
+                                           :href="'/contest/submit/'+contest.contestId +'/'+contestSubmit.submit.submitId"><b v-text="contestSubmit.submit.language.languageName"></b></a>
                                     </td>
-                                    <td>{{contestSubmit.submit.submitCodeLength}}</td>
+                                    <td v-text="contestSubmit.submit.submitCodeLength"></td>
                                     <td><a style="color: #4183c4;" href="/user/3215"
                                            v-html="getUserRatingColor(contestSubmit.submit.user.username,contestSubmit.submit.user.userRating)"></a>
                                     </td>
-                                    <td>{{contestSubmit.submit.submitTime}}</td>
+                                    <td v-text="dateFormat(contestSubmit.submit.submitTime)"></td>
                                 </tr>
                                 </tbody>
                             </table>
@@ -528,8 +528,11 @@
                                    v-on:keyup.enter="getRank('indistinct',1)" type="text">
                         </div>
                     </div>
-                    <div>
-                        <span>排行榜已在 2019-12-08 17:00:00 比赛结束后正式封榜，比赛时间段之外的提交不计入排行。 <a href="#" style="color: #25bb9b">点击查看计分规则。</a></span>
+                    <div class="ui inline">
+                        <span>排行榜已在 2019-12-08 17:00:00 比赛结束后正式封榜，比赛时间段之外的提交不计入排行。
+                            <a style="color: #25bb9b;cursor: pointer;" v-on:click="showContestTypeExplain()">点击查看计分规则。</a>
+                            <a style="color: #000; cursor: pointer;" v-on:click="contestRank()" ><i class="download icon"></i>下载比赛排名</a>
+                        </span>
                     </div>
                     <div style="overflow-x:auto;margin-top: 10px;">
                         <table class="ui segment unstackable  padded center aligned table">
@@ -686,6 +689,19 @@
                     <button class="ui positive button">确定</button>
                 </div>
             </div>
+            <div id="showContestTypeExplain" class="ui tiny test modal hidden" style="margin-top: -112.5px;">
+                <i class="close icon"></i>
+                <div class="header" style="text-align: center">
+                    <div v-text="contest.contestType.contestTypeName+'赛制规则'"></div>
+                </div>
+                <div class="content">
+                    <h2 v-html="contest.contestType.contestTypeExplain"></h2>
+                </div>
+                <div class="actions">
+                    <div class="ui negative button">关闭</div>
+                    <button class="ui positive button">确定</button>
+                </div>
+            </div>
         </div>
     </div>
     <!--页尾-->
@@ -693,7 +709,7 @@
             class="ui inverted vertical segment m-padded-tb-large">
         <div class="content container ui">
             <div class=" wide column">
-                <h2 class="m-text-thin m-text-spaced m-opacity-tiny" style="color: black">贺州学院算法竞赛训练平台</h2>
+                <h2 class="m-text-thin m-text-spaced m-opacity-tiny" style="color: black">贺州学院在线程序竞赛平台</h2>
             </div>
         </div>
     </footer>
@@ -795,6 +811,9 @@
              * */
             showPrivacyApplyContest: function () {
                 $('#showPrivacyApplyContest').modal('show');
+            },
+            showContestTypeExplain: function() {
+                $('#showContestTypeExplain').modal('show');
             },
             /**
              * 显示我的提交状态
@@ -908,7 +927,6 @@
                     .catch((error) => { // 错误的回调
 
                     });
-
             },
             getContestRank: function (page) {
                 if (page == undefined) page = 1;
@@ -944,6 +962,13 @@
                 history.pushState("", "Title", url + str);
                 this.getContestRank(page);
                 this.getUserContestRank();
+            },
+            contestRank: function() {
+                axios.post("/contest/" + this.contest.contestId + "/excel")
+                    .then((data)=>{
+                        let result = data.data;
+                        window.location.href="/downloadOnlineLearnMaterials?fileName=" + result["data"];
+                    });
             },
             getSubmit: function (key, page) {
                 if (key != '') {
@@ -1012,14 +1037,17 @@
 
         },
         created: function () {
-            this.submitPage = common.getPage(this.submitPageInfo.pageNum, this.submitPageInfo.pages);
-            this.rankPage = common.getPage(this.rankPageInfo.pageNum, this.rankPageInfo.pages);
-            this.getContestRank([[${param.page}]]);
+            this.showId();
             this.countTime();
+            this.getContestRank([[${param.page}]]);
             this.showApplyEnd();
             this.getContestSubmits([[${param.page}]]);
             setInterval(this.getContestSubmits, 15000);
-            this.showId();
+            this.submitPage = common.getPage(this.submitPageInfo.pageNum, this.submitPageInfo.pages);
+            this.rankPage = common.getPage(this.rankPageInfo.pageNum, this.rankPageInfo.pages);
+
+            let t = [[${contest}]];
+            console.log(t);
         }
     });
     window.onload = function () {

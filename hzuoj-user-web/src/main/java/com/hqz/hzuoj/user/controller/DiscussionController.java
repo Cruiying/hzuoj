@@ -4,12 +4,15 @@ import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.fastjson.JSON;
 import com.github.pagehelper.PageInfo;
 import com.hqz.hzuoj.annotations.UserLoginCheck;
+import com.hqz.hzuoj.base.ResultEntity;
 import com.hqz.hzuoj.bean.discussion.Discussion;
 import com.hqz.hzuoj.bean.discussion.DiscussionComment;
 import com.hqz.hzuoj.bean.discussion.DiscussionQuery;
 import com.hqz.hzuoj.bean.user.User;
 import com.hqz.hzuoj.service.DiscussionService;
 import com.hqz.hzuoj.util.MarkdownUtils;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -26,6 +29,7 @@ import java.util.List;
  * @CreateTime: 2020/1/17 13:11
  * @Description: TODO
  */
+@Slf4j
 @Controller
 public class DiscussionController {
 
@@ -33,7 +37,7 @@ public class DiscussionController {
     private DiscussionService discussionService;
 
     /**
-     * 帖子创建于修改页面
+     * 帖子创建与修改页面
      *
      * @param discussionId
      * @return
@@ -58,6 +62,12 @@ public class DiscussionController {
         return "d_editor";
     }
 
+    /**
+     * 帖子保存与修改接口
+     * @param discussion
+     * @param request
+     * @return
+     */
     @RequestMapping("/discussion/save")
     @ResponseBody
     @UserLoginCheck
@@ -111,6 +121,12 @@ public class DiscussionController {
         return "discussion";
     }
 
+    /**
+     * 讨论回复接口
+     * @param comment
+     * @param request
+     * @return
+     */
     @RequestMapping("/discussion/comment")
     @ResponseBody
     @UserLoginCheck
@@ -121,10 +137,29 @@ public class DiscussionController {
         user.setUserId(userId);
         comment.setUser(user);
         comment.setCommentTime(new Date());
-        System.out.println(comment);
         DiscussionComment discussionComment = discussionService.saveDiscussionComment(comment);
         if (discussionComment == null) return null;
-        System.out.println("discussionComment" + discussionComment);
         return JSON.toJSONString(discussionComment);
+    }
+
+    /**
+     * 删除讨论
+     * @param discussionId
+     * @param request
+     * @return
+     */
+    @RequestMapping("/discussion/delete")
+    @ResponseBody
+    @UserLoginCheck
+    public ResultEntity discussionDelete(Integer discussionId, HttpServletRequest request) {
+        try {
+            System.out.println(discussionId);
+            String userId = (String)request.getSession().getAttribute("userId");
+            return ResultEntity.success("删除成功", discussionService.discussionDelete(Integer.parseInt(userId), discussionId));
+        }catch (Exception e) {
+            e.printStackTrace();
+            log.error("Error:{}", e.getMessage());
+            return ResultEntity.error(e.getMessage());
+        }
     }
 }

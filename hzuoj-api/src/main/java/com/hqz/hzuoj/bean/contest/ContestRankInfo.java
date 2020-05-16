@@ -60,6 +60,18 @@ public class ContestRankInfo implements Serializable {
     @Column
     private Long contestRankId;
 
+    public ContestRankInfo() {
+        this.accepted = false;
+        this.firstAccepted = false;
+        this.contestRankId = null;
+        this.contestProblemScore = 0;
+        this.problemId = null;
+        this.score = 0;
+        this.submitTotal = 0;
+        this.contestRankInfoId = null;
+        this.punishTime = 0L;
+    }
+
     public Boolean isFirstAccepted() {
         return firstAccepted;
     }

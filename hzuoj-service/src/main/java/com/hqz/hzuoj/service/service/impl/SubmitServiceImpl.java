@@ -22,11 +22,20 @@ import com.hqz.hzuoj.service.SubmitService;
 import com.hqz.hzuoj.service.mq.MessageSender;
 import com.hqz.hzuoj.util.util.RedisUtil;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -73,6 +82,9 @@ public class SubmitServiceImpl implements SubmitService {
     private ContestRankInfoMapper contestRankInfoMapper;
 
     @Autowired
+    private ContestMapper contestMapper;
+
+    @Autowired
     private MessageSender sender;
 
     @Value("${submitQueue}")
@@ -98,7 +110,7 @@ public class SubmitServiceImpl implements SubmitService {
                         || "queue".equals(submit.getJudgeResult().getJudgeName())
                         || "Running".equals(submit.getJudgeResult().getJudgeName())
                         || "SE".equals(submit.getJudgeResult().getJudgeName())) {
-                    restartSubmit(submit.getSubmitId());
+                    startSubmit(submit);
                 }
             }
         }
@@ -107,24 +119,28 @@ public class SubmitServiceImpl implements SubmitService {
     @Override
     public String restartSubmit(Integer submitId) {
         Submit submit = submitMapper.getSubmit(submitId);
+        startSubmit(submit);
+        return "success";
+    }
+
+    private void startSubmit(Submit submit) {
         if (submit == null) {
-            return "error";
+            return;
         }
-        Map<String, Object> map = new HashMap<>();
-        map.put("submitId", submitId);
+        redisUtil.del("submit:" + submit.getSubmitId() + ":info");
         JudgeResult judgeResult = judgeResultMapper.selectJudgeName("queue");
         if (judgeResult == null) {
-            return null;
+            return;
         }
         submit.setJudgeResult(judgeResult);
         submit.setSubmitScore(0);
         submit.setSubmitRuntimeTime(0);
         submit.setSubmitRuntimeMemory(0);
+        testPointMapper.deleteSubmitTestPoint(submit.getSubmitId());
         submitMapper.restartSubmit(submit);
-        String key = "submit:" + submitId + ":info";
-        redisUtil.del(key);
+        Map<String, Object> map = new HashMap<>();
+        map.put("submitId", submit.getSubmitId());
         sender.sendQueue(submitQueue, map);
-        return "success";
     }
 
     @Override
@@ -166,7 +182,7 @@ public class SubmitServiceImpl implements SubmitService {
                 List<TestPoint> testPoints = testPointMapper.getTestPoint(submitId);
                 submit.setTestPoints(testPoints);
                 String judgeName = submit.getJudgeResult().getJudgeName();
-                if (!"PD".equals(judgeName) && !"queue".equals(judgeName) && !"Running".equals(judgeName)) {
+                if (!"PD".equals(judgeName) && !"queue".equals(judgeName) && !"Running".equals(judgeName) || !"compile".equals(judgeName)) {
                     int time = (int) (Math.random() * 60 * 60 * 24 + 10);
                     //将数据写入redis中，避免缓存击穿
                     redisUtil.set(key, JSON.toJSONString(submit), time);
@@ -322,9 +338,10 @@ public class SubmitServiceImpl implements SubmitService {
         }
         PageHelper.startPage(page, 20, true);
         List<ContestSubmit> contestSubmits = contestSubmitMapper.getContestSubmits(contestId, submitQuery);
+        contestMapper.updateAllContestStatus(new Date());
+        Contest contest = contestMapper.getContest(contestId);
         if (contestSubmits != null) {
             for (ContestSubmit contestSubmit : contestSubmits) {
-                Contest contest = contestSubmit.getContest();
                 contestSubmit.getSubmit().setSubmitRuntimeMemory(0);
                 contestSubmit.getSubmit().setSubmitRuntimeTime(0);
                 contestSubmit.getSubmit().setSubmitScore(0);
@@ -636,11 +653,9 @@ public class SubmitServiceImpl implements SubmitService {
             contestUserRating.setRank(r);
             contestUserRatingList.add(contestUserRating);
         }
-        if (contestUserRatingList != null) {
-            for (ContestUserRating contestUserRating : contestUserRatingList) {
-                contestUserRatingMapper.updateUserRating(contestUserRating.getUserId(), contestUserRating.getRank());
-                contestUserRatingMapper.saveContestUserRating(contestUserRating);
-            }
+        for (ContestUserRating contestUserRating : contestUserRatingList) {
+            contestUserRatingMapper.updateUserRating(contestUserRating.getUserId(), contestUserRating.getRank());
+            contestUserRatingMapper.saveContestUserRating(contestUserRating);
         }
         contestUserRatingMapper.updateContestUserRatingStatus(contestId, 2);
         return "success";
@@ -672,6 +687,7 @@ public class SubmitServiceImpl implements SubmitService {
         for (ContestApply contestApply : contestApplyList) {
             contestApplyMap.put(contestApply.getUserId(), contestApply);
         }
+        //遍历提交
         for (ContestSubmit contestSubmit : contestSubmits) {
             Submit submit = contestSubmit.getSubmit();
             int s = submit.getProblem().getProblemId();
@@ -682,19 +698,11 @@ public class SubmitServiceImpl implements SubmitService {
             ContestRank contestRank = rankMap.get(submit.getUser().getUserId());
             if (contestRank == null) {
                 contestRank = new ContestRank();
-                contestRank.setTotalScore(0);
-                contestRank.setPunishTime(0L);
-                contestRank.setAcceptedTotal(0);
                 contestRank.setContestApply(contestApplyMap.get(submit.getUser().getUserId()));
-                contestRank.setRank(0);
                 List<ContestRankInfo> contestRankInfos = new ArrayList<>();
+                //遍历题目
                 for (ContestProblem contestProblem : contestProblems) {
                     ContestRankInfo contestRankInfo = new ContestRankInfo();
-                    contestRankInfo.setAccepted(false);
-                    contestRankInfo.setFirstAccepted(false);
-                    contestRankInfo.setPunishTime(0L);
-                    contestRankInfo.setScore(0);
-                    contestRankInfo.setSubmitTotal(0);
                     contestRankInfo.setContestProblemScore(contestProblem.getContestProblemScore());
                     contestRankInfo.setProblemId(contestProblem.getProblem().getProblemId());
                     contestRankInfos.add(contestRankInfo);
@@ -703,6 +711,7 @@ public class SubmitServiceImpl implements SubmitService {
                 rankMap.put(submit.getUser().getUserId(), contestRank);
             }
             List<ContestRankInfo> contestRankInfos = contestRank.getContestRankInfos();
+            //遍历
             for (ContestRankInfo contestRankInfo : contestRankInfos) {
                 int p = contestRankInfo.getProblemId();
                 if (p == s) {
@@ -953,5 +962,126 @@ public class SubmitServiceImpl implements SubmitService {
      */
     private List<ContestRank> getCFContestRank(List<ContestRank> contestRanks) {
         return null;
+    }
+
+    @Override
+    public String getContestExcel(Integer contestId) throws IOException {
+        Contest contest = contestMapper.getContest(contestId);
+        List<ContestRank> contestRanks = getContestRanks(contestId);
+        if (null == contestRanks) {
+            throw new RuntimeException("比赛不存在");
+        }
+        String directory = "/hzuoj/contest/excel/";
+
+        Workbook wb = new HSSFWorkbook();
+        Sheet sheet = wb.createSheet();
+        Row row = sheet.createRow(0);
+
+        Cell cell = row.createCell(0);
+        cell.setCellValue("排名");
+
+        cell = row.createCell(1);
+        cell.setCellValue("参赛者");
+
+        cell = row.createCell(2);
+        cell.setCellValue("学校");
+
+        cell = row.createCell(3);
+        cell.setCellValue("通过");
+
+        if ("ACM".equals(contest.getContestType().getContestTypeName())) {
+            cell = row.createCell(4);
+            cell.setCellValue("罚时");
+        } else {
+            cell = row.createCell(4);
+            cell.setCellValue("总分");
+        }
+        int i = 5;
+        Integer count = 1;
+        List<ContestRankInfo> contestRankInfos = contestRanks.get(0).getContestRankInfos();
+        for (ContestRankInfo ContestRankInfo : contestRankInfos) {
+            cell = row.createCell(i);
+            cell.setCellValue("题目" + count);
+            count++;
+            i++;
+        }
+        for (int j = 0; j < contestRanks.size(); j++) {
+            row = sheet.createRow(j + 1);
+            int k = 0;
+            cell = row.createCell(k);
+            cell.setCellValue(contestRanks.get(j).getRank());
+            k++;
+            cell = row.createCell(k);
+            cell.setCellValue(contestRanks.get(j).getContestApply().getUser().getUsername());
+            k++;
+            cell = row.createCell(k);
+            cell.setCellValue(contestRanks.get(j).getContestApply().getUser().getSchool());
+            k++;
+            cell = row.createCell(k);
+            cell.setCellValue(contestRanks.get(j).getAcceptedTotal());
+            k++;
+            if ("ACM".equals(contest.getContestType().getContestTypeName())) {
+                cell = row.createCell(k);
+                cell.setCellValue(getPunishTime(contestRanks.get(j).getPunishTime()));
+                k++;
+            } else {
+                cell = row.createCell(k);
+                cell.setCellValue(contestRanks.get(j).getTotalScore());
+                k++;
+            }
+            contestRankInfos = contestRanks.get(j).getContestRankInfos();
+            for (ContestRankInfo contestRankInfo : contestRankInfos) {
+                cell = row.createCell(k);
+                k++;
+                if ("ACM".equals(contest.getContestType().getContestTypeName())) {
+                    cell.setCellValue(getPunishTime(contestRankInfo.getPunishTime()));
+                } else {
+                    cell.setCellValue(contestRankInfo.getScore());
+
+                }
+            }
+
+        }
+        File file = new File(directory);
+        if (!file.exists()) {
+            file.mkdirs();
+        }
+        String fileName = directory + UUID.randomUUID() + ".xlsx";
+        FileOutputStream os = new FileOutputStream(new File(fileName));
+        try {
+            wb.write(os);
+            return fileName;
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            os.flush();
+            os.close();
+            wb.close();
+        }
+        return null;
+    }
+    private String getPunishTime(Long punishTime) {
+        long days = Math.round(punishTime / (1000 * 60 * 60 * 24));
+        long hours = Math.round(punishTime % (1000 * 60 * 60 * 24) / (1000 * 60 * 60));
+        long minutes = Math.round((punishTime % (1000 * 60 * 60)) / (1000 * 60));
+        long seconds = Math.round((punishTime % (1000 * 60))) / 1000;
+        String ans = "";
+        if (days > 0) {
+            ans += days + ":";
+        }
+        if (hours < 10) {
+            ans += "0";
+        }
+        ans += hours + ":";
+        if (minutes < 10) {
+            ans += "0";
+        }
+        ans += minutes + ":";
+        if (seconds < 10) {
+            ans += "0";
+        }
+        ans += seconds;
+        return ans;
+
     }
 }

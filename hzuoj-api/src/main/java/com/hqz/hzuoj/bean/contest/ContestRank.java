@@ -55,6 +55,17 @@ public class ContestRank implements Serializable {
     @Transient
     private ContestApply contestApply;
 
+    public ContestRank() {
+        this.totalScore = 0;
+        this.acceptedTotal = 0;
+        this.punishTime = 0L;
+        this.rank = 0;
+        this.contestApply = null;
+        this.contestId = null;
+        this.contestRankInfos = null;
+        this.contestRankId = null;
+    }
+
     public Integer getRank() {
         return rank;
     }

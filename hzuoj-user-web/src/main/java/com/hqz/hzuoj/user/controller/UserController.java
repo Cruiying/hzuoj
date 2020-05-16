@@ -283,6 +283,13 @@ public class UserController implements ErrorController {
         return submitService.getSubmits(page, submitQuery);
     }
 
+    /**
+     * 图片上传
+     * @param file
+     * @param request
+     * @param response
+     * @return
+     */
     @PostMapping("/user/img/upload")
     @UserLoginCheck
     @ResponseBody

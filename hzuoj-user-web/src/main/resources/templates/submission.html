@@ -208,6 +208,7 @@
         data: {
             submit: [[${submit}]],
             contestId: [[${contestId}]],
+            flag: true,
         },
         methods: {
             dateFormat: function (time) {
@@ -236,6 +237,7 @@
                 return url;
             },
             connectSubmit: function () {
+
                 const url = this.getSubmitURL();
                 const tmp = this;
                 if (!!window.EventSource) {

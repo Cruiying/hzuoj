@@ -114,34 +114,14 @@
 <script src="../static/js/DateUtils.js" th:src="@{/js/DateUtils.js}"></script>
 <script src="../static/lib/jq-module/zyupload/zyupload-1.0.0.min.js"
         th:src="@{/lib/jq-module/zyupload/zyupload-1.0.0.min.js}" charset="utf-8"></script>
-
+<script src="../static/js/common.js" th:src="@{/js/common.js}"></script>
 <script>hljs.initHighlightingOnLoad();</script>
 <script th:inline="javascript">
     function getUserRatingColor(username, rating) {
-        if (rating == null || rating == undefined) return " ";
-        if (rating >= 3000) return "<span style='color: red !important;'><b>" + username + "</b></span>";
-        if (rating >= 2600) return "<span style='color: rgb(254, 76, 97)!important;'><b>" + username + "</b></span>";
-        if (rating >= 2300) return "<span style='color: #FF8C00 !important;'><b>" + username + "</b></span>";
-        if (rating >= 2100) return "<span style='color: #FBBD08 !important;'><b>" + username + "</b></span>";
-        if (rating >= 1900) return "<span style='color: #a0a !important;'><b>" + username + "</b></span>";
-        if (rating >= 1600) return "<span style='color: blue !important;'><b>" + username + "</b></span>";
-        if (rating >= 1400) return "<span style='color: #03A89E !important'><b>" + username + "</b></span>";
-        if (rating >= 1200) return "<span style='color: green !important'><b>" + username + "</b></span>";
-        if (rating < 1200) return "<span style='color: gray !important'><b>" + username + "</b></span>";
+        return common.getUserRatingColor(username,rating);
     }
     function dateFormat (time) {
-        let date = new Date(time);
-        let year = date.getFullYear();
-        /* 在日期格式中，月份是从0开始的，因此要加0
-         * 使用三元表达式在小于10的前面加0，以达到格式统一  如 09:11:05
-         * */
-        let month = date.getMonth() + 1 < 10 ? "0" + (date.getMonth() + 1) : date.getMonth() + 1;
-        let day = date.getDate() < 10 ? "0" + date.getDate() : date.getDate();
-        let hours = date.getHours() < 10 ? "0" + date.getHours() : date.getHours();
-        let minutes = date.getMinutes() < 10 ? "0" + date.getMinutes() : date.getMinutes();
-        let seconds = date.getSeconds() < 10 ? "0" + date.getSeconds() : date.getSeconds();
-        // 拼接
-        return year + "-" + month + "-" + day + " " + hours + ":" + minutes;
+        return common.getDateFormat(time);
     }
     const pageNum = [[${pageInfo.pageNum}]];
     const pageTotal = [[${pageInfo.pages}]];
@@ -175,29 +155,8 @@
     const problemId = [[${problemId}]];
 
     function getBeginAndEnd() {
-        if ((end - begin) <= 14) {
-            /**
-             * 显示十个页码，不足十个不做处理
-             */
-        } else {
-            if ((pageNum - begin) >= 7) {
-                if ((pageNum + 7) >= pageTotal) {
-                    end = pageTotal;
-                    begin = end - 14;
-                } else {
-                    end = pageNum + 7;
-                    begin = pageNum - 7;
-                }
-            } else {
-                if ((pageNum - 7) >= 1) {
-                    begin = pageNum - 7;
-                    end = begin + 14;
-                } else {
-                    begin = 1;
-                    end = begin + 14;
-                }
-            }
-        }
+        var page = common.getPage(pageNum, pageTotal);
+        begin = page.begin; end = page.end;
     }
 
     getBeginAndEnd();

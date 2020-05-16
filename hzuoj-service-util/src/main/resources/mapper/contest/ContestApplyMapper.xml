@@ -11,6 +11,7 @@
             <result column="username" property="username"/>
             <result column="user_img" property="UserImg"/>
             <result column="user_rating" property="userRating"/>
+            <result column="school" property="school"/>
         </association>
     </resultMap>
     <select id="selectAllByContest" resultMap="contestApplyResultMap">

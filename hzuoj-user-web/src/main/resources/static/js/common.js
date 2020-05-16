@@ -7,6 +7,7 @@ class Common {
      */
     getUserRatingColor(username, rating) {
         if (rating == null || rating == undefined) return " ";
+        if (rating >= 3500) return "<span style='color: red !important;'><b>" + "<span style='color:black'>" + username.substr(0, 1) + "</span>" + username.substr(1,username.length) + "</b></span>";
         if (rating >= 3000) return "<span style='color: red !important;'><b>" + username + "</b></span>";
         if (rating >= 2600) return "<span style='color: rgb(254, 76, 97)!important;'><b>" + username + "</b></span>";
         if (rating >= 2300) return "<span style='color: #FF8C00 !important;'><b>" + username + "</b></span>";
@@ -25,16 +26,7 @@ class Common {
      */
     getDateFormat(time) {
         let date = new Date(time);
-        date = date.format("yyyy-MM-dd hh:mm:ss");
-        date = new Date(date);
-        let year = date.getFullYear();
-        let month = date.getMonth() + 1 < 10 ? "0" + (date.getMonth() + 1) : date.getMonth() + 1;
-        let day = date.getDate() < 10 ? "0" + date.getDate() : date.getDate();
-        let hours = date.getHours() < 10 ? "0" + date.getHours() : date.getHours();
-        let minutes = date.getMinutes() < 10 ? "0" + date.getMinutes() : date.getMinutes();
-        let seconds = date.getSeconds() < 10 ? "0" + date.getSeconds() : date.getSeconds();
-        // 拼接
-        return year + "-" + month + "-" + day + " " + hours + ":" + minutes + ":" + seconds;
+        return date.format("yyyy-MM-dd hh:mm:ss").toString();
     }
 
     /**
@@ -138,7 +130,7 @@ class Common {
     }
 
     getRuntimeMemory(memory) {
-        if (memory == undefined || memory == null || memory == '') {
+        if (undefined ==  memory || memory == null || memory == '') {
             memory = 0;
         }
         if (memory >= 1024) {
@@ -149,7 +141,7 @@ class Common {
     }
 
     getRankScore(score) {
-        if(score == undefined) score = 0;
+        if (score == undefined) score = 0;
         if (score > 80) return "<span style='color: rgb(57, 191, 156)'>" + score + "</span>";
         if (score > 60) return "<span style='color: rgb(255, 92, 28)'>" + score + "</span>";
         if (score > 40) return "<span style='color: rgb(255, 92, 28)'>" + score + "</span>";

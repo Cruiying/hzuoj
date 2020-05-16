@@ -9,6 +9,7 @@ import com.hqz.hzuoj.bean.submit.Submit;
 import com.hqz.hzuoj.bean.submit.SubmitQuery;
 import com.hqz.hzuoj.bean.submit.TestCode;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -43,4 +44,6 @@ public interface SubmitService {
     List<ContestRank> getContestRanks(Integer contestId);
 
     String calculateContestRating(Contest contest);
+
+    String getContestExcel(Integer contestId) throws IOException;
 }
