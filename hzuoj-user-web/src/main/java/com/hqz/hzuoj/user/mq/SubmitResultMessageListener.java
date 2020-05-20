@@ -135,6 +135,7 @@ public class SubmitResultMessageListener {
                 try {
                     //发送测评消息
                     sseEmitter.send(JSON.toJSONString(event));
+
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -146,6 +147,7 @@ public class SubmitResultMessageListener {
                 }
                 //已经发送，移除测评消息
                 messageListeners.remove(messageListener);
+                Thread.sleep(100);
             }
         }
     }

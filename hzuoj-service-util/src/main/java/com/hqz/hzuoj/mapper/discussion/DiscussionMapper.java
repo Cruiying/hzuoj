@@ -28,4 +28,8 @@ public interface DiscussionMapper extends Mapper<Discussion> {
     List<DiscussionComment> getDiscussionComments(Integer discussionId);
 
     void updateDiscussionCount(Integer discussionId, Integer replyCount, Integer commendCount, Integer browseCount);
+
+    Integer commentDelete(DiscussionComment comment);
+
+    void deleteComment(Integer commentId);
 }

@@ -13,7 +13,6 @@ import java.io.Serializable;
 @Getter
 @Setter
 @AllArgsConstructor
-@NoArgsConstructor
 public class ResultEntity implements Serializable {
 
     /**
@@ -28,6 +27,10 @@ public class ResultEntity implements Serializable {
      * 请求数据
      */
     private Object data;
+
+    public ResultEntity(){
+
+    }
 
     public String getCode() {
         return code;

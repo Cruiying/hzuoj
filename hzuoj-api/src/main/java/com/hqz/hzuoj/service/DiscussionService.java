@@ -29,4 +29,6 @@ public interface DiscussionService {
     boolean deleteDiscussion(Integer discussionId);
 
     boolean discussionDelete(Integer userId, Integer discussionId);
+
+    String commentDelete(DiscussionComment comment);
 }

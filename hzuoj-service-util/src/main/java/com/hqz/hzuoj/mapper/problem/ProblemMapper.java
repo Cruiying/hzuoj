@@ -50,4 +50,5 @@ public interface ProblemMapper extends Mapper<Problem> {
 
     void updateProblemLevel(Integer problemId, ProblemLevel problemLevel);
 
+    void updateProblem(Problem problem);
 }

@@ -118,7 +118,6 @@
                                             <button type="reset" class="layui-btn layui-btn-primary">重置</button>
                                         </div>
                                     </div>
-
                                 </form>
                             </div>
                         </div>
@@ -222,8 +221,12 @@
                             contestPublic = "公开比赛";
                         }
                         let isRank = "";
+                        let contestAfreshSubmit = "";
 
                         isRank = "<a title=\"更新比赛\" onclick=\"updateContestRank(this," + contest.contestId + ")\" href=\"javascript:;\">\n" +
+                            "                                    <i class=\"layui-icon\">&#xe614;</i>\n" +
+                            "                                </a>";
+                        contestAfreshSubmit = "<a title=\"重新测评\" onclick=\"contestAfreshSubmit(this," + contest.contestId + ")\" href=\"javascript:;\">\n" +
                             "                                    <i class=\"layui-icon\">&#xe614;</i>\n" +
                             "                                </a>";
                         list.append("   <tr>\n" +
@@ -242,6 +245,7 @@
                             "                                <a title=\"删除\" onclick=\"member_del(this,'要删除的id')\" href=\"javascript:;\">\n" +
                             "                                    <i class=\"layui-icon\">&#xe640;</i>\n" +
                             "                                </a>" + isRank + "\n" +
+                            "                                </a>" + contestAfreshSubmit + "\n" +
                             "                            </td>\n" +
                             "                        </tr>");
                     }
@@ -273,7 +277,6 @@
         loadContests(1, query);
     });
 
-    /*删除问题*/
     function updateContestRank(obj, contestId) {
         layer.confirm('确认要更新比赛吗？', function () {
             //发异步删除数据
@@ -296,6 +299,32 @@
                     layer.msg('更新失败!', {icon: 5, time: 1000});
                 }
             });
+            layer.msg('提交成功', {icon: 1, time: 1000});
+        });
+    }
+
+    function contestAfreshSubmit(obj, contestId) {
+        layer.confirm('确认要重新测评吗？', function () {
+            $.ajax({
+                dataType: "json",
+                //请求方式
+                type: "POST",
+                //请求的媒体类型
+                contentType: "application/json;charset=UTF-8",
+                //请求路径
+                url: "/admin/contest/afresh/" + contestId,
+                success: function (result) {
+                    if (result["code"] == '1') {
+                        layer.msg(result["message"], {icon: 1, time: 1000});
+                    } else {
+                        layer.msg(result["message"], {icon: 5, time: 1000});
+                    }
+                },
+                error: function (result) {
+                    layer.msg('更新失败!', {icon: 5, time: 1000});
+                }
+            });
+            layer.msg('提交成功', {icon: 1, time: 1000});
 
         });
     }

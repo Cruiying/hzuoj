@@ -10,9 +10,12 @@ import com.hqz.hzuoj.bean.user.User;
 import com.hqz.hzuoj.mapper.discussion.DiscussionMapper;
 import com.hqz.hzuoj.service.DiscussionService;
 import com.hqz.hzuoj.util.util.RedisUtil;
+import org.apache.commons.beanutils.BeanUtilsBean;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.xml.stream.events.Comment;
 import java.util.*;
 
 /**
@@ -113,16 +116,20 @@ public class DiscussionServiceImpl implements DiscussionService {
         Map<Integer, Integer> father = new HashMap<>();
         for (int i = 0; i < comments.size(); i++) {
             int u = comments.get(i).getCommentId();
-
-            if (comments.get(i).getParentComment() != null
-                    && comments.get(i).getParentComment().getCommentId() != null
-                    && comments.get(i).getParentComment().getCommentId() != -1) {
+            if (comments.get(i).getParentComment() != null && comments.get(i).getParentComment().getCommentId() != null && comments.get(i).getParentComment().getCommentId() != -1) {
+                //有父亲节点
                 int v = comments.get(i).getParentComment().getCommentId();
                 Integer x = father.get(v);
+                if (x == null || x < 0) {
+                    //父亲节点已经被删除,该节点应该也要被删除
+                    discussionMapper.deleteComment(u);
+                    continue;
+                }
                 father.put(u, x);
                 DiscussionComment discussionComment = commentList.get(x);
                 discussionComment.getComments().add(comments.get(i));
             } else {
+                //没有父亲节点
                 father.put(u, tot);
                 commentList.add(comments.get(i));
                 commentList.get(tot).setComments(new ArrayList<>());
@@ -200,5 +207,22 @@ public class DiscussionServiceImpl implements DiscussionService {
         }
         discussionMapper.deleteByPrimaryKey(discussionId);
         return true;
+    }
+
+    /**
+     * 删除回复
+     * @param comment
+     * @return
+     */
+    @Override
+    public String commentDelete(DiscussionComment comment) {
+        DiscussionComment discussionComment = discussionMapper.getDiscussionComment(comment.getCommentId());
+        if (discussionComment == null) {
+            return "error";
+        }
+        if (discussionComment.getParentComment() == null || "-1".equals(discussionComment.getParentComment().getCommentId())) {
+            discussionMapper.updateDiscussionCount(discussionComment.getDiscussion().getDiscussionId(),-1, 0, 0);
+        }
+        return discussionMapper.commentDelete(comment) > 0 ? "success" : "error";
     }
 }

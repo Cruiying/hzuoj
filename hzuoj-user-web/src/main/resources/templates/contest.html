@@ -1039,8 +1039,8 @@
         created: function () {
             this.showId();
             this.countTime();
-            this.getContestRank([[${param.page}]]);
             this.showApplyEnd();
+            this.getContestRank([[${param.page}]]);
             this.getContestSubmits([[${param.page}]]);
             setInterval(this.getContestSubmits, 15000);
             this.submitPage = common.getPage(this.submitPageInfo.pageNum, this.submitPageInfo.pages);

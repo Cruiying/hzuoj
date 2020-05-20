@@ -153,13 +153,36 @@ public class DiscussionController {
     @UserLoginCheck
     public ResultEntity discussionDelete(Integer discussionId, HttpServletRequest request) {
         try {
-            System.out.println(discussionId);
             String userId = (String)request.getSession().getAttribute("userId");
             return ResultEntity.success("删除成功", discussionService.discussionDelete(Integer.parseInt(userId), discussionId));
         }catch (Exception e) {
             e.printStackTrace();
             log.error("Error:{}", e.getMessage());
             return ResultEntity.error(e.getMessage());
+        }
+    }
+
+    /**
+     * 删除讨论回复
+     * @param commentId
+     * @param request
+     * @return
+     */
+    @RequestMapping("/discussion/delete/comment/{commentId}")
+    @ResponseBody
+    @UserLoginCheck
+    public ResultEntity commentDelete(@PathVariable Integer commentId, HttpServletRequest request) {
+        try{
+            String userId = (String)request.getSession().getAttribute("userId");
+            User user = new User();
+            user.setUserId(Integer.parseInt(userId));
+            DiscussionComment discussionComment = new DiscussionComment();
+            discussionComment.setCommentId(commentId);
+            discussionComment.setUser(user);
+            return ResultEntity.success("删除成功",discussionService.commentDelete(discussionComment));
+        }catch (Exception e) {
+            log.error("error", e.getMessage());
+            return ResultEntity.error("删除失败", "");
         }
     }
 }

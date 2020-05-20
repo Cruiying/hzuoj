@@ -5,6 +5,7 @@ import com.hqz.hzuoj.bean.contest.ContestProblem;
 import com.hqz.hzuoj.bean.contest.ContestQuery;
 import com.hqz.hzuoj.bean.contest.ContestSubmit;
 import com.hqz.hzuoj.bean.problem.ProblemSubmitInfo;
+import com.hqz.hzuoj.bean.submit.Submit;
 import tk.mybatis.mapper.common.Mapper;
 
 import java.util.Date;
@@ -43,5 +44,5 @@ public interface ContestMapper extends Mapper<Contest> {
 
     ProblemSubmitInfo getContestProblemSubmitInfo(Integer contestId, Integer problemId, Integer submitPublic, Integer userId);
 
-    List<ContestSubmit> getContestSubmits(Integer page, Integer contestId);
+    List<Submit> getContestSubmits(Integer contestId);
 }

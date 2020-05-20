@@ -106,6 +106,8 @@ public class ProblemController {
         problem.setProblemExplain(MarkdownUtils.markdownToHtml(problemExplain));
         List<Data> problemDatas = dataService.getProblemDatas(problemId);
         problem.setDatas(problemDatas);
+
         return problem;
     }
+
 }

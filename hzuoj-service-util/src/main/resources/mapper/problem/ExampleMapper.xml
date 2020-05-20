@@ -7,12 +7,9 @@
     			(example_input, example_output, problem_id)
     			values
         <foreach collection="examples" item="example" index="index" separator=",">
-            (
-            #{example.exampleInput},
-            #{example.exampleOutput},
-            #{problemId}
-            )
+            (#{example.exampleInput}, #{example.exampleOutput}, #{problemId})
         </foreach>
+
     </insert>
 <!--    删除样例-->
     <delete id="deleteExamples">

@@ -43,6 +43,7 @@ public class ProblemServiceImpl implements ProblemService {
     private ProblemLevelMapper problemLevelMapper;
 
 
+
     /**
      * 保存问题
      *
@@ -51,39 +52,50 @@ public class ProblemServiceImpl implements ProblemService {
      */
     @Override
     public Integer saveProblem(Problem problem) {
-        Integer problemId = null;
+        Integer problemId = problem.getProblemId();
         if (problem.getProblemId() != null) {
             //更新问题
-            Problem problem1 = problemMapper.selectOne(problem);
+            Problem p = problemMapper.getProblem(problemId);
+            if (null == p) {
+                return null;
+            }
             problem.setProblemUpdateTime(new Date());
-            problem.setProblemCreateTime(problem1.getProblemCreateTime());
-            problemMapper.updateByPrimaryKey(problem);
-            problemMapper.deleteProblemTags(problem1.getProblemId());
+            problemMapper.updateProblem(problem);
             problemMapper.updateProblemLevel(problem.getProblemId(), problem.getProblemLevel());
             List<Tag> tags = problem.getTags();
+            problemMapper.deleteProblemTags(problemId);
             if (tags != null) {
                 for (int i = 0; i < tags.size(); i++) {
-                    problemMapper.saveProblemTag(tags.get(i).getTagId(), problem1.getProblemId());
+                    problemMapper.saveProblemTag(tags.get(i).getTagId(), problemId);
                 }
             }
+            List<Example> list = problem.getExamples();
+            exampleMapper.deleteExamples(problemId);
+            exampleMapper.saveExamples(list, problemId);
             return problem.getProblemId();
         }
         try {
             problem.setProblemUpdateTime(new Date());
             problem.setProblemCreateTime(new Date());
             problemMapper.saveProblem(problem);
+            System.out.println(problem.getProblemId());
             problemId = problem.getProblemId();
             List<Tag> tags = problem.getTags();
-            if (tags != null) {
+            if (null != tags && !tags.isEmpty()) {
                 for (int i = 0; i < tags.size(); i++) {
                     problemMapper.saveProblemTag(tags.get(i).getTagId(), problemId);
                 }
             }
+            List<Example> list = problem.getExamples();
+            exampleMapper.deleteExamples(problemId);
+            if (null != list && !list.isEmpty()){
+                exampleMapper.saveExamples(list, problemId);
+            }
+            return problemId;
         } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
-        return problemId;
     }
 
     /**
@@ -379,7 +391,7 @@ public class ProblemServiceImpl implements ProblemService {
             int myAcceptedTotal = problemMapper.getMyAcceptedTotal(userId, problemId);
             int myAllTotal = problemMapper.getMyAllTotal(userId, problemId);
             problemSubmitInfo = new ProblemSubmitInfo(allAcceptedTotal, allTotal, myAcceptedTotal, myAllTotal);
-            int time = (int) (Math.random() * 60 * 60 + 60);
+            int time = (int) (Math.random() * 60 * 60 * 24 * 30 + 60);
             redisUtil.set(key, JSON.toJSONString(problemSubmitInfo), time);
         }
 

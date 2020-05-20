@@ -1,6 +1,7 @@
 package com.hqz.hzuoj.service;
 
 import com.github.pagehelper.PageInfo;
+import com.hqz.hzuoj.base.ResultEntity;
 import com.hqz.hzuoj.bean.contest.*;
 
 import java.util.List;
@@ -36,5 +37,7 @@ public interface ContestService {
     ContestApply ApplyContest(ContestApply contestApply, String contestCode);
 
     List<ContestType> getContestTypes();
+
+    public ResultEntity contestAfreshSubmit(Integer contestId);
 
 }

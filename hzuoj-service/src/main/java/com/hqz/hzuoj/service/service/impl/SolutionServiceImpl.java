@@ -121,6 +121,11 @@ public class SolutionServiceImpl implements SolutionService {
         return true;
     }
 
+    /**
+     * 更新题解状态
+     * @param solution
+     * @return
+     */
     @Override
     public Solution updateSolutionStatus(Solution solution) {
         if (solution == null || solution.getSolutionStatus() == null || solution.getSolutionStatus().getSolutionStatusId() == null) {

@@ -41,7 +41,25 @@ public class SubmitQuery implements Serializable {
      */
     private String username;
 
+    private Integer start = 0;
 
+    private Integer size = 20;
+
+    public Integer getStart() {
+        return start;
+    }
+
+    public void setStart(Integer start) {
+        this.start = start;
+    }
+
+    public Integer getSize() {
+        return size;
+    }
+
+    public void setSize(Integer size) {
+        this.size = size;
+    }
 
     public Integer getUserId() {
         return userId;
@@ -109,6 +127,8 @@ public class SubmitQuery implements Serializable {
                 ", judgeResultId=" + judgeResultId +
                 ", problemTitle='" + problemTitle + '\'' +
                 ", username='" + username + '\'' +
+                ", start=" + start +
+                ", size=" + size +
                 '}';
     }
 }

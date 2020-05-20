@@ -13,7 +13,6 @@
     <link rel="stylesheet" href="../static/lib/jq-module/zyupload/zyupload-1.0.0.min.css"
           th:href="@{/lib/jq-module/zyupload/zyupload-1.0.0.min.css}" media="all">
     <link rel="stylesheet" href="../static/css/public.css" th:href="@{/css/public.css}" media="all">
-    <link rel="stylesheet" type="text/css" href="https://raw.githack.com/hnzzmsf/layui-formSelects/master/dist/formSelects-v4.css" />
     <link rel="stylesheet" type="text/css" href="../static/css/Selects.css" th:href="@{/css/Selects.css}">
     <script type="text/javascript" async
             src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
@@ -121,8 +120,6 @@
 <script src="../static/js/jquery.min.js" charset="utf-8" th:src="@{/js/jquery.min.js}"></script>
 <script src="https://cdn.jsdelivr.net/semantic-ui/2.2.4/semantic.min.js"></script>
 <script src="../static/lib/editormd/editormd.min.js" th:src="@{/lib/editormd/editormd.min.js}"></script>
-<script src="https://raw.githack.com/hnzzmsf/layui-formSelects/master/dist/formSelects-v4.min.js" type="text/javascript"
-        charset="utf-8"></script>
 <script src="../static/js/Selects.js" th:src="@{/js/Selects.js}"></script>
 <script src="../static/js/mathjax.js" th:src="@{/js/mathjax.js}"></script>
 <script src="../static/lib/jq-module/zyupload/zyupload-1.0.0.min.js"
@@ -421,7 +418,7 @@
 <script type="text/javascript">
     function checkUpload() {
         let problemId = $("#problemId").val();
-        if (problemId != null && problemId != "") {
+        if (true) {
             layui.use('upload', function () {
                 let upload = layui.upload;
                 //上传文件
@@ -528,7 +525,7 @@
                 success: function (info) {
                     layer.alert(info.msg);
                     if (info.flag) {
-                        $("#problemId").val(info.problemId);
+                        $("#problemId").val(info["problemId"]);
                         $("#data").html("<div class=\"layui-btn\" onclick=\"xadmin.open('数据点设置','/admin/" + info.problemId + "/dataEdit')\" ><i class=\"layui-icon\">&#xe642;</i>数据点设置</div>")
                     }
                     return false;

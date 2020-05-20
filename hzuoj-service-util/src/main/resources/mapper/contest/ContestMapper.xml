@@ -185,6 +185,7 @@
            ON pl.problem_level_id = p.problem_level_id
         where c.contest_id = #{contestId}
     </select>
+<!--    查询比赛题目-->
     <select id="selectContestProblem" resultMap="contestProblemResultMap">
         SELECT * FROM hzuoj_contests c
         INNER JOIN hzuoj_contests_problems cp
@@ -276,6 +277,7 @@
     <update id="updateContestApplyCount">
         update hzuoj_contests set contest_apply_count = #{contestApplyCount} where contest_id = #{contestId}
     </update>
+<!--    比赛提交信息-->
     <select id="getContestProblemSubmitInfo" resultType="com.hqz.hzuoj.bean.problem.ProblemSubmitInfo">
         SELECT
         (SELECT
@@ -334,5 +336,13 @@
           AND s.problem_id = #{problemId}
           AND s.submit_public = #{submitPublic}
           AND s.user_id = #{userId}) AS myAllTotal
+    </select>
+    <select id="getContestSubmits" resultType="com.hqz.hzuoj.bean.submit.Submit">
+       select s.submit_id from hzuoj_contests c
+        inner join hzuoj_contests_submits cs
+        on c.contest_id = cs.contest_id
+        inner join hzuoj_submits s
+        on s.submit_id = cs.submit_id
+        where c.contest_id = #{contestId}
     </select>
 </mapper>

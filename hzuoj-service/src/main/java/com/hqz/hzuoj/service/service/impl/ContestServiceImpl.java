@@ -3,30 +3,49 @@ package com.hqz.hzuoj.service.service.impl;
 import com.alibaba.dubbo.config.annotation.Service;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.hqz.hzuoj.base.ResultEntity;
 import com.hqz.hzuoj.bean.contest.*;
 import com.hqz.hzuoj.bean.problem.Data;
 import com.hqz.hzuoj.bean.problem.Example;
 import com.hqz.hzuoj.bean.problem.ProblemSubmitInfo;
 import com.hqz.hzuoj.bean.problem.Tag;
+import com.hqz.hzuoj.bean.submit.JudgeResult;
+import com.hqz.hzuoj.bean.submit.Submit;
 import com.hqz.hzuoj.mapper.contest.ContestApplyMapper;
 import com.hqz.hzuoj.mapper.contest.ContestMapper;
 import com.hqz.hzuoj.mapper.contest.ContestTypeMapper;
 import com.hqz.hzuoj.mapper.problem.DataMapper;
 import com.hqz.hzuoj.mapper.problem.ExampleMapper;
 import com.hqz.hzuoj.mapper.problem.ProblemMapper;
+import com.hqz.hzuoj.mapper.result.JudgeResultMapper;
+import com.hqz.hzuoj.mapper.submit.SubmitMapper;
+import com.hqz.hzuoj.mapper.submit.TestPointMapper;
 import com.hqz.hzuoj.service.ContestService;
+import com.hqz.hzuoj.service.SubmitService;
+import com.hqz.hzuoj.service.mq.MessageSender;
+import com.hqz.hzuoj.util.util.RedisUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @Author: HQZ
  * @CreateTime: 2019/12/21 18:41
  * @Description: TODO
  */
+@Transactional
 @Service
+@Slf4j
 public class ContestServiceImpl implements ContestService {
+
+    @Autowired
+    private RedisUtil redisUtil;
 
     @Autowired
     private ContestMapper contestMapper;
@@ -46,6 +65,24 @@ public class ContestServiceImpl implements ContestService {
     @Autowired
     private DataMapper dataMapper;
 
+    @Autowired
+    private TestPointMapper testPointMapper;
+
+    @Autowired
+    private SubmitService submitService;
+
+    @Autowired
+    private JudgeResultMapper judgeResultMapper;
+
+    @Autowired
+    private SubmitMapper submitMapper;
+
+    @Value("${submitQueue}")
+    private String submitQueue;
+
+    @Autowired
+    private MessageSender sender;
+
     /**
      * 根据比赛contestId获取一个比赛
      *
@@ -55,6 +92,38 @@ public class ContestServiceImpl implements ContestService {
     @Override
     public synchronized Contest getContest(Integer contestId) {
         return getContestStatus(contestId);
+    }
+
+    @Override
+    public ResultEntity contestAfreshSubmit(Integer contestId) {
+        List<Submit> contestSubmits = contestMapper.getContestSubmits(contestId);
+        for (Submit contestSubmit : contestSubmits) {
+            startSubmit(contestSubmit);
+        }
+        return ResultEntity.success("提交成功", "");
+    }
+
+    /**重新测评
+     * @param submit
+     */
+    public void startSubmit(Submit submit) {
+        if (submit == null) {
+            return;
+        }
+        redisUtil.del("submit:" + submit.getSubmitId() + ":info");
+        JudgeResult judgeResult = judgeResultMapper.selectJudgeName("queue");
+        if (judgeResult == null) {
+            return;
+        }
+        submit.setJudgeResult(judgeResult);
+        submit.setSubmitScore(0);
+        submit.setSubmitRuntimeTime(0);
+        submit.setSubmitRuntimeMemory(0);
+        testPointMapper.deleteSubmitTestPoint(submit.getSubmitId());
+        submitMapper.restartSubmit(submit);
+        Map<String, Object> map = new HashMap<>();
+        map.put("submitId", submit.getSubmitId());
+        sender.sendQueue(submitQueue, map);
     }
 
     /**
@@ -97,6 +166,7 @@ public class ContestServiceImpl implements ContestService {
         return contest;
     }
 
+
     /**
      * 保存比赛
      *
@@ -106,7 +176,7 @@ public class ContestServiceImpl implements ContestService {
     @Override
     public Contest saveContest(Contest contest) {
         if (contest == null) {
-            return  null;
+            return null;
         }
         if (contest.getContestId() != null) {
             Contest c = getContestStatus(contest.getContestId());
@@ -243,7 +313,7 @@ public class ContestServiceImpl implements ContestService {
         return new PageInfo<>(contests, 20);
     }
 
-    /**
+    /** 获取所有比赛
      * @param page
      * @return
      */
@@ -257,6 +327,12 @@ public class ContestServiceImpl implements ContestService {
         return new PageInfo<>(contests, 20);
     }
 
+    /**
+     * 获取用户比赛报名信息
+     * @param contestId
+     * @param userId
+     * @return
+     */
     @Override
     public ContestApply getContestApplyUser(Integer contestId, Integer userId) {
         if (userId == null || contestId == null) {
@@ -316,6 +392,10 @@ public class ContestServiceImpl implements ContestService {
         return null;
     }
 
+    /**
+     * 获取所有比赛类型
+     * @return
+     */
     @Override
     public List<ContestType> getContestTypes() {
         return contestTypeMapper.getContestTypes();

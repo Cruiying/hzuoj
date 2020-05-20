@@ -4,6 +4,7 @@ import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.fastjson.JSON;
 import com.github.pagehelper.PageInfo;
 import com.hqz.hzuoj.annotations.AdminLoginCheck;
+import com.hqz.hzuoj.base.ResultEntity;
 import com.hqz.hzuoj.bean.contest.Contest;
 import com.hqz.hzuoj.bean.contest.ContestProblem;
 import com.hqz.hzuoj.bean.contest.ContestQuery;
@@ -262,6 +263,11 @@ public class ContestController {
         return map;
     }
 
+    /**
+     * 更新比赛排名
+     * @param contestId
+     * @return
+     */
     @RequestMapping("/contest/update/rank/{contestId}")
     @ResponseBody
     public String updateContestRank(@PathVariable Integer contestId) {
@@ -276,6 +282,22 @@ public class ContestController {
             return JSON.toJSONString("fail");
         }
         return JSON.toJSONString(submitService.calculateContestRating(contest));
+    }
+
+    /**
+     * 比赛提交重新测评
+     * @param contestId
+     * @return
+     */
+    @RequestMapping("/contest/afresh/{contestId}")
+    @ResponseBody
+    public ResultEntity contestAfreshSubmit(@PathVariable Integer contestId) {
+        System.out.println(contestId);
+        try {
+            return contestService.contestAfreshSubmit(contestId);
+        }catch (Exception e) {
+            return ResultEntity.error("提交失败");
+        }
     }
 
 }

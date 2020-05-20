@@ -193,4 +193,36 @@
     <update id="updateProblemLevel">
         UPDATE hzuoj_problems set problem_level_id = #{problemLevel.problemLevelId} where problem_id = #{problemId}
     </update>
+<!--    更新题目-->
+    <update id="updateProblem">
+        update hzuoj_problems
+        <set>
+            <if test="problemPublic != null">
+                problem_public = #{problemPublic},
+            </if>
+            <if test="problemTitle != null and problemTitle != ''">
+                problem_title = #{problemTitle},
+            </if>
+            <if test="problemContent != null and problemContent != ''">
+                problem_content = #{problemContent},
+            </if>
+            <if test="problemExplain != null and problemExplain != ''">
+                problem_explain = #{problemExplain},
+            </if>
+            <if test="problemInputFormat != null and problemInputFormat != ''">
+                problem_input_format = #{problemInputFormat},
+            </if>
+            <if test="problemOutputFormat != null and problemOutputFormat != ''">
+                problem_output_format = #{problemOutputFormat},
+            </if>
+            <if test="problemBackground != null and problemBackground != ''">
+                problem_background = #{problemBackground},
+            </if>
+            <if test="problemUpdateTime != null">
+                problem_update_time = #{problemUpdateTime},
+            </if>
+        </set>
+
+        where problem_id = #{problemId}
+    </update>
 </mapper>

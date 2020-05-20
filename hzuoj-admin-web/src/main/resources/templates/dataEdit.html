@@ -71,10 +71,10 @@
             data: JSON.stringify(problemId),
             //请求成功
             success: function (info) {
-                let datas = info.datas;
+                const datas = info.datas;
                 let dataInfo = "";
                 for (let i = 0; i < datas.length; i++) {
-                    let name = "#" + i + ": " + datas[i].dataInput + " " + datas[i].dataOutput;
+                    let name = "#" + i;
                     let Time = datas[i].dataMaxRuntimeTime;
                     let Memory = datas[i].dataMaxRuntimeMemory;
                     let dataId = datas[i].dataId;
@@ -93,7 +93,7 @@
                         "                <div class=\"layui-form-mid layui-word-aux\">KB</div>\n" +
                         "            </div>"
                 }
-                if (datas.length>0) {
+                if (datas.length > 0) {
                     $("#dataInfo").html(dataInfo);
                     $("#btn").html(" <button type=\"submit\" class=\"layui-btn\" lay-submit=\"\" lay-filter=\"submit\">保存设置</button>");
                 } else {

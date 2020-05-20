@@ -129,7 +129,7 @@ public class TestResultMessageListener {
      * @param testId
      * @throws IOException
      */
-    private void send(Long testId) throws IOException {
+    private void send(Long testId) throws IOException, InterruptedException {
         SseEmitter sseEmitter = sseEmitters.get(testId);
         if (sseEmitter != null) {
             LinkedList<MessageListener> messageListeners = queueMessage.get(testId);
@@ -151,6 +151,7 @@ public class TestResultMessageListener {
                 }
                 //已经发送，移除测评消息
                 messageListeners.remove(messageListener);
+                Thread.sleep(50);
             }
         }
 

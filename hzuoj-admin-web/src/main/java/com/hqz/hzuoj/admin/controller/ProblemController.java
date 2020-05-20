@@ -293,11 +293,9 @@ public class ProblemController {
             return map;
         }
 //        保存题目
+        boolean flag = (problem.getProblemId() != null);
         Integer problemId = problemService.saveProblem(problem);
-        //保存测试样例
-        exampleService.saveExamples(problem.getExamples(), problemId);
-        if (problem.getProblemId() != null) {
-            problemId = problem.getProblemId();
+        if (flag) {
             map.put("msg", "题目修改成功");
         } else {
             map.put("msg", "题目添加成功");

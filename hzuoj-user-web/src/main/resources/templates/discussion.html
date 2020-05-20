@@ -80,10 +80,11 @@
                                     <div style="margin-top: 5px;">
                                         <span v-text="'发表于 '+dateFormat(discussion.discussionCreateTime)"></span>
                                         <span v-if="discussion.user.userId == loginUserId">
-                                            <a class="modify" style="cursor: pointer"
+                                            <a class="modify" style="color: rgba(0,0,0,.4); cursor: pointer;"
                                                :href="'/discussion/editor?discussionId=' + discussion.discussionId"
                                                v-text="'修改'"></a>
-                                            <a class="delete" style="cursor: pointer" v-on:click="deleteDiscussion(discussion.discussionId)"
+                                            <a class="delete" style="color: rgba(0,0,0,.4); cursor: pointer;"
+                                               v-on:click="deleteDiscussion(discussion.discussionId)"
                                                v-text="'删除'"></a>
                                         </span>
                                     </div>
@@ -136,6 +137,7 @@
                                         </a>
                                         <div class="metadata">
                                             <span class="date" v-text="dateFormat(comment.commentTime)"></span>
+                                            <a v-if="comment.user.userId == loginUserId" style="color: rgba(0,0,0,.4); cursor: pointer;" v-on:click="deleteComment(comment.commentId)">删除</a>
                                         </div>
                                         <div class="text">
                                             <span v-text="comment.commentContent"></span>
@@ -158,7 +160,6 @@
                                             </div>
                                         </span>
                                         </div>
-
                                     </div>
                                     <div style="padding: 2px" class="comments" v-for="reply in comment.comments">
                                         <div class="comment">
@@ -180,6 +181,7 @@
                                                 </div>
                                                 <div class="metadata">
                                                     <span class="date" v-text="dateFormat(reply.commentTime)"></span>
+                                                    <a v-if="reply.user.userId == loginUserId" style="color: rgba(0,0,0,.4); cursor: pointer;" v-on:click="deleteComment(reply.commentId)">删除</a>
                                                 </div>
                                                 <div class="text">
                                                     <span v-text="reply.commentContent"></span>
@@ -260,8 +262,6 @@
                         </div>
                     </div>
                 </div>
-
-
             </div>
         </div>
     </div>
@@ -384,6 +384,16 @@
             dateFormat: function (time) {
                 return common.getDateFormat(time);
             },
+            deleteComment: function (commentId) {
+                axios.post('/discussion/delete/comment/'+commentId)
+                    .then((data)=>{
+                        const result = data.data;
+                        alert(result["message"]);
+                        if (result["code"] == "1") {
+                            window.location.reload();
+                        }
+                })
+            }
         },
         created: function () {
 
@@ -391,9 +401,13 @@
     });
 
     window.onload = function () {
-        $('.ui.accordion').accordion();
+        show();
         $("#reply").css("display", "block");
+    }
 
+    function show() {
+        $('.ui.accordion').accordion();
+        setTimeout(show, 1000);
     }
 </script>
 </html>

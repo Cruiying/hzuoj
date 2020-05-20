@@ -110,13 +110,17 @@ public class Comparator {
     private boolean isLineOutputTheSame(String stdLine, String line) {
         int i = 0, j = 0;
         for (; i < stdLine.length() && j < line.length(); ++i, ++j) {
+            //判断两个字符是否相等
             if (stdLine.charAt(i) != line.charAt(j)) {
+                //如果不相等
                 if (stdLine.charAt(i) == '\n') {
+                    //如果是换行，判断该行后的数据是不是空格或者换行
                     if (!isLineEmpty(line, j)) {
                         return false;
                     }
                     return true;
                 } else if (line.charAt(j) == '\n') {
+                    //如果是换行，判断该行后的数据是不是空格或者换行
                     if (!isLineEmpty(stdLine, i)) {
                         return false;
                     }
@@ -125,12 +129,14 @@ public class Comparator {
                 return false;
             }
         }
+        //判断剩余的是不是空格或者换行
         while (i < stdLine.length()) {
             if (!isLineEmpty(stdLine, i)) {
                 return false;
             }
             ++i;
         }
+        //判断剩余的是不是空格或者换行
         while (j < line.length()) {
             if (!isLineEmpty(line, j)) {
                 return false;
@@ -149,6 +155,7 @@ public class Comparator {
      */
     private boolean isLineEmpty(String line, int startIndex) {
         for (int i = startIndex; i < line.length(); ++i) {
+            //判断是不是空格或者换行
             if (!(line.charAt(i) == ' ' || line.charAt(i) == '\n')) {
                 return false;
             }

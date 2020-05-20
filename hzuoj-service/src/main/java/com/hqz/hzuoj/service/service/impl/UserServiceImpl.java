@@ -39,9 +39,6 @@ public class UserServiceImpl implements UserService {
     private JudgeResultMapper judgeResultMapper;
 
 
-
-
-
     /**
      * 获取用户
      *

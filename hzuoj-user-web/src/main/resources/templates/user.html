@@ -576,7 +576,11 @@
 </script>
 <script>
     window.onload = function () {
+        dropdown();
+    }
+    function dropdown() {
         $(".ui.dropdown").dropdown();
+        setTimeout(dropdown, 1000);
     }
 </script>
 </html>

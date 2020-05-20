@@ -27,6 +27,7 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -123,7 +124,7 @@ public class SubmitServiceImpl implements SubmitService {
         return "success";
     }
 
-    private void startSubmit(Submit submit) {
+    public void startSubmit(Submit submit) {
         if (submit == null) {
             return;
         }
@@ -182,7 +183,7 @@ public class SubmitServiceImpl implements SubmitService {
                 List<TestPoint> testPoints = testPointMapper.getTestPoint(submitId);
                 submit.setTestPoints(testPoints);
                 String judgeName = submit.getJudgeResult().getJudgeName();
-                if (!"PD".equals(judgeName) && !"queue".equals(judgeName) && !"Running".equals(judgeName) || !"compile".equals(judgeName)) {
+                if (!"PD".equals(judgeName) && !"queue".equals(judgeName) && !"Running".equals(judgeName) && !"compile".equals(judgeName)) {
                     int time = (int) (Math.random() * 60 * 60 * 24 + 10);
                     //将数据写入redis中，避免缓存击穿
                     redisUtil.set(key, JSON.toJSONString(submit), time);
@@ -242,8 +243,21 @@ public class SubmitServiceImpl implements SubmitService {
         }
         int size = 20;
         PageHelper.startPage(page, size, true);
-        List<Submit> submits = submitMapper.getSubmits(submitQuery);
-        return new PageInfo<>(submits, size);
+        submitQuery.setStart((page - 1) * size);
+        submitQuery.setSize(size);
+        List<Integer> submitIds = submitMapper.getSubmitIds(submitQuery);
+        PageInfo<Integer> p = new PageInfo<>(submitIds, size);
+        List<Integer> list = new ArrayList<>();
+        for (Integer submitId : submitIds) {
+            list.add(submitId);
+        }
+        List<Submit> submits = submitMapper.getSubmitsBySubmitId(list);
+        PageInfo<Submit> pageInfo = new PageInfo<>(submits, size);
+        pageInfo.setPages(p.getPages());
+        pageInfo.setTotal(p.getTotal());
+        pageInfo.setPageNum(p.getPageNum());
+        pageInfo.setSize(p.getSize());
+        return pageInfo;
     }
 
     /**
@@ -1060,6 +1074,7 @@ public class SubmitServiceImpl implements SubmitService {
         }
         return null;
     }
+
     private String getPunishTime(Long punishTime) {
         long days = Math.round(punishTime / (1000 * 60 * 60 * 24));
         long hours = Math.round(punishTime % (1000 * 60 * 60 * 24) / (1000 * 60 * 60));

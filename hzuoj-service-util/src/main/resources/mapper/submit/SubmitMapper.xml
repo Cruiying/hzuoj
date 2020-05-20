@@ -82,14 +82,15 @@
         #{submitScore},#{submitRuntimeTime},#{submitRuntimeMemory},
         #{submitPublic}, #{problem.problemId}, #{user.userId}, #{language.languageId}, #{judgeResult.judgeResultId})
     </insert>
-    <select id="getSubmits" resultMap="submitResultMap">
-        SELECT
+    <sql id="submits">
         s.submit_id,s.submit_time,s.submit_code_length,
         s.submit_runtime_memory,s.submit_runtime_time,s.submit_score,
         p.problem_id,p.problem_title,
-        l.*,
-        jr.*,
-        u.*
+        l.*, jr.*, u.*
+    </sql>
+    <select id="getSubmits" resultMap="submitResultMap">
+        SELECT
+        <include refid="submits"></include>
         from hzuoj_submits s
         INNER JOIN hzuoj_languages l
         on l.language_id = s.language_id
@@ -101,7 +102,12 @@
         on u.user_id = s.user_id
         <where>
             1 = 1
-
+            <if test="submitId != null">
+                and s.submit_id=#{submitId}
+            </if>
+            <if test="userId != null">
+                and u.user_id = #{userId}
+            </if>
             <if test="languageId != null">
                 and l.language_id = #{languageId}
             </if>
@@ -109,34 +115,21 @@
                 and jr.judge_result_id = #{judgeResultId}
             </if>
             <if test="problemTitle != null and problemTitle != ''">
-                and p.problem_title like '%${problemTitle}%'
+                and p.problem_title = #{problemTitle}
             </if>
             <if test="username != null and username != ''">
-                and u.username like '%${username}%'
-            </if>
-            <if test="userId != null">
-                and u.user_id = #{userId}
-            </if>
-            <if test="submitId != null">
-                and s.submit_id=#{submitId}
+                and u.username = #{username}
             </if>
             <if test="problemId != null">
                 and s.problem_id=#{problemId}
             </if>
-
             and s.submit_public = 1
             and p.problem_public = 1
-            ORDER BY submit_time DESC
         </where>
     </select>
     <select id="selectAll" resultMap="submitResultMap">
         SELECT
-        s.submit_id,s.submit_time,s.submit_code_length,
-        s.submit_runtime_memory,s.submit_runtime_time,s.submit_score,
-        p.problem_id,p.problem_title,
-        l.*,
-        jr.*,
-        u.*
+        <include refid="submits"></include>
         from hzuoj_submits s
         INNER JOIN hzuoj_languages l
         on l.language_id = s.language_id
@@ -146,16 +139,10 @@
         on s.judge_result_id = jr.judge_result_id
         INNER JOIN hzuoj_users u
         on u.user_id = s.user_id
-        ORDER BY s.submit_time DESC
     </select>
     <select id="getCheckSubmits" resultMap="submitResultMap">
         SELECT
-        s.submit_id,s.submit_time,s.submit_code_length,
-        s.submit_runtime_memory,s.submit_runtime_time,s.submit_score,
-        p.problem_id,p.problem_title,
-        l.*,
-        jr.*,
-        u.*
+        <include refid="submits"></include>
         from hzuoj_submits s
         INNER JOIN hzuoj_languages l
         on l.language_id = s.language_id
@@ -166,6 +153,94 @@
         INNER JOIN hzuoj_users u
         on u.user_id = s.user_id
         where s.submit_time &gt; #{date}
+    </select>
+    <select id="getSubmitIds" resultType="java.lang.Integer">
+        SELECT
+        s.submit_id
+        from hzuoj_submits s
+        <if test="problemId != null or (problemTitle != null and problemTitle != '')">
+            inner join hzuoj_problems p
+            on p.problem_id = s.problem_id
+        </if>
+        <if test="userId != null or (username != null and username != '')">
+            inner join hzuoj_users u
+            on u.user_id = s.user_id
+        </if>
+        where
+        s.submit_public = 1
+        <if test="submitId != null">
+            and s.submit_id=#{submitId}
+        </if>
+        <if test="userId != null">
+            and u.user_id = #{userId}
+        </if>
+        <if test="languageId != null">
+            and s.language_id = #{languageId}
+        </if>
+        <if test="judgeResultId != null">
+            and s.judge_result_id = #{judgeResultId}
+        </if>
+        <if test="problemId != null">
+            and s.problem_id=#{problemId}
+        </if>
+        <if test="problemTitle != null and problemTitle != ''">
+            and p.problem_title = #{problemTitle}
+        </if>
+        <if test="username != null and username != ''">
+            and u.username = #{username}
+        </if>
+        order by s.submit_id desc
+    </select>
+    <select id="getSubmitsBySubmitId" resultMap="submitResultMap" parameterType="list">
+        SELECT
+        <include refid="submits"></include>
+        from hzuoj_submits s
+        INNER JOIN hzuoj_languages l
+        on l.language_id = s.language_id
+        INNER JOIN hzuoj_problems p
+        on p.problem_id = s.problem_id
+        INNER JOIN hzuoj_judge_result jr
+        on s.judge_result_id = jr.judge_result_id
+        INNER JOIN hzuoj_users u
+        on u.user_id = s.user_id
+        <where>
+            s.submit_id in (
+            -1,
+            <foreach collection="list" item="item">
+                #{item},
+            </foreach>
+            -1
+            )
+        </where>
+        order by s.submit_id desc
+    </select>
+    <select id="getSubmitCount" resultType="java.lang.Integer">
+        select count(1) from hzuoj_submits
+        where
+        1 = 1
+        <if test="submitId != null">
+            and s.submit_id=#{submitId}
+        </if>
+        <if test="userId != null">
+            and u.user_id = #{userId}
+        </if>
+        <if test="languageId != null">
+            and s.language_id = #{languageId}
+        </if>
+        <if test="judgeResultId != null">
+            and s.judge_result_id = #{judgeResultId}
+        </if>
+        <if test="problemId != null">
+            and s.problem_id=#{problemId}
+        </if>
+        <if test="problemTitle != null and problemTitle != ''">
+            and p.problem_title like CONCAT('%', #{problemTitle}, '%')
+        </if>
+        <if test="username != null and username != ''">
+            and u.username like CONCAT('%', #{username}, '%')
+        </if>
+        and s.submit_public = 1
+        and p.problem_public = 1
     </select>
     <update id="restartSubmit">
         update hzuoj_submits set submit_score = #{submitScore},

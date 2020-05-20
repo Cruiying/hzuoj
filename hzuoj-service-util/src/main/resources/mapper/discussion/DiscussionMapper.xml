@@ -33,6 +33,9 @@
             <result column="cu1_user_img" property="UserImg"/>
             <result column="cu1_user_rating" property="userRating"/>
         </association>
+        <association property="discussion" javaType="com.hqz.hzuoj.bean.discussion.Discussion">
+            <id column="cu1_discussion_id" property="discussionId"></id>
+        </association>
         <association property="parentComment" javaType="com.hqz.hzuoj.bean.discussion.DiscussionComment">
             <id column="cu2_comment_id" property="commentId"/>
             <result column="cu2_comment_content" property="commentContent"/>
@@ -45,6 +48,7 @@
             </association>
         </association>
     </resultMap>
+<!--    保存讨论-->
     <insert id="saveDiscussion">
         <selectKey order="AFTER" keyProperty="discussionId" resultType="int">
             select LAST_INSERT_ID()
@@ -57,12 +61,22 @@
         #{discussionTitle},#{user.userId}, #{discussionTop}, #{discussionReplyCount},
         #{discussionCommendCount}, #{discussionBrowseCount})
     </insert>
+<!--    删除回复-->
+    <delete id="commentDelete">
+        delete from hzuoj_discussions_comments where comment_id = #{commentId} and user_id = #{user.userId}
+    </delete>
+<!--    删除回复-->
+    <delete id="deleteComment">
+        delete from hzuoj_discussions_comments where comment_id = #{commentId}
+    </delete>
+    <!--    获取讨论-->
     <select id="getDiscussion" resultMap="discussionResultMap">
         SELECT * FROM hzuoj_discussions d
         INNER JOIN hzuoj_users u
         ON d.user_id = u.user_id
         WHERE d.discussion_id = #{discussionId}
     </select>
+<!--    获取讨论列表-->
     <select id="getDiscussions" resultMap="discussionResultMap">
         SELECT
           d.discussion_id, d.discussion_title,
@@ -98,12 +112,14 @@
             </if>
         ,d.discussion_id DESC
     </select>
+<!--    更新讨论-->
     <update id="updateDiscussion">
         update hzuoj_discussions set
         discussion_content=#{discussionContent},discussion_modify_time=#{discussionModifyTime},
         discussion_title=#{discussionTitle}
         where discussion_id = #{discussionId}
     </update>
+<!--    保存回复-->
     <insert id="saveDiscussionComment">
         <selectKey order="AFTER" keyProperty="commentId" resultType="int">
             select LAST_INSERT_ID()
@@ -114,6 +130,7 @@
         VALUES(#{commentContent}, #{commentTime}, #{user.userId},
         #{discussion.discussionId}, #{parentComment.commentId})
     </insert>
+<!--    获取回复列表-->
     <select id="getDiscussionComments" resultMap="discussionCommentResultMap">
        SELECT
           cu1.`comment_id` cu1_comment_id,
@@ -142,9 +159,11 @@
             ON cu1.parent_comment_id = cu2.comment_id
         WHERE cu1.discussion_id = #{discussionId}
 
-        ORDER BY cu1.comment_time ASC
+	    and (cu1.parent_comment_id = -1 or cu2.comment_id is not null)
+        ORDER BY cu1.comment_id ASC
 
     </select>
+<!--    获取回复-->
     <select id="getDiscussionComment" resultMap="discussionCommentResultMap">
         SELECT
           cu1.`comment_id` cu1_comment_id,
@@ -173,6 +192,7 @@
             ON cu1.parent_comment_id = cu2.comment_id
         WHERE cu1.comment_id = #{commentId}
     </select>
+<!--    更新讨论数量-->
     <update id="updateDiscussionCount">
         update hzuoj_discussions set
         discussion_reply_count = discussion_reply_count + #{replyCount},

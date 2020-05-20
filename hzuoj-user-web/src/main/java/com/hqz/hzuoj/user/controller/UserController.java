@@ -41,7 +41,6 @@ import java.util.*;
  * @Description: TODO
  */
 @Controller
-@Async
 public class UserController implements ErrorController {
 
     @Reference
@@ -204,6 +203,7 @@ public class UserController implements ErrorController {
      */
     @RequestMapping("/ranking")
     public String getRanking(Integer page, ModelMap modelMap, RankingQuery rankingQuery) {
+        System.err.println(userService);
         if (page == null || page <= 0) page = 1;
         if(rankingQuery == null) rankingQuery = new RankingQuery();
         PageInfo<Rank> pageInfo = userService.getRanks(page, rankingQuery);
@@ -214,11 +214,11 @@ public class UserController implements ErrorController {
     @RequestMapping("/rank/list")
     @ResponseBody
     public PageInfo<Rank> getRanking(Integer page) {
+        System.err.println(userService);
         if (page == null || page <= 0) page = 1;
         PageInfo<Rank> pageInfo = userService.getRanks(page, new RankingQuery());
         return pageInfo;
     }
-
     /**
      * 获取用户信息
      *
@@ -227,12 +227,14 @@ public class UserController implements ErrorController {
      * @return
      */
     @RequestMapping("/user/{userId}")
-    private String getUser(@PathVariable Integer userId, ModelMap modelMap) {
+    public String getUser(@PathVariable Integer userId, ModelMap modelMap) {
+
         User user = userService.getUser(userId);
         if (user == null) return "404";
         modelMap.put("user", user);
         return "user";
     }
+
 
     /**
      * 用户修改
@@ -244,7 +246,7 @@ public class UserController implements ErrorController {
     @RequestMapping("/user/editor")
     @ResponseBody
     @UserLoginCheck
-    private User editorUser(@RequestBody User user, HttpServletRequest request) {
+    public User editorUser(@RequestBody User user, HttpServletRequest request) {
         String str = (String) request.getSession().getAttribute("userId");
         Integer userId = Integer.parseInt(str);
         user.setUserId(userId);
@@ -261,7 +263,7 @@ public class UserController implements ErrorController {
      */
     @RequestMapping("/user/contests/{userId}")
     @ResponseBody
-    private PageInfo<Contest> getUserContests(@PathVariable Integer userId, Integer page) {
+    public PageInfo<Contest> getUserContests(@PathVariable Integer userId, Integer page) {
         ContestQuery contestQuery = new ContestQuery();
         contestQuery.setUserId(userId);
         contestQuery.setSignUpFilter(1);
@@ -277,7 +279,7 @@ public class UserController implements ErrorController {
      */
     @RequestMapping("/user/problems/{userId}")
     @ResponseBody
-    private PageInfo<Submit> getUserSubmit(@PathVariable Integer userId, Integer page) {
+    public PageInfo<Submit> getUserSubmit(@PathVariable Integer userId, Integer page) {
         SubmitQuery submitQuery = new SubmitQuery();
         submitQuery.setUserId(userId);
         return submitService.getSubmits(page, submitQuery);
