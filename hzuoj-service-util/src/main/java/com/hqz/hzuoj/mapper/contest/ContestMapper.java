@@ -1,9 +1,6 @@
 package com.hqz.hzuoj.mapper.contest;
 
-import com.hqz.hzuoj.bean.contest.Contest;
-import com.hqz.hzuoj.bean.contest.ContestProblem;
-import com.hqz.hzuoj.bean.contest.ContestQuery;
-import com.hqz.hzuoj.bean.contest.ContestSubmit;
+import com.hqz.hzuoj.bean.contest.*;
 import com.hqz.hzuoj.bean.problem.ProblemSubmitInfo;
 import com.hqz.hzuoj.bean.submit.Submit;
 import tk.mybatis.mapper.common.Mapper;
@@ -45,4 +42,12 @@ public interface ContestMapper extends Mapper<Contest> {
     ProblemSubmitInfo getContestProblemSubmitInfo(Integer contestId, Integer problemId, Integer submitPublic, Integer userId);
 
     List<Submit> getContestSubmits(Integer contestId);
+
+    /**
+     * 获取比赛用户获得的积分积分
+     * @param contestApply
+     */
+    ContestUserRating getContestUserRating(ContestApply contestApply);
+
+    void updateContestRankIsFinish(Contest contest);
 }

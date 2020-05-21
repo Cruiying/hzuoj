@@ -43,7 +43,7 @@ public class TestResultMessageListener {
         for (Map.Entry<Long, LinkedList<MessageListener>> entry : queueMessage.entrySet()) {
             Long key = entry.getKey();
             LinkedList<MessageListener> value = entry.getValue();
-            while(null != value && !value.isEmpty()) {
+            while (null != value && !value.isEmpty()) {
                 MessageListener message = value.getFirst();
                 long time = message.getDate().getTime();
                 if (nowTime - time > diff) {
@@ -100,27 +100,29 @@ public class TestResultMessageListener {
      */
     @EventListener
     public void deployEventHandler(TestResultMessageEvent messageEvent) throws IOException, InterruptedException {
+
+        Long testId = messageEvent.getTestId();
+        MessageListener messageListener = new MessageListener();
+        //保证发送的消息顺序性
         synchronized (this) {
-            Long testId = messageEvent.getTestId();
-            //保证发送的消息顺序性
-            MessageListener messageListener = new MessageListener();
             messageListener.setDate(new Date());
-            messageListener.setMessage(messageEvent);
-            LinkedList<MessageListener> messageListeners = queueMessage.get(testId);
-            if (null == messageListeners) {
-                messageListeners = new LinkedList<>();
-            }
-            messageListeners.add(messageListener);
-            queueMessage.put(testId, messageListeners);
-            SseEmitter sseEmitter = sseEmitters.get(testId);
-            if (null != sseEmitter) {
-                send(testId);
-            } else {
-                //等待500继续发送消息
-                Thread.sleep(2000);
-                send(testId);
-            }
         }
+        messageListener.setMessage(messageEvent);
+        LinkedList<MessageListener> messageListeners = queueMessage.get(testId);
+        if (null == messageListeners) {
+            messageListeners = new LinkedList<>();
+        }
+        messageListeners.add(messageListener);
+        queueMessage.put(testId, messageListeners);
+        SseEmitter sseEmitter = sseEmitters.get(testId);
+        if (null != sseEmitter) {
+            send(testId);
+        } else {
+            //等待500继续发送消息
+            Thread.sleep(2000);
+            send(testId);
+        }
+
     }
 
     /**
@@ -132,26 +134,32 @@ public class TestResultMessageListener {
     private void send(Long testId) throws IOException, InterruptedException {
         SseEmitter sseEmitter = sseEmitters.get(testId);
         if (sseEmitter != null) {
+            long index = 0;
             LinkedList<MessageListener> messageListeners = queueMessage.get(testId);
             while (null != messageListeners && !messageListeners.isEmpty()) {
                 MessageListener messageListener = messageListeners.getFirst();
                 TestResultMessageEvent event = (TestResultMessageEvent) messageListener.getMessage();
                 boolean completed = event.isCompleted();
                 try {
+                    long time = messageListener.getDate().getTime();
                     //发送测评消息
-                    sseEmitter.send(JSON.toJSONString(event));
+                    if(index < time) {
+                        index = time;
+                        sseEmitter.send(JSON.toJSONString(event));
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
+                } finally {
+                    //判断是否最后的测评消息
+                    if (completed) {
+                        //如果是最后的测试消息，移除监听器中的监听
+                        sseEmitter.complete();
+                        removeSseEmitters(testId);
+                    }
+                    //已经发送，移除测评消息
+                    messageListeners.remove(messageListener);
                 }
-                //判断是否最后的测评消息
-                if (completed) {
-                    //如果是最后的测试消息，移除监听器中的监听
-                    sseEmitter.complete();
-                    removeSseEmitters(testId);
-                }
-                //已经发送，移除测评消息
-                messageListeners.remove(messageListener);
-                Thread.sleep(50);
+
             }
         }
 

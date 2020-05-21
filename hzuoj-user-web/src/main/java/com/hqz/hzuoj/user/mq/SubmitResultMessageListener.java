@@ -40,7 +40,7 @@ public class SubmitResultMessageListener {
         for (Map.Entry<Integer, LinkedList<MessageListener>> entry : queueMessage.entrySet()) {
             Integer key = entry.getKey();
             LinkedList<MessageListener> value = entry.getValue();
-            while(null != value && !value.isEmpty()) {
+            while (null != value && !value.isEmpty()) {
                 MessageListener message = value.getFirst();
                 long time = message.getDate().getTime();
                 if (nowTime - time > diff) {
@@ -96,25 +96,26 @@ public class SubmitResultMessageListener {
      */
     @EventListener
     public void deployEventHandler(SubmitResultMessageEvent messageEvent) throws IOException, InterruptedException {
+
+        Integer submitId = messageEvent.getSubmitId();
+        MessageListener messageListener = new MessageListener();
+        //保证发送的消息顺序性
         synchronized (this) {
-            Integer submitId = messageEvent.getSubmitId();
-            //保证发送的消息顺序性
-            MessageListener messageListener = new MessageListener();
             messageListener.setDate(new Date());
-            messageListener.setMessage(messageEvent);
-            LinkedList<MessageListener> messageListeners = queueMessage.get(submitId);
-            if (null == messageListeners) {
-                messageListeners = new LinkedList<>();
-            }
-            messageListeners.add(messageListener);
-            queueMessage.put(submitId, messageListeners);
-            SseEmitter sseEmitter = sseEmitters.get(submitId);
-            if (null != sseEmitter) {
-                send(submitId);
-            } else {
-                Thread.sleep(500);
-                send(submitId);
-            }
+        }
+        messageListener.setMessage(messageEvent);
+        LinkedList<MessageListener> messageListeners = queueMessage.get(submitId);
+        if (null == messageListeners) {
+            messageListeners = new LinkedList<>();
+        }
+        messageListeners.add(messageListener);
+        queueMessage.put(submitId, messageListeners);
+        SseEmitter sseEmitter = sseEmitters.get(submitId);
+        if (null != sseEmitter) {
+            send(submitId);
+        } else {
+            Thread.sleep(500);
+            send(submitId);
         }
     }
 
@@ -127,15 +128,19 @@ public class SubmitResultMessageListener {
     private void send(Integer submitId) throws InterruptedException {
         SseEmitter sseEmitter = sseEmitters.get(submitId);
         if (sseEmitter != null) {
+            long index = 0;
             LinkedList<MessageListener> messageListeners = queueMessage.get(submitId);
             while (null != messageListeners && !messageListeners.isEmpty()) {
                 MessageListener messageListener = messageListeners.getFirst();
+                long time = messageListener.getDate().getTime();
                 SubmitResultMessageEvent event = (SubmitResultMessageEvent) messageListener.getMessage();
                 boolean completed = event.isCompleted();
                 try {
                     //发送测评消息
-                    sseEmitter.send(JSON.toJSONString(event));
-
+                    if(index < time) {
+                        index = time;
+                        sseEmitter.send(JSON.toJSONString(event));
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -147,7 +152,6 @@ public class SubmitResultMessageListener {
                 }
                 //已经发送，移除测评消息
                 messageListeners.remove(messageListener);
-                Thread.sleep(100);
             }
         }
     }

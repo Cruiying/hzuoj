@@ -66,7 +66,7 @@ public class DataController {
      */
     @RequestMapping("/upload")
     @ResponseBody
-    public Map<String, Object> upload1(@RequestParam("file") MultipartFile file, Integer problemId) {
+    public Map<String, Object> upload(@RequestParam("file") MultipartFile file, Integer problemId) {
         Map map = new HashMap<String, String>();
         if (problemId == null) {
             map.put("msg", "上传失败");
@@ -96,13 +96,8 @@ public class DataController {
         File file2 = new File(filepath);
         File file3 = new File(dataZipPath);
         try {
-
-            if (!file2.exists()) {
-                file2.mkdirs();
-            }
-            if (!file3.exists()) {
-                file3.mkdirs();
-            }
+            file2.mkdirs();
+            file3.mkdirs();
             String savePath = filepath + "/" + filename;
             //上传文件到服务器
             String up = uploadPath + "/" + fastDFSClientWrapper.uploadFile(file);
@@ -133,6 +128,7 @@ public class DataController {
         }
         return map;
     }
+
     /**
      * 删除文件夹
      *
@@ -159,12 +155,13 @@ public class DataController {
 
     /**
      * 检查测试数据是否合法
+     *
      * @param path
      * @param problemId
      * @return
      */
     private List<Data> check(String path, Integer problemId) {
-       List<Data> dataList = new ArrayList<>();
+        List<Data> dataList = new ArrayList<>();
         //输入测试数据Map
         Map<String, String> inMap = getFiles(path, ".in");
         //输出测试数据Map
@@ -233,7 +230,7 @@ public class DataController {
     }
 
     /**
-     * 测试点网页
+     * 测试点页面
      *
      * @param problemId
      * @param modelMap
@@ -275,11 +272,11 @@ public class DataController {
     public Map<String, Object> updateProblemData(@PathVariable Integer problemId, @RequestBody List<Data> datas) {
         Map<String, Object> map = new HashMap<>();
         try {
-            if (datas != null){
+            if (datas != null) {
                 Problem problem = new Problem();
                 problem.setProblemId(problemId);
                 for (Data data : datas) {
-                    if(data.getDataMaxRuntimeMemory()<0||data.getDataMaxRuntimeTime()<0) {
+                    if (data.getDataMaxRuntimeMemory() < 0 || data.getDataMaxRuntimeTime() < 0) {
                         map.put("msg", "修改失败！运行时间与运行内存必须大于0");
                     }
                     data.setProblem(problem);

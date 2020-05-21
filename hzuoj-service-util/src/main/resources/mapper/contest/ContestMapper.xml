@@ -277,7 +277,10 @@
     <update id="updateContestApplyCount">
         update hzuoj_contests set contest_apply_count = #{contestApplyCount} where contest_id = #{contestId}
     </update>
-<!--    比赛提交信息-->
+    <update id="updateContestRankIsFinish">
+        update hzuoj_contests set contest_rank_is_finish = #{contestRankIsFinish} where contest_id = #{contestId}
+    </update>
+    <!--    比赛提交信息-->
     <select id="getContestProblemSubmitInfo" resultType="com.hqz.hzuoj.bean.problem.ProblemSubmitInfo">
         SELECT
         (SELECT
@@ -344,5 +347,8 @@
         inner join hzuoj_submits s
         on s.submit_id = cs.submit_id
         where c.contest_id = #{contestId}
+    </select>
+    <select id="getContestUserRating" resultType="com.hqz.hzuoj.bean.contest.ContestUserRating">
+        select * from hzuoj_contests_users_rating  where user_id = #{userId} and contest_id = #{contestId}
     </select>
 </mapper>

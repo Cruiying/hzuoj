@@ -40,12 +40,16 @@ public class DataServiceImpl implements DataService {
             return;
         }
         dataMapper.deleteData(problemId);
+        List<Data> problemDatas = dataMapper.getProblemDatas(problemId);
+        for (Data problemData : problemDatas) {
+            dataMapper.deleteByPrimaryKey(problemData);
+        }
         for (Data data : dataList) {
             dataMapper.insert(data);
         }
         problemMapper.updateProblemData(problemId, uploadPath);
         String key = "data:" + problemId + ":info";
-        int time = (int) (Math.random() * 60 * 60 + 10);
+        int time = (int) (Math.random() * 60 * 60 * 24 * 30 + 10);
         redisUtil.set(key, JSON.toJSONString(dataList), time);
     }
 

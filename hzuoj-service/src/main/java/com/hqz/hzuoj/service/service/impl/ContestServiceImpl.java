@@ -103,6 +103,8 @@ public class ContestServiceImpl implements ContestService {
         return ResultEntity.success("提交成功", "");
     }
 
+
+
     /**重新测评
      * @param submit
      */
@@ -401,5 +403,15 @@ public class ContestServiceImpl implements ContestService {
         return contestTypeMapper.getContestTypes();
     }
 
+    /**
+     * 删除比赛
+     * @param contestId
+     * @return
+     */
+    @Override
+    public String contestDelete(Integer contestId) {
+        int count = contestMapper.deleteByPrimaryKey(contestId);
+        return count == 1 ? "success" : "error";
+    }
 
 }

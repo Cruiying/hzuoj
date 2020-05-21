@@ -122,6 +122,7 @@ public class SubmitController {
     @RequestMapping(value = "/test")
     @ResponseBody
     public Map<String, Object> test(@RequestBody TestCode testCode) {
+        System.out.println(testCode.getLanguage());
         Map<String, Object> map = new HashMap<>();
         TestCode saveTestCode = submitService.saveTestCode(testCode);
         if (saveTestCode == null) {
@@ -165,6 +166,7 @@ public class SubmitController {
     @ResponseBody
     @UserLoginCheck
     public String submit(@RequestBody Submit submit, HttpServletRequest request, HttpServletResponse response) throws IOException, InterruptedException {
+        System.out.println(submit.getLanguage());
         submit.setSubmitPublic(1); //公开提交
         submit.setSubmitTime(new Date());
         User user = new User();

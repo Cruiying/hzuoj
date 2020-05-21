@@ -55,6 +55,9 @@ public class ContestRank implements Serializable {
     @Transient
     private ContestApply contestApply;
 
+    @Transient
+    private ContestUserRating contestUserRating;
+
     public ContestRank() {
         this.totalScore = 0;
         this.acceptedTotal = 0;
@@ -64,6 +67,14 @@ public class ContestRank implements Serializable {
         this.contestId = null;
         this.contestRankInfos = null;
         this.contestRankId = null;
+    }
+
+    public ContestUserRating getContestUserRating() {
+        return contestUserRating;
+    }
+
+    public void setContestUserRating(ContestUserRating contestUserRating) {
+        this.contestUserRating = contestUserRating;
     }
 
     public Integer getRank() {
@@ -128,7 +139,6 @@ public class ContestRank implements Serializable {
         this.contestId = contestId;
     }
 
-
     @Override
     public String toString() {
         return "ContestRank{" +
@@ -137,9 +147,10 @@ public class ContestRank implements Serializable {
                 ", acceptedTotal=" + acceptedTotal +
                 ", totalScore=" + totalScore +
                 ", punishTime=" + punishTime +
+                ", contestId=" + contestId +
                 ", contestRankInfos=" + contestRankInfos +
                 ", contestApply=" + contestApply +
-                ", contestId=" + contestId +
+                ", contestUserRating=" + contestUserRating +
                 '}';
     }
 }

@@ -155,6 +155,7 @@
             AND s.user_id = #{userId}
             AND jr.judge_name = 'AC'
             AND s.submit_public = 1
+        limit 1
     </select>
     <!--    获取我在ProblemId提交数量-->
     <select id="getMyAllTotal" resultType="java.lang.Integer">
@@ -169,6 +170,7 @@
           WHERE p.problem_id = #{problemId}
             AND s.user_id = #{userId}
             AND s.submit_public = 1
+            limit 1
     </select>
     <!--    删除题目标签-->
     <delete id="deleteProblemTags">

@@ -98,4 +98,12 @@ public class ResultEntity implements Serializable {
         return resultEntity;
     }
 
+    public static ResultEntity error(String message) {
+        ResultEntity resultEntity = new ResultEntity();
+        resultEntity.setCode(Constants.ERROR);
+        resultEntity.setMessage(message);
+        resultEntity.setData(null);
+        return resultEntity;
+    }
+
 }

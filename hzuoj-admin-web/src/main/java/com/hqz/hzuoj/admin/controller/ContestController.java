@@ -13,6 +13,7 @@ import com.hqz.hzuoj.bean.problem.Problem;
 import com.hqz.hzuoj.service.ContestService;
 import com.hqz.hzuoj.service.ProblemService;
 import com.hqz.hzuoj.service.SubmitService;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -32,6 +33,7 @@ import java.util.*;
 @Controller
 @AdminLoginCheck
 @RequestMapping("/admin")
+@Slf4j
 public class ContestController {
 
     @Reference
@@ -300,4 +302,19 @@ public class ContestController {
         }
     }
 
+    /**
+     * 比赛删除
+     * @param contestId
+     * @return
+     */
+    @ResponseBody
+    @RequestMapping("/contest/delete/{contestId}")
+    public ResultEntity contestDelete(@PathVariable Integer contestId) {
+        try {
+            return ResultEntity.success("删除成功", contestService.contestDelete(contestId));
+        } catch (Exception e) {
+            log.error("error", e.getMessage());
+            return ResultEntity.error(e.getMessage());
+        }
+    }
 }

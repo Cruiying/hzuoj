@@ -557,18 +557,22 @@
                                         满分:{{contestProblem.contestProblemScore}}分
                                     </div>
                                 </th>
+                                <th v-if="contest.contestRankIsFinish == true && contest.contestStatus == 2 && contest.contestIsRank == true" style="font-weight: 500;background-color: #e8e8e8">
+                                    <div>积分</div>
+                                </th>
                             </tr>
                             </thead>
                             <tbody v-if="rankPageInfo !=null" style="background-color: #f4f4f4">
                             <tr v-for="contestRank in rankPageInfo.list" style="height: 70px">
                                 <td>
-                                    <div v-if="contestRank.rank == 1" class="ui yellow ribbon label"
-                                         v-text="contestRank.rank"></div>
-                                    <div v-if="contestRank.rank == 2" class="ui ribbon label"
-                                         v-text="contestRank.rank"></div>
-                                    <div v-if="contestRank.rank == 3" class="ui brown ribbon label"
-                                         v-text="contestRank.rank"></div>
-                                    <div v-if="contestRank.rank > 3" v-text="contestRank.rank"></div>
+                                    <span v-if="contestRank.rank == 1" class="ui yellow ribbon label"
+                                         v-text="contestRank.rank"></span>
+                                    <span v-if="contestRank.rank == 2" class="ui ribbon label"
+                                         v-text="contestRank.rank"></span>
+                                    <span v-if="contestRank.rank == 3" class="ui brown ribbon label"
+                                         v-text="contestRank.rank"></span>
+                                    <span v-if="contestRank.rank > 3" v-text="contestRank.rank"></span>
+
                                 </td>
                                 <td style="text-align: left;min-width:120px; max-width: 120px; word-wrap:break-word;word-break:break-all;">
                                     <img style="width: 35px;height: 35px;border-radius: 50%;" alt="头像"
@@ -594,8 +598,8 @@
                                     :class="{'first_ac':contestRankInfos.firstAccepted ==true, 'wa': contestRankInfos.accepted == false && contestRankInfos.submitTotal > 0,'ac': contestRankInfos.firstAccepted !=true && contestRankInfos.accepted == true}">
                                     <p v-text="contestRankInfos.accepted == true ? punishTime(contestRankInfos.punishTime) : ''"></p>
                                     <p v-if="contestRankInfos.accepted == true"
-                                       v-text="contestRankInfos.submitTotal>1?'(-'+contestRankInfos.submitTotal+')':''"></p>
-                                    <p v-if="contestRankInfos.accepted == false && contestRankInfos.submitTotal > 0">
+                                       v-text="contestRankInfos.submitTotal>1?'(-'+(contestRankInfos.submitTotal-1)+')':''"></p>
+                                    <p v-if="contestRankInfos.accepted == false && contestRankInfos.submitTotal >= 1">
                                         (-{{contestRankInfos.submitTotal}})</p>
                                 </td>
                                 <td v-if="contest.contestType.contestTypeName!='ACM'"
@@ -603,11 +607,13 @@
                                     <p v-if="contestRankInfos.submitTotal > 0"
                                        v-html="getRankScore(contestRankInfos.score)"></p>
                                 </td>
-
+                                <td v-if="contest.contestRankIsFinish == true && contest.contestStatus == 2 &&  contest.contestIsRank == true">
+                                    <span style="color: red" v-text="getContestUserRating(contestRank)"></span>
+                                </td>
                             </tr>
                             </tbody>
                         </table>
-                        <div style="overflow-x:auto; ">
+                        <div style="overflow-x:auto;">
                             <div style="margin-top:  30px; " v-if="rankPageInfo != null">
                                 <div style="text-align: center; ">
                                     <div class="ui pagination menu" style="box-shadow: none; ">
@@ -948,6 +954,11 @@
                         return String.fromCharCode(i + 65);
                     }
                 }
+            },
+            getContestUserRating: function(contestRank) {
+                if (contestRank.contestUserRating == null) return "0";
+                if (contestRank.contestUserRating.rank > 0) return "+" + contestRank.contestUserRating.rank;
+                return contestRank.contestUserRating.rank;
             },
             getRank: function (key, page) {
                 if (key != '') {

@@ -242,7 +242,7 @@
                             "                                <a title=\"编辑\" onclick=\"xadmin.open('编辑','/admin/contest?contestId=" + contest.contestId + "')\" href=\"javascript:;\">\n" +
                             "                                    <i class=\"layui-icon\">&#xe642;</i>\n" +
                             "                                </a>\n" +
-                            "                                <a title=\"删除\" onclick=\"member_del(this,'要删除的id')\" href=\"javascript:;\">\n" +
+                            "                                <a title=\"删除\" onclick=\"contestDelete(this," + contest.contestId + ")\" href=\"javascript:;\">\n" +
                             "                                    <i class=\"layui-icon\">&#xe640;</i>\n" +
                             "                                </a>" + isRank + "\n" +
                             "                                </a>" + contestAfreshSubmit + "\n" +
@@ -303,6 +303,38 @@
         });
     }
 
+    /**
+     * 删除比赛
+     * @param obj
+     * @param contestId
+     */
+    function contestDelete(obj, contestId) {
+        layer.confirm("确认要删除比赛?", function () {
+            $.ajax({
+                dataType: "json",
+                type: "POST",
+                contestType: "application/json;charset=UTF-8",
+                url: "/admin/contest/delete/" + contestId,
+                success: function (result) {
+                    if (result["code"] == '1') {
+                        layer.msg(result["message"], {icon: 1, time: 1000});
+                    } else {
+                        layer.msg(result["message"], {icon: 5, time: 1000});
+                    }
+                },
+                error: function f() {
+                    layer.msg('删除失败!', {icon: 5, time: 1000});
+                }
+            });
+            layer.msg('提交成功', {icon: 1, time: 1000});
+        })
+    }
+
+    /**
+     * 比赛测评重新提交
+     * @param obj
+     * @param contestId
+     */
     function contestAfreshSubmit(obj, contestId) {
         layer.confirm('确认要重新测评吗？', function () {
             $.ajax({

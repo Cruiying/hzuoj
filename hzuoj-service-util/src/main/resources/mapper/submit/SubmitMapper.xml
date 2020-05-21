@@ -126,6 +126,7 @@
             and s.submit_public = 1
             and p.problem_public = 1
         </where>
+        order by s.submit_id desc
     </select>
     <select id="selectAll" resultMap="submitResultMap">
         SELECT

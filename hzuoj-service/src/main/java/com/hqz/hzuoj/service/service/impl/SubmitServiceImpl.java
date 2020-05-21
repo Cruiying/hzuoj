@@ -398,7 +398,7 @@ public class SubmitServiceImpl implements SubmitService {
                 return null;
             }
         }
-        synchronized (SubmitServiceImpl.class) {
+        synchronized (this) {
             isRank = true;
             //获得更新权利
             try {
@@ -415,7 +415,16 @@ public class SubmitServiceImpl implements SubmitService {
             } finally {
                 isRank = false;
             }
-            return getContestRank(page, contestId, contestRankQuery);
+            PageInfo<ContestRank> contestRank = getContestRank(page, contestId, contestRankQuery);
+            List<ContestRank> list = contestRank.getList();
+            if (null != list && !list.isEmpty()) {
+                for (ContestRank rank : list) {
+                    ContestApply contestApply = rank.getContestApply();
+                    ContestUserRating contestUserRating = contestMapper.getContestUserRating(contestApply);
+                    rank.setContestUserRating(contestUserRating);
+                }
+            }
+            return contestRank;
         }
     }
 
@@ -440,6 +449,9 @@ public class SubmitServiceImpl implements SubmitService {
             for (ContestRank contestRank : contestRanks) {
                 List<ContestRankInfo> contestRankInfos = contestRankInfoMapper.getContestRankInfos(contestRank.getContestRankId());
                 contestRank.setContestRankInfos(contestRankInfos);
+
+                ContestUserRating contestUserRating = contestMapper.getContestUserRating(contestRank.getContestApply());
+                contestRank.setContestUserRating(contestUserRating);
             }
         }
         return new PageInfo<>(contestRanks, size);
@@ -633,6 +645,8 @@ public class SubmitServiceImpl implements SubmitService {
         if (contestRanks == null || contestRanks.size() <= 1) {
             return "fail";
         }
+        contest.setContestRankIsFinish(false);
+        contestMapper.updateContestRankIsFinish(contest);
         List<ContestUserRating> contestUserRatings = contestUserRatingMapper.getContestUserRatings(contestId);
         contestUserRatingMapper.updateContestUserRatingStatus(contestId, 1);
         if (contestUserRatings != null) {
@@ -672,6 +686,8 @@ public class SubmitServiceImpl implements SubmitService {
             contestUserRatingMapper.saveContestUserRating(contestUserRating);
         }
         contestUserRatingMapper.updateContestUserRatingStatus(contestId, 2);
+        contest.setContestRankIsFinish(true);
+        contestMapper.updateContestRankIsFinish(contest);
         return "success";
     }
 

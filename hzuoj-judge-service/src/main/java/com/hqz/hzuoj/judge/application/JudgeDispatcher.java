@@ -1,5 +1,6 @@
 package com.hqz.hzuoj.judge.application;
 
+import com.hqz.hzuoj.bean.language.Language;
 import com.hqz.hzuoj.bean.problem.Data;
 import com.hqz.hzuoj.bean.submit.Submit;
 import com.hqz.hzuoj.bean.submit.TestCode;
@@ -122,12 +123,10 @@ public class JudgeDispatcher {
      * @param submitId
      */
     public void RunningSubmit(Integer submitId) {
+
         /**
-         * 创建运行目录和文件
+         * 获取数据
          */
-        String randomName = DigestUtils.getRandomString(25, DigestUtils.Mode.ALPHA);
-        String baseDirectory = String.format("%s/submit/%s", new Object[]{judgeSystemAnsPath, randomName});
-        String baseFileName = DigestUtils.getRandomString(12, DigestUtils.Mode.ALPHA);
         Submit submit = submitMapper.getSubmit(submitId);
         if (submit == null) {
             submit = new Submit();
@@ -135,7 +134,14 @@ public class JudgeDispatcher {
             applicationDispatcher.onSubmitErrorOccurred(submitId, submit, true);
             return;
         }
+        /**
+         * 创建运行目录和文件
+         */
+        String randomName = DigestUtils.getRandomString(12, DigestUtils.Mode.ALPHA);
+        String baseDirectory = String.format("%s/submit/%s", new Object[]{judgeSystemAnsPath, randomName});
+        String baseFileName = DigestUtils.getRandomString(12, DigestUtils.Mode.ALPHA);
         try {
+
             testPointMapper.deleteSubmitTestPoint(submitId);
             //预处理用户提交所需要的资源
             if (!submitPreprocess(submit, baseDirectory, baseFileName)) {
@@ -158,6 +164,7 @@ public class JudgeDispatcher {
 
     }
 
+
     /**
      * 创建用户提交的自测
      *
@@ -168,10 +175,10 @@ public class JudgeDispatcher {
         /**
          * 创建运行目录和文件
          */
-        String randomName = DigestUtils.getRandomString(25, DigestUtils.Mode.ALPHA);
+        String randomName = DigestUtils.getRandomString(12, DigestUtils.Mode.ALPHA);
         String baseDirectory = String.format("%s/test/%s", new Object[]{judgeSystemAnsPath, randomName});
         String checkpointsFilePath = String.format("%s/test/%s", new Object[]{judgeSystemDataPath, testCode.getTestId()});
-        String baseFileName = UUID.randomUUID().toString().replaceAll("-", "");
+        String baseFileName = DigestUtils.getRandomString(12, DigestUtils.Mode.ALPHA);
         try {
             //预处理用户自测所需要的资源
             if (!TestPreprocess(testCode, baseDirectory, baseFileName)) {
@@ -382,8 +389,8 @@ public class JudgeDispatcher {
      * @return 包含程序运行结果的Map对象
      */
     private Map<String, Object> getRuntimeResult(Map<String, Object> result, String standardOutputFilePath, String outputFilePath) {
-        if (result.get("runtimeResult").equals("AC")){
-            if (isOutputTheSame(standardOutputFilePath,outputFilePath)) {
+        if (result.get("runtimeResult").equals("AC")) {
+            if (isOutputTheSame(standardOutputFilePath, outputFilePath)) {
                 result.put("runtimeResult", "AC");
             } else {
                 result.put("runtimeResult", "WA");

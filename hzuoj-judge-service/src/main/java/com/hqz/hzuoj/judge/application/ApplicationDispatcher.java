@@ -194,7 +194,6 @@ public class ApplicationDispatcher {
      * @param testId - 自测记录的唯一标识符
      */
     public void createTest(Long testId, TestCode testCode) {
-        System.out.println("自测本地测评机");
         judgeDispatcher.RunningTest(testId, testCode);
     }
 

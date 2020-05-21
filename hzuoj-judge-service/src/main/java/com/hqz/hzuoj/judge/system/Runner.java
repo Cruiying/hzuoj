@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Scanner;
 
 /**
  * @Author: HQZ
@@ -15,6 +16,7 @@ import java.util.Map;
  */
 @Component
 public class Runner {
+
 
     @Autowired
     private JudgeSystem judgeSystem;
