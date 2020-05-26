@@ -96,6 +96,8 @@ public class DataController {
         File file2 = new File(filepath);
         File file3 = new File(dataZipPath);
         try {
+            deleteDirectory(file2);
+            deleteDirectory(file3);
             file2.mkdirs();
             file3.mkdirs();
             String savePath = filepath + "/" + filename;

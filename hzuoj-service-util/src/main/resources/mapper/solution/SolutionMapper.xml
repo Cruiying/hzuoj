@@ -70,12 +70,56 @@
         </where>
         order by s.solution_modify_time desc
     </select>
+
+    <resultMap id="userSolutionResultMap" type="com.hqz.hzuoj.bean.solution.Solution">
+        <id column="solution_id" property="solutionId"/>
+        <result column="solution_create_time" property="solutionCreateTime"/>
+        <result column="solution_modify_time" property="solutionModifyTime"/>
+        <result column="solution_title" property="solutionTitle"/>
+        <association property="user" javaType="com.hqz.hzuoj.bean.user.User">
+            <id column="user_id" property="userId"/>
+            <result column="username" property="username"/>
+            <result column="user_img" property="UserImg"/>
+            <result column="user_rating" property="userRating"/>
+        </association>
+        <association property="solutionStatus" javaType="com.hqz.hzuoj.bean.solution.SolutionStatus">
+            <id column="solution_status_id" property="solutionStatusId"/>
+            <result column="solution_status_name" property="solutionStatusName"/>
+        </association>
+        <association property="problem" javaType="com.hqz.hzuoj.bean.problem.Problem">
+            <id column="problem_id" property="problemId"/>
+            <result column="problem_title" property="problemTitle"/>
+        </association>
+    </resultMap>
+    <select id="getUserSolutions" resultMap="userSolutionResultMap">
+        SELECT
+        s.solution_id, s.solution_title,s.solution_create_time,s.solution_modify_time,
+        p.problem_id,p.problem_title,
+        u.user_id,u.username,u.user_rating,u.user_img,
+        ss.*
+        FROM
+        hzuoj_solutions s
+        INNER JOIN hzuoj_problems p ON s.problem_id = p.problem_id
+        inner join hzuoj_solutions_status ss on ss.solution_status_id = s.solution_status_id
+        inner join hzuoj_users u on u.user_id = s.user_id
+        <where>
+            1 = 1
+            <if test="solutionId != null and solutionId != ''">
+                and s.solution_id = #{solutionId}
+            </if>
+            <if test="userId != null and userId != ''">
+                and s.user_id = #{userId}
+            </if>
+        </where>
+    </select>
+<!--    更新题解-->
     <update id="updateSolution">
         update hzuoj_solutions set
         solution_content=#{solutionContent},solution_modify_time=#{solutionModifyTime},
         solution_title=#{solutionTitle}
         WHERE solution_id = #{solutionId}
     </update>
+<!--    更新题解状态-->
     <update id="updateSolutionStatus">
         update hzuoj_solutions set
         solution_status_id=#{solutionStatus.solutionStatusId}

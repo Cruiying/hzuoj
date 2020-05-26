@@ -1,6 +1,7 @@
 package com.hqz.hzuoj.bean.problem;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * @Author: HQZ
@@ -21,8 +22,13 @@ public class ProblemQuery implements Serializable {
      */
     private Integer tagId;
     /**
+     * 题目标签
+     */
+    private List<Integer> tags;
+    /**
      * 题目等级
      */
+
     private Integer problemLevelId;
 
     public Integer getProblemId() {
@@ -55,6 +61,14 @@ public class ProblemQuery implements Serializable {
 
     public void setProblemLevelId(Integer problemLevelId) {
         this.problemLevelId = problemLevelId;
+    }
+
+    public List<Integer> getTags() {
+        return tags;
+    }
+
+    public void setTags(List<Integer> tags) {
+        this.tags = tags;
     }
 
     @Override

@@ -1,6 +1,7 @@
 package com.hqz.hzuoj.mapper.solution;
 
 import com.hqz.hzuoj.bean.solution.Solution;
+import com.hqz.hzuoj.vo.UserSolutionVO;
 import tk.mybatis.mapper.common.Mapper;
 
 import java.util.List;
@@ -21,4 +22,6 @@ public interface SolutionMapper extends Mapper<Solution> {
     List<Solution> getSolutions(Solution solution);
 
     void updateSolutionStatus(Solution solution);
+
+    List<Solution> getUserSolutions(UserSolutionVO userSolutionVO);
 }

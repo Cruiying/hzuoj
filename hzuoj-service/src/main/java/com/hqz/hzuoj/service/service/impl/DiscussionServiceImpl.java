@@ -1,6 +1,7 @@
 package com.hqz.hzuoj.service.service.impl;
 
 import com.alibaba.dubbo.config.annotation.Service;
+import com.alibaba.fastjson.JSON;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.hqz.hzuoj.bean.discussion.Discussion;
@@ -33,6 +34,7 @@ public class DiscussionServiceImpl implements DiscussionService {
 
     /**
      * 获取讨论
+     *
      * @param discussionId
      * @return
      */
@@ -41,7 +43,7 @@ public class DiscussionServiceImpl implements DiscussionService {
         Discussion discussion = discussionMapper.getDiscussion(discussionId);
         if (discussion != null) {
             //浏览次数+1
-            discussionMapper.updateDiscussionCount(discussionId,0,0,1);
+            discussionMapper.updateDiscussionCount(discussionId, 0, 0, 1);
             discussion.setDiscussionBrowseCount(discussion.getDiscussionBrowseCount() + 1);
         }
         return discussion;
@@ -49,6 +51,7 @@ public class DiscussionServiceImpl implements DiscussionService {
 
     /**
      * 保存讨论
+     *
      * @param discussion
      * @return
      */
@@ -81,6 +84,7 @@ public class DiscussionServiceImpl implements DiscussionService {
 
     /**
      * 获取讨论列表
+     *
      * @param page
      * @param discussionQuery
      * @return
@@ -106,38 +110,107 @@ public class DiscussionServiceImpl implements DiscussionService {
      */
     @Override
     public List<DiscussionComment> getDiscussionComments(Integer discussionId) {
-        List<DiscussionComment> discussionComments = discussionMapper.getDiscussionComments(discussionId);
-        return getDiscussionComments(discussionComments);
-    }
-
-    private List<DiscussionComment> getDiscussionComments(List<DiscussionComment> comments) {
+        List<DiscussionComment> comments = discussionMapper.getDiscussionComments(discussionId);
+        Map<Integer, List<DiscussionComment>> commentTree = buildCommentTree(comments);
         List<DiscussionComment> commentList = new ArrayList<>();
-        int tot = 0;
-        Map<Integer, Integer> father = new HashMap<>();
-        for (int i = 0; i < comments.size(); i++) {
-            int u = comments.get(i).getCommentId();
-            if (comments.get(i).getParentComment() != null && comments.get(i).getParentComment().getCommentId() != null && comments.get(i).getParentComment().getCommentId() != -1) {
-                //有父亲节点
-                int v = comments.get(i).getParentComment().getCommentId();
-                Integer x = father.get(v);
-                if (x == null || x < 0) {
-                    //父亲节点已经被删除,该节点应该也要被删除
-                    discussionMapper.deleteComment(u);
-                    continue;
-                }
-                father.put(u, x);
-                DiscussionComment discussionComment = commentList.get(x);
-                discussionComment.getComments().add(comments.get(i));
-            } else {
-                //没有父亲节点
-                father.put(u, tot);
-                commentList.add(comments.get(i));
-                commentList.get(tot).setComments(new ArrayList<>());
-                tot++;
+        for (DiscussionComment comment : comments) {
+            if (comment.getParentComment() == null) {
+                commentDelete(comment);
+                continue;
+            }
+            if (comment.getParentComment().getCommentId() == -1) {
+                getDepthComment(commentTree, comment, 2);
+                commentList.add(comment);
             }
         }
         return commentList;
     }
+
+
+    /**
+     * 构建评论回复树关系
+     *
+     * @param comments
+     * @return
+     */
+    private Map<Integer, List<DiscussionComment>> buildCommentTree(List<DiscussionComment> comments) {
+        Map<Integer, List<DiscussionComment>> commentTree = new HashMap<>();
+        HashMap<Integer, DiscussionComment> commentMap = new HashMap<>();
+        for (DiscussionComment comment : comments) {
+            comment.setComments(new ArrayList<>());
+            commentMap.put(comment.getCommentId(), comment);
+        }
+        for (DiscussionComment comment : comments) {
+            if (comment.getParentComment().getCommentId() != -1) {
+                DiscussionComment discussionComment = commentMap.get(comment.getParentComment().getCommentId());
+                comment.setParentComment(JSON.parseObject(JSON.toJSONString(discussionComment), DiscussionComment.class));
+            }
+        }
+        for (DiscussionComment comment : comments) {
+            DiscussionComment parentComment = comment.getParentComment();
+            if (parentComment != null) {
+                List<DiscussionComment> list = commentTree.get(parentComment.getCommentId());
+                if (list == null) {
+                    list = new ArrayList<>();
+                }
+                list.add(JSON.parseObject(JSON.toJSONString(comment), DiscussionComment.class));
+                commentTree.put(parentComment.getCommentId(), list);
+            }
+        }
+        return commentTree;
+    }
+
+    /**
+     * 获取评论depth级回复
+     *
+     * @param commentTree
+     * @param comment
+     * @param depth
+     */
+    private void getDepthComment(Map<Integer, List<DiscussionComment>> commentTree, DiscussionComment comment, int depth) {
+        if (depth == 1) {
+            //到达三级回复
+            ArrayList<DiscussionComment> comments = new ArrayList<>();
+            dfs(commentTree, comments, comment.getCommentId());
+            comments.sort(new Comparator<DiscussionComment>() {
+                @Override
+                public int compare(DiscussionComment o1, DiscussionComment o2) {
+                    return o1.getCommentId() - o2.getCommentId();
+                }
+            });
+            comment.setComments(comments);
+        } else {
+            ArrayList<DiscussionComment> comments = new ArrayList<>();
+            List<DiscussionComment> commentList = commentTree.get(comment.getCommentId());
+            if (commentList != null) {
+                //遍历子树
+                for (DiscussionComment discussionComment : commentList) {
+                    getDepthComment(commentTree, discussionComment, depth - 1);
+                    comments.add(discussionComment);
+                }
+            }
+            comment.setComments(comments);
+        }
+    }
+
+    /**
+     * 遍历回复子树，并将子树所有节点加入到回复根节点中
+     *
+     * @param commentTree
+     * @param comments
+     * @param commentId
+     */
+    private void dfs(Map<Integer, List<DiscussionComment>> commentTree, List<DiscussionComment> comments, int commentId) {
+        List<DiscussionComment> commentList = commentTree.get(commentId);
+        if (null != commentList) {
+            //遍历子树
+            for (DiscussionComment discussionComment : commentList) {
+                comments.add(discussionComment);
+                dfs(commentTree, comments, discussionComment.getCommentId());
+            }
+        }
+    }
+
 
     /**
      * 保存评论
@@ -147,21 +220,30 @@ public class DiscussionServiceImpl implements DiscussionService {
      */
     @Override
     public DiscussionComment saveDiscussionComment(DiscussionComment comment) {
+        //评论
         if (comment.getParentComment() == null || comment.getParentComment().getCommentId() == -1) {
             DiscussionComment discussionComment = new DiscussionComment();
             discussionComment.setCommentId(-1);
             comment.setParentComment(discussionComment);
             discussionMapper.saveDiscussionComment(comment);
-            discussionMapper.updateDiscussionCount(comment.getDiscussion().getDiscussionId(),1,0,0);
+            discussionMapper.updateDiscussionCount(comment.getDiscussion().getDiscussionId(), 1, 0, 0);
         } else {
+            //回复
             discussionMapper.saveDiscussionComment(comment);
         }
         comment = discussionMapper.getDiscussionComment(comment.getCommentId());
+        if (comment == null) {
+            return null;
+        }
+        if (comment.getComments() == null || comment.getComments().isEmpty()) {
+            comment.setComments(new ArrayList<>());
+        }
         return comment;
     }
 
     /**
      * 讨论置顶
+     *
      * @param discussion
      * @return
      */
@@ -178,6 +260,7 @@ public class DiscussionServiceImpl implements DiscussionService {
 
     /**
      * 删除讨论
+     *
      * @param discussionId
      * @return
      */
@@ -191,6 +274,7 @@ public class DiscussionServiceImpl implements DiscussionService {
 
     /**
      * 删除用户讨论
+     *
      * @param userId
      * @param discussionId
      * @return
@@ -211,6 +295,7 @@ public class DiscussionServiceImpl implements DiscussionService {
 
     /**
      * 删除回复
+     *
      * @param comment
      * @return
      */
@@ -220,9 +305,12 @@ public class DiscussionServiceImpl implements DiscussionService {
         if (discussionComment == null) {
             return "error";
         }
-        if (discussionComment.getParentComment() == null || "-1".equals(discussionComment.getParentComment().getCommentId())) {
-            discussionMapper.updateDiscussionCount(discussionComment.getDiscussion().getDiscussionId(),-1, 0, 0);
+        if (discussionComment.getParentComment() == null || "-1".equals(discussionComment.getParentComment().getCommentId().toString())) {
+            discussionMapper.updateDiscussionCount(discussionComment.getDiscussion().getDiscussionId(), -1, 0, 0);
         }
-        return discussionMapper.commentDelete(comment) > 0 ? "success" : "error";
+        if (discussionMapper.commentDelete(comment) > 0) {
+            return "success";
+        }
+        throw new RuntimeException("删除失败");
     }
 }

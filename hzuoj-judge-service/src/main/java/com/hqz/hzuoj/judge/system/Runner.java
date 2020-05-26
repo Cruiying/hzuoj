@@ -44,6 +44,11 @@ public class Runner {
         exitCode = (Integer) RuntimeInfo.get("exitCode");
         usedTime = (Integer) RuntimeInfo.get("usedTime");
         usedMemory = (Integer) RuntimeInfo.get("usedMemory");
+        //如果是Java语言，内存和运行时间是C/C++的两倍
+        if (language.getLanguageName().equalsIgnoreCase("Java")) {
+            timeLimit *= 2;
+            memoryLimit *= 2;
+        }
         //根据程序运行信息封装运行结果
         runtimeResult = getRuntimeResult(exitCode, timeLimit, usedTime, memoryLimit, usedMemory);
         result.put("runtimeResult", runtimeResult);

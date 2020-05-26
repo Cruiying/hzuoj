@@ -185,10 +185,10 @@
             and s.problem_id=#{problemId}
         </if>
         <if test="problemTitle != null and problemTitle != ''">
-            and p.problem_title = #{problemTitle}
+            and p.problem_title like concat('%', #{problemTitle}, '%')
         </if>
         <if test="username != null and username != ''">
-            and u.username = #{username}
+            and u.username like concat('%', #{username}, '%')
         </if>
         order by s.submit_id desc
     </select>

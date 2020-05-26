@@ -39,11 +39,13 @@ public class DataServiceImpl implements DataService {
         if (null == dataList || dataList.size() <= 0) {
             return;
         }
-        dataMapper.deleteData(problemId);
+
         List<Data> problemDatas = dataMapper.getProblemDatas(problemId);
+        System.out.println(problemDatas);
         for (Data problemData : problemDatas) {
             dataMapper.deleteByPrimaryKey(problemData);
         }
+        dataMapper.deleteData(problemId);
         for (Data data : dataList) {
             dataMapper.insert(data);
         }

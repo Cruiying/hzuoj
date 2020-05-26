@@ -15,10 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
@@ -108,17 +105,45 @@ public class DiscussionController {
             return "404";
         }
         Discussion discussion = discussionService.getDiscussion(discussionId);
-        PageInfo<Discussion> pageInfo = discussionService.getDiscussions(1,new DiscussionQuery());
         if (discussion == null) {
             return "404";
         }
         String s = MarkdownUtils.markdownToHtml(discussion.getDiscussionContent());
-        List<DiscussionComment> discussionComments = discussionService.getDiscussionComments(discussionId);
         discussion.setDiscussionContent(s);
         modelMap.put("discussion", discussion);
-        modelMap.put("comments", discussionComments);
-        modelMap.put("discussions", pageInfo.getList());
         return "discussion";
+    }
+
+    /**
+     * 获取讨论列表
+     * @param discussionQuery
+     * @return
+     */
+    @RequestMapping(value = "/discussions/info", method = RequestMethod.POST)
+    @ResponseBody
+    public ResultEntity getDiscussions(@RequestBody DiscussionQuery discussionQuery) {
+        try {
+            return ResultEntity.success("获取成功", discussionService.getDiscussions(1, discussionQuery).getList());
+        }catch (Exception e) {
+            log.error("getDiscussions({}), Error message: {}", discussionQuery, e.getMessage());
+            return ResultEntity.error(e.getMessage());
+        }
+    }
+
+    /**
+     * 获取讨论回复列表
+     * @param discussionId
+     * @return
+     */
+    @RequestMapping("/discussion/comments/{discussionId}")
+    @ResponseBody
+    public ResultEntity getDiscussionComments(@PathVariable Integer discussionId) {
+        try {
+            return ResultEntity.success("获取成功", discussionService.getDiscussionComments(discussionId));
+        } catch (Exception e) {
+            log.error("getDiscussionComments({}) Error: {}", discussionId, e.getMessage());
+            return ResultEntity.error(e.getMessage());
+        }
     }
 
     /**

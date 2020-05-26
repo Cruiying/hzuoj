@@ -393,8 +393,57 @@
                         </div>
                     </div>
                 </div>
-                <div class="ui user-item" style="display: none; height: 200px"></div>
-                <div class="ui user-item" style="display: none; height: 200px"></div>
+                <div class="ui user-item" style="display: none; height: 200px">
+                    <div class="ui" style="margin-top: 50px;margin-bottom: 10px; border-bottom: 2px solid #25bb9b;">
+                        <div class="row">
+                            <div class="five wide column">
+                                <button class="ui teal button" style="background-color: #22ae90;border-radius: 0">我发表的讨论
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="ui user-item" style="display: none; height: 200px">
+                    <div class="ui" style="margin-top: 50px;margin-bottom: 10px; border-bottom: 2px solid #25bb9b;">
+                        <div class="row">
+                            <div class="five wide column">
+                                <button class="ui teal button" style="background-color: #22ae90;border-radius: 0">我发表的题解
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="overflow-x: auto">
+                        <table class="ui unstackable very basic center aligned table"
+                               style="white-space: nowrap;">
+                            <thead>
+                            <tr>
+                                <th>题解ID</th>
+                                <th>题解标题</th>
+                                <th>所属题目</th>
+                                <th>提交时间</th>
+                                <th>修改时间</th>
+                                <th>审核状态</th>
+                                <th v-if="user.userId == loginUserId">操作</th>
+                            </tr>
+                            </thead>
+                            <tbody v-if="solutions != null && solutions.list != null">
+                            <tr v-for="solution in solutions.list">
+                                <td v-text="'#'+solution.solutionId">#1</td>
+                                <td v-text="solution.solutionTitle">蓝桥杯</td>
+                                <td v-text="solution.problem.problemTitle">蓝桥杯</td>
+                                <td v-text="dateFormat(solution.solutionCreateTime)">2020-222 22</td>
+                                <td v-text="dateFormat(solution.solutionModifyTime)">2020-222 22</td>
+                                <td v-text="solution.solutionStatus.solutionStatusName">通过</td>
+                                <td v-if="user.userId == loginUserId">
+                                    <a href="/problems?tagId=41" class="tag button">查看</a>
+                                    <a href="/problems?tagId=41" class="tag button">修改</a>
+                                    <a style="color: red;" href="/problems?tagId=41" class="tag button">删除</a>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
 
             </div>
             <div style="height: 50px;"></div>
@@ -431,6 +480,7 @@
             submitPage: null,
             rankPage: null,
             schools: [],
+            solutions: null,
         },
         methods: {
             dateFormat: function (time) {
@@ -470,19 +520,7 @@
                 });
             },
             punishTime: function (mss) {
-                const days = Math.round(mss / (1000 * 60 * 60 * 24));
-                const hours = Math.round((mss % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                const minutes = Math.round((mss % (1000 * 60 * 60)) / (1000 * 60));
-                const seconds = Math.round((mss % (1000 * 60))) / 1000;
-                let ans = "";
-                if (days > 0) ans += days + ":";
-                if (hours < 10) ans += "0";
-                ans += hours + ":";
-                if (minutes < 10) ans += "0";
-                ans += minutes + ":";
-                if (seconds < 10) ans += "0";
-                ans += seconds;
-                return ans;
+                return common.formatDuring(mss);
             },
             getColorFromScore: function (score) {
                return common.getColorFromScore(score);
@@ -559,9 +597,20 @@
             },
             getUserRatingColor: function (username, rating) {
                 return common.getUserRatingColor(username,rating);
+            },
+            getUserSolutions(page) {
+                axios.post("/user/solutions", {"userId": this.user.userId,"solutionId": "", "page": page, "pageSize": 20})
+                    .then((data)=>{
+                   if (data.data["code"] == "1") {
+                       this.solutions = data.data["data"];
+                   } else {
+                       alert(data.data["message"]);
+                   }
+                });
             }
         },
         created: function () {
+            this.getUserSolutions(1);
             this.rankPage = common.getPage(1,1);
             this.submitPage = common.getPage(1, 1);
             this.getUserContests(1);

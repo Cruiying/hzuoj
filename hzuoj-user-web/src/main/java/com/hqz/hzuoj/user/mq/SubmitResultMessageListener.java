@@ -100,9 +100,7 @@ public class SubmitResultMessageListener {
         Integer submitId = messageEvent.getSubmitId();
         MessageListener messageListener = new MessageListener();
         //保证发送的消息顺序性
-        synchronized (this) {
-            messageListener.setDate(new Date());
-        }
+        messageListener.setDate(new Date());
         messageListener.setMessage(messageEvent);
         LinkedList<MessageListener> messageListeners = queueMessage.get(submitId);
         if (null == messageListeners) {
@@ -110,13 +108,7 @@ public class SubmitResultMessageListener {
         }
         messageListeners.add(messageListener);
         queueMessage.put(submitId, messageListeners);
-        SseEmitter sseEmitter = sseEmitters.get(submitId);
-        if (null != sseEmitter) {
-            send(submitId);
-        } else {
-            Thread.sleep(500);
-            send(submitId);
-        }
+        send(submitId);
     }
 
     /**
@@ -126,7 +118,13 @@ public class SubmitResultMessageListener {
      * @throws IOException
      */
     private void send(Integer submitId) throws InterruptedException {
+        int count = 0;
         SseEmitter sseEmitter = sseEmitters.get(submitId);
+        while (sseEmitter == null && count < 1000) {
+            count++;
+            sseEmitter = sseEmitters.get(submitId);
+            Thread.sleep(5);
+        }
         if (sseEmitter != null) {
             long index = 0;
             LinkedList<MessageListener> messageListeners = queueMessage.get(submitId);
@@ -137,7 +135,7 @@ public class SubmitResultMessageListener {
                 boolean completed = event.isCompleted();
                 try {
                     //发送测评消息
-                    if(index < time) {
+                    if (index < time) {
                         index = time;
                         sseEmitter.send(JSON.toJSONString(event));
                     }

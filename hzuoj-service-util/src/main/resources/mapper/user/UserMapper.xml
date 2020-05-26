@@ -178,12 +178,12 @@
         WHERE s.`user_id` = #{userId} and s.`judge_result_id` = #{judgeResultId}  AND s.`submit_public`  = #{submitPublic}
     </select>
     <select id="getUserChallengeTotal" resultType="java.lang.Integer">
-         SELECT COUNT(*) FROM hzuoj_users u
+        SELECT COUNT(*) FROM hzuoj_users u
         INNER JOIN (
-        SELECT s.`problem_id`,s.`user_id` FROM hzuoj_submits s
-        WHERE s.`submit_public`  = #{submitPublic}
-        GROUP BY s.`problem_id`,s.`user_id`) t
-        ON t.user_id = u.`user_id`
-        WHERE u.`user_id` = #{userId}
+            SELECT s.user_id FROM hzuoj_submits s
+            GROUP BY s.problem_id,s.user_id
+            ) t
+        ON t.user_id = u.user_id
+        WHERE u.user_id = #{userId}
     </select>
 </mapper>

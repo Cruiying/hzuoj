@@ -272,9 +272,7 @@ public class SubmitServiceImpl implements SubmitService {
             page = 1;
         }
         int size = 20;
-        PageHelper.startPage(page, size, true);
-        List<Submit> submits = submitMapper.selectAll();
-        return new PageInfo<>(submits, size);
+        return getSubmits(page, new SubmitQuery());
     }
 
     /**
@@ -384,10 +382,6 @@ public class SubmitServiceImpl implements SubmitService {
             return null;
         }
         Integer contestId = contest.getContestId();
-        if (contest.getContestRankIsFinish()) {
-            //比赛排名更新结束
-            return getContestRank(page, contestId, contestRankQuery);
-        }
         if (isRank) {
             //没有获得更新权利
             if (isFinish) {
@@ -686,7 +680,7 @@ public class SubmitServiceImpl implements SubmitService {
             contestUserRatingMapper.saveContestUserRating(contestUserRating);
         }
         contestUserRatingMapper.updateContestUserRatingStatus(contestId, 2);
-        contest.setContestRankIsFinish(true);
+        //contest.setContestRankIsFinish(true);
         contestMapper.updateContestRankIsFinish(contest);
         return "success";
     }

@@ -4,12 +4,15 @@ import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.fastjson.JSON;
 import com.github.pagehelper.PageInfo;
 import com.hqz.hzuoj.annotations.UserLoginCheck;
+import com.hqz.hzuoj.base.ResultEntity;
 import com.hqz.hzuoj.bean.problem.Problem;
 import com.hqz.hzuoj.bean.solution.Solution;
 import com.hqz.hzuoj.bean.user.User;
 import com.hqz.hzuoj.service.ProblemService;
 import com.hqz.hzuoj.service.SolutionService;
 import com.hqz.hzuoj.util.MarkdownUtils;
+import com.hqz.hzuoj.vo.UserSolutionVO;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import java.util.List;
 
 /**
@@ -26,6 +30,7 @@ import java.util.List;
  * @Description: TODO
  */
 @Controller
+@Slf4j
 public class SolutionController {
 
     @Reference
@@ -36,6 +41,7 @@ public class SolutionController {
 
     /**
      * 题解页面
+     *
      * @param problemId
      * @return
      */
@@ -50,12 +56,13 @@ public class SolutionController {
             solution.setSolutionContent(s);
         }
         modelMap.put("pageInfo", pageInfo);
-       modelMap.put("problem", problem);
+        modelMap.put("problem", problem);
         return "solutions";
     }
 
     /**
      * 题解编辑页面
+     *
      * @param problemId
      * @param modelMap
      * @param request
@@ -88,6 +95,7 @@ public class SolutionController {
 
     /**
      * 保存或者修改
+     *
      * @param solution
      * @return
      */
@@ -96,7 +104,7 @@ public class SolutionController {
     @ResponseBody
     public String saveSolution(@RequestBody Solution solution, HttpServletRequest request) {
         if (solution == null) return null;
-        if (solution.getProblem() == null || solution.getProblem().getProblemId() == null) return  null;
+        if (solution.getProblem() == null || solution.getProblem().getProblemId() == null) return null;
         String str = (String) request.getSession().getAttribute("userId");
         Integer userId = Integer.parseInt(str);
         User user = new User();
@@ -105,5 +113,46 @@ public class SolutionController {
         Solution saveSolution = solutionService.saveSolution(solution);
         if (saveSolution == null) return null;
         return JSON.toJSONString(saveSolution);
+    }
+
+    /**
+     * 获取用户的题解信息
+     *
+     * @param userSolutionVO
+     * @return
+     */
+    @RequestMapping("/user/solutions")
+    @ResponseBody
+    public ResultEntity getUserSolutions(@RequestBody UserSolutionVO userSolutionVO) {
+        try {
+            System.out.println(userSolutionVO);
+            return ResultEntity.success("获取成功", solutionService.getUserSolutions(userSolutionVO));
+        } catch (Exception e) {
+            log.error("error:", e.getMessage());
+            return ResultEntity.error(e.getMessage());
+        }
+    }
+
+    /**
+     * 删除用户题解
+     * @param solutionId
+     * @param session
+     * @return
+     */
+    @RequestMapping("/solution/delete/{solutionId}")
+    @ResponseBody
+    @UserLoginCheck
+    public ResultEntity solutionDelete(@PathVariable Integer solutionId, HttpSession session) {
+        try {
+            Solution solution = solutionService.getSolution(solutionId);
+            Integer u = Integer.parseInt(session.getAttribute("userId").toString());
+            if (!u.equals(solution.getUser().getUserId())) {
+                return ResultEntity.error("不能删除别人发表的题解");
+            }
+            return ResultEntity.success("删除成功", solutionService.deleteSolution(solutionId));
+        } catch (Exception e) {
+            log.info("Error", e.getMessage());
+            return ResultEntity.error(e.getMessage());
+        }
     }
 }

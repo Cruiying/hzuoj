@@ -14,21 +14,15 @@
     <link rel="stylesheet" href="../static/lib/editormd/css/editormd.min.css"
           th:href="@{/lib/editormd/css/editormd.min.css}">
     <link rel="stylesheet" href="../static/css/me.css" th:href="@{/css/me.css}">
-    <link rel="stylesheet" href="../static/lib/layui/css/layui.css" media="all" th:href="@{/lib/layui/css/layui.css}">
     <link rel="stylesheet" href="../static/lib/jq-module/zyupload/zyupload-1.0.0.min.css"
           th:href="@{/lib/jq-module/zyupload/zyupload-1.0.0.min.css}" media="all">
     <link rel="stylesheet" href="https://apps.bdimg.com/libs/highlight.js/9.1.0/styles/tomorrow.min.css">
-    <link rel="stylesheet" href="../static/lib/layui/css/layui.css" media="all" th:href="@{/lib/layui/css/layui.css}">
     <link rel="stylesheet" href="../static/lib/jq-module/zyupload/zyupload-1.0.0.min.css"
           th:href="@{/lib/jq-module/zyupload/zyupload-1.0.0.min.css}" media="all">
     <link href="https://cdn.bootcss.com/prism/1.15.0/themes/prism.css" rel="stylesheet">
-    <script src="../static/lib/vue/vue.js" th:src="@{/lib/vue/vue.js}"></script>
-    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
-    <script type="text/javascript" src="https://cdn.bootcss.com/axios/0.19.0-beta.1/axios.js"></script>
     <link rel="stylesheet" href="../static/lib/jq-module/zyupload/zyupload-1.0.0.min.css"
           th:href="@{/lib/jq-module/zyupload/zyupload-1.0.0.min.css}" media="all">
-    <script type="text/javascript" async
-            src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+
     <link rel="stylesheet" type="text/css" href="../static/css/main.css" th:href="@{/css/main.css}">
     <style>
         html, body {
@@ -56,7 +50,7 @@
         <div class="row" style="margin-top: -23px;">
             <a class="ui teal button" href="#submit">提交</a>
             <a v-if="contestId==null" class="ui purple button" :href="'/problem/solutions/'+problem.problemId">查看题解</a>
-            <a :href="'/submits?problemId='+problem.problemId" class="ui positive button">提交记录</a>
+            <a v-if="contestId==null"  :href="'/submits?problemId='+problem.problemId" class="ui positive button">提交记录</a>
         </div>
     </div>
     <div class="ui grid" v-if="problem != null">
@@ -266,14 +260,16 @@
         </div>
     </div>
 </footer>
-<script src="../static/js/mathjax.js" th:src="@{/js/mathjax.js}"></script>
+<script src="../static/lib/vue/vue.js" th:src="@{/lib/vue/vue.js}"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="//cdn.bootcss.com/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/javascript" src="https://cdn.bootcss.com/axios/0.19.0-beta.1/axios.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jquery@3.2/dist/jquery.min.js"></script>
 <script async="async" type="text/javascript"
         src="https://cdn.jsdelivr.net/npm/syzoj-public-cdn@1.0.6/cdnjs/monaco-editor/0.18.1/min/vs/editor/editor.main.nls.js"></script>
 <script async="async" type="text/javascript"
         src="https://cdn.jsdelivr.net/npm/syzoj-public-cdn@1.0.6/self/vendor/tokenizer/monaco-tokenizer.js"></script>
 <script src="https://cdn.jsdelivr.net/semantic-ui/2.2.4/semantic.min.js"></script>
-<script src="../static/lib/layui/layui.js" charset="utf-8" th:src="@{/lib/layui/layui.js}"></script>
 <script src="../static/js/DateUtils.js" th:src="@{/js/DateUtils.js}"></script>
 <script src="../static/lib/jq-module/zyupload/zyupload-1.0.0.min.js"
         th:src="@{/lib/jq-module/zyupload/zyupload-1.0.0.min.js}" charset="utf-8"></script>

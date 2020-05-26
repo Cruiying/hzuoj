@@ -9,7 +9,9 @@ import com.hqz.hzuoj.bean.solution.SolutionStatus;
 import com.hqz.hzuoj.mapper.solution.SolutionMapper;
 import com.hqz.hzuoj.mapper.solution.SolutionStatusMapper;
 import com.hqz.hzuoj.service.SolutionService;
+import com.hqz.hzuoj.vo.UserSolutionVO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 
 import java.util.Date;
 import java.util.List;
@@ -137,5 +139,21 @@ public class SolutionServiceImpl implements SolutionService {
         }
         solutionMapper.updateSolutionStatus(solution);
         return  getSolution(solution.getSolutionId());
+    }
+
+    /**
+     * 获取用户题解
+     * @param userSolutionVO
+     * @return
+     */
+    @Override
+    public PageInfo getUserSolutions(UserSolutionVO userSolutionVO) {
+        System.err.println(userSolutionVO);
+        PageHelper.startPage(userSolutionVO.getPage(), userSolutionVO.getPageSize(), true);
+        List<Solution> list = solutionMapper.getUserSolutions(userSolutionVO);
+        for (Solution solution : list) {
+            System.out.println(solution);
+        }
+        return new PageInfo<>(list, userSolutionVO.getPageSize());
     }
 }
