@@ -23,29 +23,22 @@
             <result column="user_challenge_total" property="userChallengeTotal"/>
         </association>
     </resultMap>
+<!--    回复map-->
     <resultMap id="discussionCommentResultMap" type="com.hqz.hzuoj.bean.discussion.DiscussionComment">
-        <id column="cu1_comment_id" property="commentId"/>
-        <result column="cu1_comment_content" property="commentContent"/>
-        <result column="cu1_comment_time" property="commentTime"/>
+        <id column="comment_id" property="commentId"/>
+        <result column="comment_content" property="commentContent"/>
+        <result column="comment_time" property="commentTime"/>
         <association property="user" javaType="com.hqz.hzuoj.bean.user.User">
-            <id column="cu1_user_id" property="userId"/>
-            <result column="cu1_username" property="username"/>
-            <result column="cu1_user_img" property="UserImg"/>
-            <result column="cu1_user_rating" property="userRating"/>
+            <id column="user_id" property="userId"/>
+            <result column="username" property="username"/>
+            <result column="user_img" property="UserImg"/>
+            <result column="user_rating" property="userRating"/>
         </association>
         <association property="discussion" javaType="com.hqz.hzuoj.bean.discussion.Discussion">
-            <id column="cu1_discussion_id" property="discussionId"></id>
+            <id column="discussion_id" property="discussionId"/>
         </association>
         <association property="parentComment" javaType="com.hqz.hzuoj.bean.discussion.DiscussionComment">
-            <id column="cu2_comment_id" property="commentId"/>
-            <result column="cu2_comment_content" property="commentContent"/>
-            <result column="cu2_comment_time" property="commentTime"/>
-            <association property="user" javaType="com.hqz.hzuoj.bean.user.User">
-                <id column="cu2_user_id" property="userId"/>
-                <result column="cu2_username" property="username"/>
-                <result column="cu2_user_img" property="UserImg"/>
-                <result column="cu2_user_rating" property="userRating"/>
-            </association>
+            <id column="parent_comment_id" property="commentId"/>
         </association>
     </resultMap>
 <!--    保存讨论-->
@@ -132,65 +125,15 @@
     </insert>
 <!--    获取回复列表-->
     <select id="getDiscussionComments" resultMap="discussionCommentResultMap">
-       SELECT
-          cu1.`comment_id` cu1_comment_id,
-          cu1.`comment_content` cu1_comment_content,
-          cu1.`comment_time` cu1_comment_time,
-          cu1.`discussion_id` cu1_discussion_id,
-          cu1.`email` cu1_email,
-          cu1.`parent_comment_id` cu1_parent_comment_id,
-          cu1.`username` cu1_username,
-          cu1.`user_id` cu1_user_id,
-          cu1.`user_img` cu1_user_img,
-          cu1.`user_rating` cu1_user_rating,
-          cu2.`comment_id` cu2_comment_id,
-          cu2.`comment_content` cu2_comment_content,
-          cu2.`comment_time` cu2_comment_time,
-          cu2.`discussion_id` cu2_discussion_id,
-          cu2.`email` cu2_email,
-          cu2.`parent_comment_id` cu2_parent_comment_id,
-          cu2.`username` cu2_username,
-          cu2.`user_id` cu2_user_id,
-          cu2.`user_img` cu2_user_img,
-          cu2.`user_rating` cu2_user_rating
-        FROM
-          comment_users cu1
-          LEFT JOIN comment_users cu2
-            ON cu1.parent_comment_id = cu2.comment_id
-        WHERE cu1.discussion_id = #{discussionId}
-
-	    and (cu1.parent_comment_id = -1 or cu2.comment_id is not null)
-        ORDER BY cu1.comment_id ASC
-
+        select * from hzuoj_discussions_comments dc
+        inner join hzuoj_users u on dc.user_id = u.user_id
+        where dc.discussion_id = #{discussionId}
     </select>
 <!--    获取回复-->
     <select id="getDiscussionComment" resultMap="discussionCommentResultMap">
-        SELECT
-          cu1.`comment_id` cu1_comment_id,
-          cu1.`comment_content` cu1_comment_content,
-          cu1.`comment_time` cu1_comment_time,
-          cu1.`discussion_id` cu1_discussion_id,
-          cu1.`email` cu1_email,
-          cu1.`parent_comment_id` cu1_parent_comment_id,
-          cu1.`username` cu1_username,
-          cu1.`user_id` cu1_user_id,
-          cu1.`user_img` cu1_user_img,
-          cu1.`user_rating` cu1_user_rating,
-          cu2.`comment_id` cu2_comment_id,
-          cu2.`comment_content` cu2_comment_content,
-          cu2.`comment_time` cu2_comment_time,
-          cu2.`discussion_id` cu2_discussion_id,
-          cu2.`email` cu2_email,
-          cu2.`parent_comment_id` cu2_parent_comment_id,
-          cu2.`username` cu2_username,
-          cu2.`user_id` cu2_user_id,
-          cu2.`user_img` cu2_user_img,
-          cu2.`user_rating` cu2_user_rating
-        FROM
-          comment_users cu1
-          LEFT JOIN comment_users cu2
-            ON cu1.parent_comment_id = cu2.comment_id
-        WHERE cu1.comment_id = #{commentId}
+        select * from hzuoj_discussions_comments dc
+        inner join hzuoj_users u on dc.user_id = u.user_id
+        where dc.comment_id = #{commentId}
     </select>
 <!--    更新讨论数量-->
     <update id="updateDiscussionCount">

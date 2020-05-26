@@ -4,6 +4,7 @@ import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.fastjson.JSON;
 import com.github.pagehelper.PageInfo;
 import com.hqz.hzuoj.annotations.UserLoginCheck;
+import com.hqz.hzuoj.base.ResultEntity;
 import com.hqz.hzuoj.bean.contest.*;
 import com.hqz.hzuoj.bean.language.Language;
 import com.hqz.hzuoj.bean.problem.Problem;
@@ -20,6 +21,7 @@ import com.hqz.hzuoj.user.mq.MessageSender;
 import com.hqz.hzuoj.user.mq.SubmitResultMessageListener;
 import com.hqz.hzuoj.util.MarkdownUtils;
 import javassist.NotFoundException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
@@ -29,6 +31,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.sql.ResultSet;
 import java.text.ParseException;
 import java.util.*;
 
@@ -39,6 +42,7 @@ import java.util.*;
  */
 @Controller
 @CrossOrigin
+@Slf4j
 public class ContestController {
 
     @Reference
@@ -149,10 +153,21 @@ public class ContestController {
         modelMap.put("page", JSON.toJSONString(pageInfo));
         modelMap.put("pageInfo", pageInfo);
         modelMap.put("contestApplys", contestApplys);
-        modelMap.put("rankList", userService.getRanks(1, new RankingQuery()));
+        //modelMap.put("rankList", userService.getRanks(1, new RankingQuery()));
         modelMap.put("contestQuery", contestQuery);
         modelMap.put("contestTypes", contestTypes);
         return "contests";
+    }
+
+    @RequestMapping("/user/rank/list")
+    @ResponseBody
+    public ResultEntity getRankList() {
+        try {
+            return ResultEntity.success("获取成功",userService.getRanks(1, new RankingQuery()));
+        }catch (Exception e) {
+            log.error("Error", e.getMessage());
+            return ResultEntity.error(e.getMessage());
+        }
     }
 
     /**

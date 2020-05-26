@@ -238,7 +238,6 @@ public class UserController implements ErrorController {
      */
     @RequestMapping("/user/{userId}")
     public String getUser(@PathVariable Integer userId, ModelMap modelMap) {
-
         User user = userService.getUser(userId);
         if (user == null) {
             return "404";

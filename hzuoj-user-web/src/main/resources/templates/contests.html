@@ -14,19 +14,11 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/semantic-ui/2.2.4/semantic.min.css">
 
     <link rel="stylesheet" href="../static/css/me.css" th:href="@{/css/me.css}">
-    <!--    <script type="text/javascript" src="../static/js/xadmin.js" th:src="@{/js/xadmin.js}"></script>-->
-    <link rel="stylesheet" href="../static/lib/layui/css/layui.css" media="all" th:href="@{/lib/layui/css/layui.css}">
     <link rel="stylesheet" href="../static/lib/jq-module/zyupload/zyupload-1.0.0.min.css"
           th:href="@{/lib/jq-module/zyupload/zyupload-1.0.0.min.css}" media="all">
     <script src="../static/lib/vue/vue.js" th:src="@{/lib/vue/vue.js}"></script>
     <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
     <script type="text/javascript" src="https://cdn.bootcss.com/axios/0.19.0-beta.1/axios.js"></script>
-
-    <script type="text/javascript" async
-            src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
-    </script>
-    <!--    <script src="../static/lib/vs/basic-languages/cpp/cpp.js" th:src="@{/lib/vs/basic-languages/cpp/cpp.js}"></script>-->
-    <!--    <script src="../static/lib/vs/basic-languages/**" th:src="@{/lib/vs/basic-languages/}"></script>-->
     <link rel="stylesheet" type="text/css" href="../static/css/main.css" th:href="@{/css/main.css}">
     <style>
         .icon {
@@ -231,8 +223,8 @@
                         </div>
                     </div>
                     <div class="ui teal">
-                        <div class="ui fluid vertical menu">
-                            <a :href="'/user/'+ rank.user.userId" class="item" v-for="rank,index in rankList.list"
+                        <div class="ui fluid vertical menu" v-if="rankList != null">
+                            <a  :href="'/user/'+ rank.user.userId" class="item" v-for="rank,index in rankList.list"
                                v-if="index < 8">
                                 <div class="ui two column grid">
                                     <div class="column"
@@ -299,12 +291,10 @@
 <footer th:replace="fragment::footer"></footer>
 </body>
 <script src="../static/js/jquery.min.js" charset="utf-8" th:src="@{/js/jquery.min.js}"></script>
-<script src="../static/lib/layui/layui.js" charset="utf-8" th:src="@{/lib/layui/layui.js}"></script>
 <script src="../static/js/semantic.js" th:src="@{/js/semantic.js}"></script>
 <script src="../static/js/DateUtils.js" th:src="@{/js/DateUtils.js}"></script>
 <script src="../static/lib/jq-module/zyupload/zyupload-1.0.0.min.js"
         th:src="@{/lib/jq-module/zyupload/zyupload-1.0.0.min.js}" charset="utf-8"></script>
-<script src="../static/js/mathjax.js" th:src="@{/js/mathjax.js}"></script>
 <script src="../static/js/common.js" th:src="@{/js/common.js}"></script>
 <script th:inline="javascript" type="text/javascript">
     new Vue({
@@ -317,7 +307,7 @@
             contests: [[${pageInfo.list}]],
             loginUserId: [[${session.userId}]],
             contestApplys: [[${contestApplys}]],
-            rankList: [[${rankList}]],
+            rankList: null,
             contestTypes: [[${contestTypes}]]
         },
         methods: {
@@ -401,6 +391,14 @@
             mounted: function () {
 
             },
+            getRankList: function() {
+                axios.post("/user/rank/list")
+                    .then((data)=>{
+                    if (data.data["code"] == '1') {
+                        this.rankList = data.data["data"];
+                    }
+                })
+            },
             getURL: function (str, val) {
                 let tmp = JSON.parse(JSON.stringify(this.contestQuery));
                 if (tmp == null) tmp = {};
@@ -411,6 +409,9 @@
                 if (tmp.categoryFilter != null) url += 'categoryFilter=' + tmp.categoryFilter + "&";
                 return url;
             },
+        },
+        created: function () {
+            this.getRankList();
         }
     });
 </script>

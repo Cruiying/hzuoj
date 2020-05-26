@@ -72,7 +72,7 @@ public class UserServiceImpl implements UserService {
             user.setUserAcceptedTotal(userMapper.getUserAcceptedTotal(userId, judgeResult.getJudgeResultId(), 1));
             user.setUserSubmitAcceptedTotal(userMapper.getUserSubmitAcceptedTotal(userId, judgeResult.getJudgeResultId(), 1));
             userMapper.updateByPrimaryKey(user);
-            int time = (int) (Math.random() * 60 * 60 + 60);
+            int time = (int) (Math.random() * 60 * 60 * 24 + 60);
             redisUtil.set(key, JSON.toJSONString(user), time);
         }
         return user;

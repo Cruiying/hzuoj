@@ -4,6 +4,7 @@ import com.hqz.hzuoj.bean.user.User;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 

@@ -41,9 +41,7 @@ public class SolutionController {
      */
     @RequestMapping("/problem/solutions/{problemId}")
     public String getSolutions(Integer page, @PathVariable Integer problemId, ModelMap modelMap) {
-        if (page == null || page <= 0) {
-            page = 1;
-        }
+        if (page == null || page <= 0) page = 1;
         PageInfo<Solution> pageInfo = solutionService.getSolutions(page, problemId);
         Problem problem = problemService.getProblem(problemId);
         List<Solution> solutions = pageInfo.getList();
@@ -68,9 +66,7 @@ public class SolutionController {
     public String editorSolution(@PathVariable Integer problemId, Integer solutionId, ModelMap modelMap, HttpServletRequest request) {
         if (problemId != null) {
             Problem problem = problemService.getProblem(problemId);
-            if (problem == null) {
-                return "404";
-            }
+            if (problem == null) return "404";
             Solution solution = solutionService.getSolution(solutionId);
             if (solution != null) {
                 String str = (String) request.getSession().getAttribute("userId");
@@ -99,21 +95,15 @@ public class SolutionController {
     @UserLoginCheck
     @ResponseBody
     public String saveSolution(@RequestBody Solution solution, HttpServletRequest request) {
-        if (solution == null) {
-            return null;
-        }
-        if (solution.getProblem() == null || solution.getProblem().getProblemId() == null) {
-            return  null;
-        }
+        if (solution == null) return null;
+        if (solution.getProblem() == null || solution.getProblem().getProblemId() == null) return  null;
         String str = (String) request.getSession().getAttribute("userId");
         Integer userId = Integer.parseInt(str);
         User user = new User();
         user.setUserId(userId);
         solution.setUser(user);
         Solution saveSolution = solutionService.saveSolution(solution);
-        if (saveSolution == null) {
-            return null;
-        }
+        if (saveSolution == null) return null;
         return JSON.toJSONString(saveSolution);
     }
 }

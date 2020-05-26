@@ -14,14 +14,10 @@
     <link rel="stylesheet" href="../static/lib/tocbot/tocbot.css" th:href="@{/lib/tocbot/tocbot.css}">
     <link rel="stylesheet" href="../static/css/me.css" th:href="@{/css/me.css}">
     <link rel="stylesheet" href="https://apps.bdimg.com/libs/highlight.js/9.1.0/styles/tomorrow.min.css">
-    <link rel="stylesheet" href="../static/lib/layui/css/layui.css" media="all" th:href="@{/lib/layui/css/layui.css}">
     <link rel="stylesheet" href="../static/lib/jq-module/zyupload/zyupload-1.0.0.min.css"
           th:href="@{/lib/jq-module/zyupload/zyupload-1.0.0.min.css}" media="all">
     <link href="https://cdn.bootcss.com/prism/1.15.0/themes/prism.css" rel="stylesheet">
     <link href="https://cdn.bootcss.com/prism/1.15.0/plugins/line-numbers/prism-line-numbers.css" rel="stylesheet">
-    <script type="text/javascript" async
-            src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
-    </script>
     <script src="../static/lib/vue/vue.js" th:src="@{/lib/vue/vue.js}"></script>
     <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
     <script type="text/javascript" src="https://cdn.bootcss.com/axios/0.19.0-beta.1/axios.js"></script>
@@ -46,8 +42,6 @@
             background-color: rgb(239, 239, 239);
         }
     </style>
-    <link rel="stylesheet" type="text/css" data-name="vs/editor/editor.main"
-          href="https://cdn.jsdelivr.net/npm/syzoj-public-cdn@1.0.6/cdnjs/monaco-editor/0.18.1/min/vs/editor/editor.main.css">
     <script src="../static/js/jquery.min.js" charset="utf-8" th:src="@{/js/jquery.min.js}"></script>
 </head>
 <body>
@@ -118,9 +112,9 @@
                         </div>
                     </div>
                     <div class="sixteen wide column">
-                        <div id="comment-container" class="ui teal segment">
+                        <div id="comment-container" class="ui teal segment" v-if="comments != null">
                             <div class="ui threaded comments" style="max-width: 100%; padding: 0">
-                                <div class="comment" v-for="comment,index in comments">
+                                <div class="comment" v-for="comment,i in comments">
                                     <a class="avatar">
                                         <img src="../static/images/default.png"
                                              :src="comment.user.userImg != null && comment.user.userImg.length>0 ? comment.user.userImg: '/images/default.png'">
@@ -130,14 +124,16 @@
                                             <a :href="'/user/'+comment.user.userId"
                                                v-html="getUserRatingColor(comment.user.username,comment.user.userRating)"></a>
                                             <div class="ui mini basic teal left pointing label m-padded-mini"
-                                                 v-text="(index+1)+'楼'"></div>
+                                                 v-text="(i+1)+'楼'"></div>
                                             <div v-if="comment.user.userId==discussion.user.userId"
                                                  class="ui mini basic teal left pointing label m-padded-mini"
                                                  v-text="'楼主'"></div>
                                         </a>
                                         <div class="metadata">
                                             <span class="date" v-text="dateFormat(comment.commentTime)"></span>
-                                            <a v-if="comment.user.userId == loginUserId" style="color: rgba(0,0,0,.4); cursor: pointer;" v-on:click="deleteComment(comment.commentId)">删除</a>
+                                            <a v-if="comment.user.userId == loginUserId"
+                                               style="color: rgba(0,0,0,.4); cursor: pointer;"
+                                               v-on:click="deleteComment(comment.commentId)">删除</a>
                                         </div>
                                         <div class="text">
                                             <span v-text="comment.commentContent"></span>
@@ -150,7 +146,7 @@
                                                             <input type="text" placeholder="评论内容">
                                                         </div>
                                                         <div class="field" style="text-align: right">
-                                                            <button v-on:click="onReply(index,comment.commentId,$event)"
+                                                            <button v-on:click="onReply(i, i, 0, comment.commentId, $event)"
                                                                     style="background: #22ae90; color: white;"
                                                                     class="ui button">回复
                                                             </button>
@@ -161,7 +157,7 @@
                                         </span>
                                         </div>
                                     </div>
-                                    <div style="padding: 2px" class="comments" v-for="reply in comment.comments">
+                                    <div style="padding: 2px" class="comments" v-for="reply,j in comment.comments">
                                         <div class="comment">
                                             <a class="avatar">
                                                 <img src="../static/images/default.png"
@@ -181,7 +177,9 @@
                                                 </div>
                                                 <div class="metadata">
                                                     <span class="date" v-text="dateFormat(reply.commentTime)"></span>
-                                                    <a v-if="reply.user.userId == loginUserId" style="color: rgba(0,0,0,.4); cursor: pointer;" v-on:click="deleteComment(reply.commentId)">删除</a>
+                                                    <a v-if="reply.user.userId == loginUserId"
+                                                       style="color: rgba(0,0,0,.4); cursor: pointer;"
+                                                       v-on:click="deleteComment(reply.commentId)">删除</a>
                                                 </div>
                                                 <div class="text">
                                                     <span v-text="reply.commentContent"></span>
@@ -194,15 +192,63 @@
                                                                     <input type="text" placeholder="评论内容">
                                                                 </div>
                                                                 <div class="field" style="text-align: right">
-                                                                    <button v-on:click="onReply(index,reply.commentId,$event)"
+                                                                    <button v-on:click="onReply(i,j, 3, reply.commentId,$event)"
                                                                             style="background: #22ae90; color: white;"
-                                                                            class="ui button">回复
-                                                                    </button>
+                                                                            class="ui button">回复</button>
                                                                 </div>
                                                             </div>
                                                         </div>
                                                     </div>
                                                 </span>
+                                                </div>
+                                            </div>
+                                            <div style="padding: 2px" class="comments" v-for="r,k in reply.comments">
+                                                <div class="comment">
+                                                    <a class="avatar">
+                                                        <img src="../static/images/default.png"
+                                                             :src="r.user.userImg != null && r .user.userImg.length>0 ? r.user.userImg: '/images/default.png'">
+                                                    </a>
+                                                    <div class="content" style="padding-top: 0!important;">
+                                                        <div class="author">
+                                                            <a :href="'/user/'+r.user.userId"
+                                                               v-html="getUserRatingColor(r.user.username,r.user.userRating)"></a>
+                                                            <div v-if="r.user.userId==discussion.user.userId"
+                                                                 class="ui mini basic teal left pointing label m-padded-mini"
+                                                                 v-text="'楼主'"></div>
+                                                            <span style=" color: #009c95;font-weight: 400"> 回复 </span><a
+                                                                :href="'/user/'+r.parentComment.user.userId"
+                                                                class="m-teal"
+                                                                v-html="getUserRatingColor(r.parentComment.user.username,r.parentComment.user.userRating)"> </a>
+                                                        </div>
+                                                        <div class="metadata">
+                                                            <span class="date"
+                                                                  v-text="dateFormat(r.commentTime)"></span>
+                                                            <a v-if="r.user.userId == loginUserId"
+                                                               style="color: rgba(0,0,0,.4); cursor: pointer;"
+                                                               v-on:click="deleteComment(r.commentId)">删除</a>
+                                                        </div>
+                                                        <div class="text">
+                                                            <span v-text="r.commentContent"></span>
+                                                            <span class="actions">
+                                                                <div class="ui accordion field">
+                                                                    <a class="title">回复</a>
+                                                                    <div class="content field">
+                                                                        <div class="ui form">
+                                                                            <div class="field">
+                                                                                <input type="text" placeholder="评论内容">
+                                                                            </div>
+                                                                            <div class="field"
+                                                                                 style="text-align: right">
+                                                                                <button v-on:click="onReply(i,j,3,r.commentId,$event)"
+                                                                                        style="background: #22ae90; color: white;"
+                                                                                        class="ui button">回复</button>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </span>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -277,6 +323,7 @@
 </body>
 <script th:replace="fragment::script"></script>
 <script src="../static/js/common.js" th:src="@{/js/common.js}"></script>
+<script src="//cdn.bootcss.com/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 <!--初始化mathjax-->
 <script th:inline="none">
     let isMathjaxConfig = false; // 防止重复调用Config，造成性能损耗
@@ -312,21 +359,14 @@
 <script th:inline="javascript">
     new Vue({
         el: '#app',
-        inject: ['reload'],
-        provide() {
-            return {
-                reload: this.reload
-            }
-        },
         data: {
             discussion: [[${discussion}]],
-            discussions: [[${discussions}]],
+            discussions: {},
             loginUserId: [[${session.userId}]],
-            pageInfo: [[${pageInfo}]],
-            comments: [[${comments}]],
+            comments: []
         },
         methods: {
-            onReply: function (index, commentId, obj) {
+            onReply: function (i, j, k, commentId, obj) {
                 const commentContent = $(obj.currentTarget.parentNode.parentNode.firstChild.firstChild).val();
                 $(obj.currentTarget.parentNode.parentNode.firstChild.firstChild).val("");
                 let comment = {};
@@ -340,11 +380,15 @@
                 axios.post('/discussion/comment', comment)
                     .then((data) => { // 正确的回调
                         if (data.data != null) {
-                            this.comments[index].comments.push(data.data);
+                            if (k == 2) {
+                                this.comments[i].comments.push(data.data);
+                            } else if (k == 3) {
+                                this.comments[i].comments[j].comments.push(data.data);
+                            }
+                            this.getDiscussionComments();
                         }
                     })
                     .catch((error) => { // 错误的回调
-
                     });
             },
             getUserRatingColor: function (username, rating) {
@@ -354,11 +398,10 @@
                 axios.post('/discussion/delete?discussionId=' + discussionId)
                     .then((data) => {
                         const result = data.data;
+                        alert(result["message"]);
                         if (result["code"] == "1") {
-                            alert(result["message"]);
                             window.location.href = "/discussions";
                         } else {
-                            alert(result["message"]);
                         }
                     })
             },
@@ -375,6 +418,7 @@
                             this.comments.push(data.data);
                             this.discussion.discussionReplyCount = this.discussion.discussionReplyCount + 1;
                         }
+                        this.println(this.comments);
                     })
                     .catch((error) => { // 错误的回调
 
@@ -385,25 +429,47 @@
                 return common.getDateFormat(time);
             },
             deleteComment: function (commentId) {
-                axios.post('/discussion/delete/comment/'+commentId)
-                    .then((data)=>{
+                axios.post('/discussion/delete/comment/' + commentId)
+                    .then((data) => {
                         const result = data.data;
                         alert(result["message"]);
                         if (result["code"] == "1") {
                             window.location.reload();
                         }
+                    })
+            },
+            getDiscussionComments() {
+                axios.post("/discussion/comments/" + this.discussion.discussionId)
+                    .then((data) => {
+                        console.log(data.data);
+                        if (data.data["code"] == 1) {
+                            this.comments = data.data["data"];
+                        }
+                    }).catch((data) => {
+
+                })
+            },
+            getDiscussions() {
+                axios.post("/discussions/info", {}).then((data) => {
+                    if (data.data["code"] == 1) {
+                        console.log(data.data["data"])
+                        this.discussions = data.data["data"];
+                    } else {
+                        alert(data.data["message"]);
+                    }
+                }).catch((error)=>{
+                    alert(error)
                 })
             }
         },
         created: function () {
+            this.getDiscussions();
+            this.getDiscussionComments();
 
+            show();
+            $("#reply").css("display", "block");
         }
     });
-
-    window.onload = function () {
-        show();
-        $("#reply").css("display", "block");
-    }
 
     function show() {
         $('.ui.accordion').accordion();

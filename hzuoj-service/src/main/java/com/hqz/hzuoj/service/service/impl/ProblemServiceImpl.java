@@ -71,7 +71,9 @@ public class ProblemServiceImpl implements ProblemService {
             }
             List<Example> list = problem.getExamples();
             exampleMapper.deleteExamples(problemId);
-            exampleMapper.saveExamples(list, problemId);
+            if(null != list && !list.isEmpty()){
+                exampleMapper.saveExamples(list, problemId);
+            }
             return problem.getProblemId();
         }
         try {

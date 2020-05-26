@@ -104,9 +104,7 @@ public class TestResultMessageListener {
         Long testId = messageEvent.getTestId();
         MessageListener messageListener = new MessageListener();
         //保证发送的消息顺序性
-        synchronized (this) {
-            messageListener.setDate(new Date());
-        }
+        messageListener.setDate(new Date());
         messageListener.setMessage(messageEvent);
         LinkedList<MessageListener> messageListeners = queueMessage.get(testId);
         if (null == messageListeners) {
@@ -114,15 +112,7 @@ public class TestResultMessageListener {
         }
         messageListeners.add(messageListener);
         queueMessage.put(testId, messageListeners);
-        SseEmitter sseEmitter = sseEmitters.get(testId);
-        if (null != sseEmitter) {
-            send(testId);
-        } else {
-            //等待500继续发送消息
-            Thread.sleep(2000);
-            send(testId);
-        }
-
+        send(testId);
     }
 
     /**
@@ -132,7 +122,13 @@ public class TestResultMessageListener {
      * @throws IOException
      */
     private void send(Long testId) throws IOException, InterruptedException {
+        int count = 0;
         SseEmitter sseEmitter = sseEmitters.get(testId);
+        while (sseEmitter == null && count < 1000) {
+            count++;
+            sseEmitter = sseEmitters.get(testId);
+            Thread.sleep(5);
+        }
         if (sseEmitter != null) {
             long index = 0;
             LinkedList<MessageListener> messageListeners = queueMessage.get(testId);
@@ -143,7 +139,7 @@ public class TestResultMessageListener {
                 try {
                     long time = messageListener.getDate().getTime();
                     //发送测评消息
-                    if(index < time) {
+                    if (index < time) {
                         index = time;
                         sseEmitter.send(JSON.toJSONString(event));
                     }
@@ -159,7 +155,6 @@ public class TestResultMessageListener {
                     //已经发送，移除测评消息
                     messageListeners.remove(messageListener);
                 }
-
             }
         }
 

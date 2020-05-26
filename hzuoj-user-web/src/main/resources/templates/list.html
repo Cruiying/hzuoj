@@ -12,21 +12,13 @@
           content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi"/>
     <link rel="stylesheet" href="../static/css/semantic.css" th:href="@{/css/semantic.css}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/semantic-ui/2.2.4/semantic.min.css">
-
     <link rel="stylesheet" href="../static/css/me.css" th:href="@{/css/me.css}">
-    <!--    <script type="text/javascript" src="../static/js/xadmin.js" th:src="@{/js/xadmin.js}"></script>-->
     <link rel="stylesheet" href="../static/lib/layui/css/layui.css" media="all" th:href="@{/lib/layui/css/layui.css}">
     <link rel="stylesheet" href="../static/lib/jq-module/zyupload/zyupload-1.0.0.min.css"
           th:href="@{/lib/jq-module/zyupload/zyupload-1.0.0.min.css}" media="all">
     <script src="../static/lib/vue/vue.js" th:src="@{/lib/vue/vue.js}"></script>
     <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
     <script type="text/javascript" src="https://cdn.bootcss.com/axios/0.19.0-beta.1/axios.js"></script>
-
-    <script type="text/javascript" async
-            src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
-    </script>
-    <!--    <script src="../static/lib/vs/basic-languages/cpp/cpp.js" th:src="@{/lib/vs/basic-languages/cpp/cpp.js}"></script>-->
-    <!--    <script src="../static/lib/vs/basic-languages/**" th:src="@{/lib/vs/basic-languages/}"></script>-->
     <link rel="stylesheet" type="text/css" href="../static/css/main.css" th:href="@{/css/main.css}">
     <style>
         a {
@@ -51,10 +43,11 @@
 <body>
 <!--导航-->
 <nav th:replace="fragment::menu('problems')"></nav>
-<div class="ui " style="background-image: url('/images/top.png'); height: 180px;" >
+<div class="ui " style="background-image: url('/images/top.png'); height: 180px;">
     <div class="ui container" style="padding-top: 60px;padding-left: 9%; float: left">
         <div class="ui middle container">
-            <h1 style="color: white;font-weight: 700; font-size: 35px;">贺州学院<span style="color: red; text-align: center">H</span>
+            <h1 style="color: white;font-weight: 700; font-size: 35px;">贺州学院<span
+                    style="color: red; text-align: center">H</span>
                 <span style="color: orange;text-align: center">z</span>
                 <span style="color: yellow; text-align: center">u</span>
                 <span style="color: green; text-align: center">O</span>
@@ -66,79 +59,88 @@
 <div style="height: 50px;"></div>
 <!--中间内容-->
 <div class="ui container " id="app" style="min-height: 400px;">
-    <div style="display: block;height: 80px;" :style="'display: none'"  class="ui active centered inline loader"></div>
+    <div style="display: block;height: 80px;" :style="'display: none'" class="ui active centered inline loader"></div>
     <div style="display: none;" :style="'display: block'">
-        <form action="/problems" class="ui small from" method="get">
-            <div class="ui grid" style="margin-bottom: 5px;">
-                <div class="ui eight wide column search">
-                    <div class="ui icon input">
-                        <input id="search" class="prompt" name="problemTitle" :value="problemQuery.problemTitle" type="text"
-                               placeholder="请输入题目...">
-                        <i class="search icon"></i>
+<!--        <div class="ui grid">-->
+<!--            <div class="sixteen wide column">-->
+<!--                <span style="cursor: pointer" class="ui tiny olive label">上下界网络流</span>-->
+<!--            </div>-->
+<!--        </div>-->
+        <div class="ui">
+            <form action="/problems" class="ui small from" method="get">
+                <div class="ui grid" style="margin-bottom: 5px;">
+                    <div class="ui eight wide column search">
+                        <div class="ui icon input">
+                            <input id="search" class="prompt" name="problemTitle" :value="problemQuery.problemTitle"
+                                   type="text"
+                                   placeholder="请输入题目...">
+                            <i class="search icon"></i>
+                        </div>
+                        <div class="results"></div>
                     </div>
-                    <div class="results"></div>
                 </div>
-            </div>
-            <div style="overflow-x:auto">
-                <table class="ui unstackable padded center aligned table" style="white-space: nowrap;">
-                    <thead>
-                    <tr>
-                        <th>题号</th>
-                        <th style="text-align: left">题目名称</th>
-                        <th></th>
-                        <th>通过/提交</th>
-                        <th>难度</th>
-                        <th>状态</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr v-if="pageInfo != null" v-for="problem in pageInfo.list">
-                        <td v-text="problem.problemId">68</td>
-                        <td style="text-align: left"><a :href="'/problem/'+ problem.problemId" class="m-problem"
-                                                        v-text="problem.problemTitle">传销自残</a></td>
-                        <td style="text-align: right">
-                            <a :href="'/problems?tagId='+tag.tagId" class="tag button" v-for="tag in problem.tags"
-                               v-text="tag.tagName">数论</a>
-                        </td>
-                        <td v-text="problem.problemSubmitInfo.allAcceptedTotal+'/'+ problem.problemSubmitInfo.allTotal">
-                            2/12
-                        </td>
-                        <td class="m-problem"><a style="color: #25bb9b !important;"
-                                                 :href="'/problems?problemLevelId='+problem.problemLevel.problemLevelId"
-                                                 v-text="problem.problemLevel.problemLevelName"></a></td>
-                        <td v-if="problem.problemSubmitInfo.myAllTotal == 0">未提交</td>
-                        <td v-if="problem.problemSubmitInfo.myAcceptedTotal > 0" class="m-problem"><i
-                                class="icon checkmark"></i>已通过
-                        </td>
-                        <td style="color: red"
-                            v-if="problem.problemSubmitInfo.myAllTotal != 0 && problem.problemSubmitInfo.myAcceptedTotal <= 0">
-                            <i class="icon close"></i>未通过
-                        </td>
-                    </tr>
-                    </tbody>
+                <div style="overflow-x:auto">
+                    <table class="ui unstackable padded center aligned table" style="white-space: nowrap;">
+                        <thead>
+                        <tr>
+                            <th>题号</th>
+                            <th style="text-align: left">题目名称</th>
+                            <th></th>
+                            <th>通过/提交</th>
+                            <th>难度</th>
+                            <th>状态</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr v-if="pageInfo != null" v-for="problem in pageInfo.list">
+                            <td v-text="problem.problemId">68</td>
+                            <td style="text-align: left"><a :href="'/problem/'+ problem.problemId" class="m-problem"
+                                                            v-text="problem.problemTitle">传销自残</a></td>
+                            <td style="text-align: right">
+                                <a :href="'/problems?tagId='+tag.tagId" class="tag button" v-for="tag in problem.tags"
+                                   v-text="tag.tagName">数论</a>
+                            </td>
+                            <td v-text="problem.problemSubmitInfo.allAcceptedTotal+'/'+ problem.problemSubmitInfo.allTotal">
+                                2/12
+                            </td>
+                            <td class="m-problem"><a style="color: #25bb9b !important;"
+                                                     :href="'/problems?problemLevelId='+problem.problemLevel.problemLevelId"
+                                                     v-text="problem.problemLevel.problemLevelName"></a></td>
+                            <td v-if="problem.problemSubmitInfo.myAllTotal == 0">未提交</td>
+                            <td v-if="problem.problemSubmitInfo.myAcceptedTotal > 0" class="m-problem"><i
+                                    class="icon checkmark"></i>已通过
+                            </td>
+                            <td style="color: red"
+                                v-if="problem.problemSubmitInfo.myAllTotal != 0 && problem.problemSubmitInfo.myAcceptedTotal <= 0">
+                                <i class="icon close"></i>未通过
+                            </td>
+                        </tr>
+                        </tbody>
 
-                </table>
-                <!--分页-->
-                <div style="margin-top:  30px; " v-if="pageInfo != null">
-                    <div style="text-align: center; ">
-                        <div class="ui pagination menu" style="box-shadow: none; ">
-                            <a :href="'/problems'+getURL(1)" class="icon item"
-                               :class="{'disabled':page.page==1}">首页</a>
-                            <a :href="'/problems'+getURL(page.page-1)" class="icon item" :class="{'disabled':page.page==1}"><i
-                                    class="left chevron icon"></i></a>
-                            <a :href="'/problems'+getURL(index)" v-for="index in page.end" v-if="index>=page.begin" class="item"
-                               :class="{'active':page.page==index}" v-text="index"></a>
-                            <a :href="'/problems'+getURL(page.page + 1)"
-                               :class="{'disabled':page.page==page.total}" class=" icon item"><i
-                                    class="right chevron icon"></i></a>
-                            <a :href="'/problems'+getURL(page.page)"
-                               :class="{'disabled':pageInfo.page==page.total}" class=" icon item">尾页</a>
+                    </table>
+                    <!--分页-->
+                    <div style="margin-top:  30px; " v-if="pageInfo != null">
+                        <div style="text-align: center; ">
+                            <div class="ui pagination menu" style="box-shadow: none; ">
+                                <a :href="'/problems'+getURL(1)" class="icon item"
+                                   :class="{'disabled':page.page==1}">首页</a>
+                                <a :href="'/problems'+getURL(page.page-1)" class="icon item"
+                                   :class="{'disabled':page.page==1}"><i
+                                        class="left chevron icon"></i></a>
+                                <a :href="'/problems'+getURL(index)" v-for="index in page.end" v-if="index>=page.begin"
+                                   class="item"
+                                   :class="{'active':page.page==index}" v-text="index"></a>
+                                <a :href="'/problems'+getURL(page.page + 1)"
+                                   :class="{'disabled':page.page==page.total}" class=" icon item"><i
+                                        class="right chevron icon"></i></a>
+                                <a :href="'/problems'+getURL(page.page)"
+                                   :class="{'disabled':pageInfo.page==page.total}" class=" icon item">尾页</a>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        </form>
-
+            </form>
+        </div>
     </div>
 </div>
 <!--底部footer-->
@@ -152,12 +154,10 @@
 </footer>
 </body>
 <script src="../static/js/jquery.min.js" charset="utf-8" th:src="@{/js/jquery.min.js}"></script>
-<script src="../static/lib/layui/layui.js" charset="utf-8" th:src="@{/lib/layui/layui.js}"></script>
 <script src="../static/js/semantic.js" th:src="@{/js/semantic.js}"></script>
 <script src="../static/js/DateUtils.js" th:src="@{/js/DateUtils.js}"></script>
 <script src="../static/lib/jq-module/zyupload/zyupload-1.0.0.min.js"
         th:src="@{/lib/jq-module/zyupload/zyupload-1.0.0.min.js}" charset="utf-8"></script>
-<script src="../static/js/mathjax.js" th:src="@{/js/mathjax.js}"></script>
 <script src="../static/js/common.js" th:src="@{/js/common.js}"></script>
 
 <script th:inline="javascript">
@@ -171,13 +171,14 @@
         methods: {
             getURL: function (page) {
                 let url = "?";
-                if (this.problemQuery.problemId != null) url += 'problemId=' + this.problemQuery.problemId +"&";
-                if (this.problemQuery.problemTitle != null) url += 'problemTitle=' + this.problemQuery.problemTitle +"&";
-                if (this.problemQuery.tagId != null) url += 'tagId=' + this.problemQuery.tagId +"&";
-                if (this.problemQuery.problemLevelId != null) url += 'problemLevelId=' + this.problemQuery.problemLevelId +"&";
+                if (this.problemQuery.problemId != null) url += 'problemId=' + this.problemQuery.problemId + "&";
+                if (this.problemQuery.problemTitle != null) url += 'problemTitle=' + this.problemQuery.problemTitle + "&";
+                if (this.problemQuery.tagId != null) url += 'tagId=' + this.problemQuery.tagId + "&";
+                if (this.problemQuery.problemLevelId != null) url += 'problemLevelId=' + this.problemQuery.problemLevelId + "&";
                 url += "page=" + page;
                 return url;
             }
+
         },
         created: function () {
             this.page = common.getPage(this.pageInfo.pageNum, this.pageInfo.pages);

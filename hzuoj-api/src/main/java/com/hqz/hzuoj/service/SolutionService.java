@@ -3,6 +3,7 @@ package com.hqz.hzuoj.service;
 import com.github.pagehelper.PageInfo;
 import com.hqz.hzuoj.bean.solution.Solution;
 import com.hqz.hzuoj.bean.solution.SolutionStatus;
+import com.hqz.hzuoj.vo.UserSolutionVO;
 
 import java.util.List;
 
@@ -26,4 +27,6 @@ public interface SolutionService {
     boolean deleteSolution(Integer solutionId);
 
     Solution updateSolutionStatus(Solution solution);
+
+    PageInfo getUserSolutions(UserSolutionVO userSolutionVO);
 }

@@ -528,7 +528,6 @@
                         $("#problemId").val(info["problemId"]);
                         $("#data").html("<div class=\"layui-btn\" onclick=\"xadmin.open('数据点设置','/admin/" + info.problemId + "/dataEdit')\" ><i class=\"layui-icon\">&#xe642;</i>数据点设置</div>")
                     }
-                    return false;
                 },
                 //请求失败，包含具体的错误信息
                 error: function (e) {
