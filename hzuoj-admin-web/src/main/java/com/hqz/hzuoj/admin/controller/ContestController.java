@@ -317,4 +317,15 @@ public class ContestController {
             return ResultEntity.error(e.getMessage());
         }
     }
+
+    @RequestMapping(value = "contest/update/rank/final/{contestId}")
+    @ResponseBody
+    public ResultEntity contestUpdateRankFinal(@PathVariable Integer contestId) {
+        try {
+            return ResultEntity.success("修改成功", contestService.contestUpdateRankFinal(contestId));
+        }catch (Exception e) {
+            log.error("contestUpdateRankFinal({}) Error message: {}", contestId, e.getMessage());
+            return ResultEntity.error(e.getMessage());
+        }
+    }
 }
