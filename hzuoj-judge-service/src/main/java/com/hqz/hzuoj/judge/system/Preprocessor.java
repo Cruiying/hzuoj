@@ -97,8 +97,12 @@ public class Preprocessor {
     public String loadProblemData(Problem problem) throws IOException, ZipException {
         String problemDataAddress = problem.getProblemDataAddress();
         Integer problemDataVersions = problem.getProblemDataVersions();
-        if (problemDataVersions == null) return "error";
-        if (problemDataAddress == null) return "error";
+        if (problemDataVersions == null) {
+            return "error";
+        }
+        if (problemDataAddress == null) {
+            return "error";
+        }
         //下载路径
         String filepath = problemDataPath + "/" + problem.getProblemId();
         //解压路径
@@ -131,7 +135,9 @@ public class Preprocessor {
         } catch (Exception e) {
             //如果发生异常，删除数据
             e.printStackTrace();
-            if (file1.exists()) file1.delete();
+            if (file1.exists()) {
+                file1.delete();
+            }
         }
         return "success";
     }
@@ -155,7 +161,7 @@ public class Preprocessor {
      * @param newClassName - 新的类名
      */
     private String replaceClassName(Language language, String code, String newClassName) {
-        if (!language.getLanguageName().equalsIgnoreCase("Java")) {
+        if (!"Java".equalsIgnoreCase(language.getLanguageName())) {
             return code;
         }
         return code.replaceAll("class[ \n]+Main", "class " + newClassName);
@@ -189,7 +195,9 @@ public class Preprocessor {
                 String input = testCode.getTestInput();
                 IOUtils.write(input, inputStream, "UTF-8");
                 IOUtils.closeQuietly(inputStream);
-                if (inputStream != null) inputStream.close();
+                if (inputStream != null) {
+                    inputStream.close();
+                }
             }
             {
                 String outputFilePath = String.format("%s/output#%s.txt", new Object[]{checkpointsFilePath, testCode.getTestId()});

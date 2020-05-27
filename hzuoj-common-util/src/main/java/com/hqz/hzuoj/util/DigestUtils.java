@@ -74,7 +74,7 @@ public class DigestUtils {
 		try {
 			MessageDigest md = MessageDigest.getInstance("MD5");
 			md.update(password.getBytes());
-			 byte byteData[] = md.digest();
+			 byte[] byteData = md.digest();
 	 
 			StringBuilder sb = new StringBuilder();
 			for (int i = 0; i < byteData.length; i++) {

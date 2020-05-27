@@ -138,7 +138,9 @@ public class DiscussionController {
         comment.setUser(user);
         comment.setCommentTime(new Date());
         DiscussionComment discussionComment = discussionService.saveDiscussionComment(comment);
-        if (discussionComment == null) return null;
+        if (discussionComment == null) {
+            return null;
+        }
         return JSON.toJSONString(discussionComment);
     }
 

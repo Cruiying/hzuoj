@@ -171,7 +171,9 @@ public class JudgeDispatcher {
      * @param testId
      */
     public void RunningTest(Long testId, TestCode testCode) {
-        if (testCode == null) return;
+        if (testCode == null) {
+            return;
+        }
         /**
          * 创建运行目录和文件
          */
@@ -389,7 +391,7 @@ public class JudgeDispatcher {
      * @return 包含程序运行结果的Map对象
      */
     private Map<String, Object> getRuntimeResult(Map<String, Object> result, String standardOutputFilePath, String outputFilePath) {
-        if (result.get("runtimeResult").equals("AC")) {
+        if ("AC".equals(result.get("runtimeResult"))) {
             if (isOutputTheSame(standardOutputFilePath, outputFilePath)) {
                 result.put("runtimeResult", "AC");
             } else {
@@ -460,7 +462,9 @@ public class JudgeDispatcher {
      * @param file
      */
     private void deleteDirectory(File file) {
-        if (file == null) return;
+        if (file == null) {
+            return;
+        }
         if (file.isFile()) {// 表示该文件不是文件夹
             file.delete();
         } else {

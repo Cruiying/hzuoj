@@ -76,8 +76,12 @@ public class ContestController {
     @RequestMapping("/contests/{contestId}")
     public String contest(@PathVariable Integer contestId, HttpServletRequest request, ModelMap modelMap, SubmitQuery submitQuery, ContestRankQuery contestRankQuery) throws NotFoundException, ParseException {
         modelMap.put("now", new Date());
-        if (submitQuery == null) submitQuery = new SubmitQuery();
-        if (contestRankQuery == null) contestRankQuery = new ContestRankQuery();
+        if (submitQuery == null) {
+            submitQuery = new SubmitQuery();
+        }
+        if (contestRankQuery == null) {
+            contestRankQuery = new ContestRankQuery();
+        }
         modelMap.put("submitQuery", submitQuery);
         modelMap.put("contestRankQuery", contestRankQuery);
         Contest contest = contestService.getContest(contestId);
@@ -119,7 +123,9 @@ public class ContestController {
      */
     @RequestMapping("/contests")
     public String contests(Integer page, ModelMap modelMap, HttpServletRequest request, ContestQuery contestQuery) {
-        if (contestQuery == null) contestQuery = new ContestQuery();
+        if (contestQuery == null) {
+            contestQuery = new ContestQuery();
+        }
         modelMap.put("contestQuery", contestQuery);
         String str = (String) request.getSession().getAttribute("userId");
         if (str == null) {
@@ -228,7 +234,9 @@ public class ContestController {
                 modelMap.put("languages", languages);
             }
             Problem problem = contestProblem.getProblem();
-            if (problem == null) return "404";
+            if (problem == null) {
+                return "404";
+            }
             contestProblem.setProblem(getProblem(contestProblem.getProblem()));
             modelMap.put("contestId", contestId);
             modelMap.put("problemId", problemId);
@@ -403,9 +411,13 @@ public class ContestController {
     @RequestMapping("/contest/submits/{contestId}")
     @ResponseBody
     public PageInfo<ContestSubmit> getContestSubmits(Integer page, @PathVariable Integer contestId, @RequestBody SubmitQuery submitQuery) {
-        if (page == null || page <= 0) page = 1;
+        if (page == null || page <= 0) {
+            page = 1;
+        }
         Contest contest = contestService.getContest(contestId);
-        if (contest == null) return null;
+        if (contest == null) {
+            return null;
+        }
 
         PageInfo<ContestSubmit> contestSubmits = submitService.getContestSubmits(page, contestId, submitQuery);
         return contestSubmits;
@@ -424,7 +436,9 @@ public class ContestController {
     @ResponseBody
     public PageInfo<ContestRank> getContestRank(HttpServletRequest request, @PathVariable Integer contestId, Integer page, @RequestBody ContestRankQuery contestRankQuery) {
         Contest contest = contestService.getContest(contestId);
-        if (contest == null) return null;
+        if (contest == null) {
+            return null;
+        }
         if ("OI".equals(contest.getContestType().getContestTypeName()) && contest.getContestStatus() == 1) {
             return null;
         }

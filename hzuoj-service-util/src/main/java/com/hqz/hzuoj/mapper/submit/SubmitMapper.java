@@ -39,6 +39,7 @@ public interface SubmitMapper extends Mapper<Submit> {
      *
      * @return
      */
+    @Override
     List<Submit> selectAll();
 
     /**
