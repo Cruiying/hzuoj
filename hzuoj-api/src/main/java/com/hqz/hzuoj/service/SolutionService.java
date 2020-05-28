@@ -28,5 +28,5 @@ public interface SolutionService {
 
     Solution updateSolutionStatus(Solution solution);
 
-    PageInfo getUserSolutions(UserSolutionVO userSolutionVO);
+    PageInfo<Solution> getUserSolutions(UserSolutionVO userSolutionVO);
 }

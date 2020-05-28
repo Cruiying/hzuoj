@@ -147,13 +147,9 @@ public class SolutionServiceImpl implements SolutionService {
      * @return
      */
     @Override
-    public PageInfo getUserSolutions(UserSolutionVO userSolutionVO) {
-        System.err.println(userSolutionVO);
+    public PageInfo<Solution> getUserSolutions(UserSolutionVO userSolutionVO) {
         PageHelper.startPage(userSolutionVO.getPage(), userSolutionVO.getPageSize(), true);
         List<Solution> list = solutionMapper.getUserSolutions(userSolutionVO);
-        for (Solution solution : list) {
-            System.out.println(solution);
-        }
         return new PageInfo<>(list, userSolutionVO.getPageSize());
     }
 }

@@ -15,10 +15,7 @@ import com.hqz.hzuoj.vo.UserSolutionVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -40,7 +37,7 @@ public class SolutionController {
     private ProblemService problemService;
 
     /**
-     * 题解页面
+     * 题解列表页面
      *
      * @param problemId
      * @return
@@ -125,7 +122,6 @@ public class SolutionController {
     @ResponseBody
     public ResultEntity getUserSolutions(@RequestBody UserSolutionVO userSolutionVO) {
         try {
-            System.out.println(userSolutionVO);
             return ResultEntity.success("获取成功", solutionService.getUserSolutions(userSolutionVO));
         } catch (Exception e) {
             log.error("error:", e.getMessage());
@@ -154,5 +150,25 @@ public class SolutionController {
             log.info("Error", e.getMessage());
             return ResultEntity.error(e.getMessage());
         }
+    }
+
+    /**
+     * 获取题解详细信息
+     * @param problemId
+     * @param solutionId
+     * @param map
+     * @return
+     */
+    @RequestMapping(value = "/solution/{problemId}/{solutionId}", method = RequestMethod.GET)
+    public String solution(@PathVariable Integer problemId, @PathVariable Integer solutionId, ModelMap map) {
+        try {
+            map.put("problemId", problemId);
+            map.put("solutionId", solutionId);
+            Solution solution = solutionService.getSolution(solutionId);
+            map.put("solution", solution);
+        }catch (Exception e) {
+            log.error("solution({}, {}), error message: {}", problemId, solutionId, e.getMessage());
+        }
+        return "solution";
     }
 }
