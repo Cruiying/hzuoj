@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title th:if="${solution != null && solution.problem != null}" th:text="${'P' + solution.problem.problemId +' ' + solution.problem.problemTitle + ' 题解'}"></title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport"
+          content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi"/>
+    <link rel="stylesheet" href="../static/css/semantic.css" th:href="@{/css/semantic.css}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/semantic-ui/2.2.4/semantic.min.css">
+
+    <link rel="stylesheet" href="../static/css/me.css" th:href="@{/css/me.css}">
+    <!--    <script type="text/javascript" src="../static/js/xadmin.js" th:src="@{/js/xadmin.js}"></script>-->
+    <link rel="stylesheet" href="../static/lib/layui/css/layui.css" media="all" th:href="@{/lib/layui/css/layui.css}">
+    <link rel="stylesheet" href="../static/lib/jq-module/zyupload/zyupload-1.0.0.min.css"
+          th:href="@{/lib/jq-module/zyupload/zyupload-1.0.0.min.css}" media="all">
+    <script src="../static/lib/vue/vue.js" th:src="@{/lib/vue/vue.js}"></script>
+    <link rel="stylesheet" href="https://apps.bdimg.com/libs/highlight.js/9.1.0/styles/tomorrow.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script type="text/javascript" async
+            src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+    </script>
+    <link rel="stylesheet" href="../static/lib/jq-module/zyupload/zyupload-1.0.0.min.css"
+          th:href="@{/lib/jq-module/zyupload/zyupload-1.0.0.min.css}" media="all">
+    <!--    <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.17.1/build/styles/default.min.css">-->
+    <link href="https://cdn.bootcss.com/prism/1.15.0/themes/prism.css" rel="stylesheet">
+    <link href="https://cdn.bootcss.com/prism/1.15.0/plugins/line-numbers/prism-line-numbers.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.2/dist/jquery.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="../static/css/main.css" th:href="@{/css/main.css}">
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+        }
+
+        a {
+            text-decoration: none !important;
+        }
+    </style>
+    <link rel="stylesheet" type="text/css" data-name="vs/editor/editor.main"
+          href="https://cdn.jsdelivr.net/npm/syzoj-public-cdn@1.0.6/cdnjs/monaco-editor/0.18.1/min/vs/editor/editor.main.css">
+    <!--    <script async="async" type="text/javascript" src="https://cdn.jsdelivr.net/npm/syzoj-public-cdn@1.0.6/self/vendor/tokenizer/definitions/c_cpp.js"></script>-->
+    <!--    <script async="async" type="text/javascript" src="https://cdn.jsdelivr.net/npm/syzoj-public-cdn@1.0.6/self/vendor/tokenizer/definitions/java.js"></script>-->
+    <!--    <script async="async" type="text/javascript" src="https://cdn.jsdelivr.net/npm/syzoj-public-cdn@1.0.6/self/vendor/tokenizer/definitions/python.js"></script>-->
+</head>
+<body>
+<nav th:replace="fragment::menu('problems')"></nav>
+<div class="ui" style="background-image: url('/img/banner.jpg'); height: 150px;">
+    <div class="ui container" style="padding-left: 9%; float: left">
+        <div class="ui middle container" style="">
+            <h1 style="color: white; font-size: 32px; line-height: 150px;" th:text="${'P' + problem.problemId +' ' + problem.problemTitle + ' 题解'}">P5850 calc加强版 题解</h1>
+        </div>
+    </div>
+</div>
+<div style="background: rgba(3,3,3,0.03)!important;">
+    <div class="ui container" id="app">
+        <div class="ui">
+            <div class="sixteen wide column">
+                <div class="ui segment grid">
+                    <div class="sixteen wide column">
+                        <div><h2><b>以下题解仅供学习参考使用。</b></h2></div>
+                        <div><p style="margin-top: 1.6rem;font-size: 16px;color: rgba(0, 0, 0, .85);">
+                            抄袭、复制题解，以达到刷AC率/AC数量或其他目的的行为。</p></div>
+                        <div style="margin-top: 1.6rem; text-align: right">
+                            <a th:href="@{'/problem/solution/editor/' + ${problemId}}" class="ui teal button"
+                               style="background-color: #22ae90; ">我要写题解</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="solution">
+
+            </div>
+            <div class="sixteen wide column" style="margin: 25px 0 25px 0"
+                 th:if="${pageInfo==null||pageInfo.list==null || pageInfo.list.size()==0 }">
+                <div class="ui segment">
+                    <h1><b>还没有人发布题解</b></h1>
+                    <p> 不如自己发布一篇？</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div style="margin-top:  30px; " th:if="${pageInfo!=null&&pageInfo.list!=null && pageInfo.list.size()!=0 }">
+        <div style="text-align: center; ">
+            <div class="ui pagination menu" style="box-shadow: none; " id="page">
+            </div>
+        </div>
+    </div>
+    <footer style="margin-top: 50px; background: rgba(33,33,33,0.1)!important;"
+            class="ui inverted vertical segment m-padded-tb-large">
+        <div class="content container ui">
+            <div class=" wide column">
+                <h2 class="m-text-thin m-text-spaced m-opacity-tiny" style="color: black">贺州学院算法竞赛训练平台</h2>
+            </div>
+        </div>
+    </footer>
+</div>
+
+</body>
+<script src="../static/js/mathjax.js" th:src="@{/js/mathjax.js}"></script>
+<script src="../static/js/jquery.min.js" charset="utf-8" th:src="@{/js/jquery.min.js}"></script>
+<script src="https://cdn.bootcss.com/prism/1.15.0/prism.js"></script>
+<script src="https://cdn.bootcss.com/prism/1.15.0/components/prism-java.js"></script>
+<script src="//cdn.jsdelivr.net/npm/jquery.scrollto@2.1.2/jquery.scrollTo.min.js"></script>
+<script src="../static/js/mathjax.js" th:src="@{/js/mathjax.js}"></script>
+<script src="http://cdn.bootcss.com/highlight.js/8.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/marked/0.3.4/marked.min.js"></script>
+<script src="../static/lib/layui/layui.js" charset="utf-8" th:src="@{/lib/layui/layui.js}"></script>
+<script src="../static/js/semantic.js" th:src="@{/js/semantic.js}"></script>
+<script src="../static/js/DateUtils.js" th:src="@{/js/DateUtils.js}"></script>
+<script src="../static/lib/jq-module/zyupload/zyupload-1.0.0.min.js"
+        th:src="@{/lib/jq-module/zyupload/zyupload-1.0.0.min.js}" charset="utf-8"></script>
+<script src="../static/js/common.js" th:src="@{/js/common.js}"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+<script th:inline="javascript">
+    function getUserRatingColor(username, rating) {
+        return common.getUserRatingColor(username,rating);
+    }
+    function dateFormat (time) {
+        return common.getDateFormat(time);
+    }
+    const pageNum = [[${pageInfo.pageNum}]];
+    const pageTotal = [[${pageInfo.pages}]];
+    const ss = [[${pageInfo.list}]];
+    $("#solution").html("");
+    for (let i = 0; i < ss.length; i++) {
+        const solution = ss[i];
+        $("#solution").append("<div class=\"sixteen wide column\" style=\"margin: 25px 0 25px 0\">\n" +
+            "                <div class=\"ui segment grid\">\n" +
+            "                    <div class=\"sixteen wide column\">\n" +
+            "                        <div class=\"ui middle aligned\">\n" +
+            "                            <div class=\"column\" style=\"float: left\">\n" +
+            "                                作者: <a href=\"/user/" + solution.user.userId + "\">" + getUserRatingColor(solution.user.username, solution.user.userRating) + "</a>\n" +
+            "                                更新时间: <span>" + dateFormat(solution.solutionModifyTime) + "</span>\n" +
+            "                                在<a href=\"/blog/" + solution.user.username + "\">Ta的博客查看</a>\n" +
+            "                            </div>\n" +
+            "                            <div class=\"column\" style=\"float: right; \">\n" +
+            "                                <i class=\"thumbs outline down icon\"></i>\n" +
+            "                                <i class=\"thumbs outline up icon\"></i>\n" +
+            "                            </div>\n" +
+            "                        </div>\n" +
+            "                    </div>\n" +
+            "                    <div class=\"sixteen wide column\">\n" +
+            "                        <div class=\"ui\">" + solution.solutionContent + "</div>\n" +
+            "                    </div>\n" +
+            "                </div>\n" +
+            "            </div>")
+    }
+    let begin = 1;
+    let end = [[${pageInfo.pages}]];
+    const problemId = [[${problemId}]];
+
+    function getBeginAndEnd() {
+        var page = common.getPage(pageNum, pageTotal);
+        begin = page.begin; end = page.end;
+    }
+
+    getBeginAndEnd();
+
+    function solutions(page) {
+        window.location.href = "/problem/solutions/" + problemId + "?page=" + page;
+    }
+
+    if (pageNum == 1) {
+        $("#page").append("<a onclick='solutions(1)' class=\"icon item disabled\">首页</a>\n");
+        $("#page").append("<a onclick='solutions(1)' class=\"icon item disabled\"><i class=\"left chevron icon\"></i></a>\n")
+
+    } else {
+        $("#page").append("<a onclick='solutions(1)' class=\"icon item\">首页</a>\n");
+        $("#page").append("<a onclick='solutions(1)' class=\"icon item\"><i class=\"left chevron icon\"></i></a>\n")
+    }
+    let href = "href='/problem/solutions/" + problemId + "?page=" + 1 + "'";
+    for (let i = begin; i <= end; i++) {
+        let t = '';
+        if (i == pageNum) t = 'active';
+        $("#page").append("<a onclick='solutions(" + i + ")' class=\"item " + t + "\">" + i + "</a>\n")
+    }
+    if (pageNum == pageTotal) {
+        $("#page").append("<a onclick='solutions(" + pageTotal + ")' class=\" icon item disabled\"><i class=\"right chevron icon\"></i></a>\n");
+        $("#page").append("<a onclick='solutions(" + pageTotal + ")' class=\"icon item disabled\">尾页</a>\n");
+    } else {
+        $("#page").append("<a onclick='solutions(" + pageTotal + ")' class=\" icon item\"><i class=\"right chevron icon\"></i></a>\n");
+        $("#page").append("<a onclick='solutions(" + pageTotal + ")' class=\"icon item\">尾页</a>\n");
+    }
+</script>
+</html>

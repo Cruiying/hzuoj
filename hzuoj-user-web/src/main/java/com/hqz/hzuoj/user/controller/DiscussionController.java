@@ -123,7 +123,7 @@ public class DiscussionController {
     @ResponseBody
     public ResultEntity getDiscussions(@RequestBody DiscussionQuery discussionQuery) {
         try {
-            return ResultEntity.success("获取成功", discussionService.getDiscussions(1, discussionQuery).getList());
+            return ResultEntity.success("获取成功", discussionService.getDiscussions(1, discussionQuery));
         }catch (Exception e) {
             log.error("getDiscussions({}), Error message: {}", discussionQuery, e.getMessage());
             return ResultEntity.error(e.getMessage());
@@ -163,7 +163,9 @@ public class DiscussionController {
         comment.setUser(user);
         comment.setCommentTime(new Date());
         DiscussionComment discussionComment = discussionService.saveDiscussionComment(comment);
-        if (discussionComment == null) return null;
+        if (discussionComment == null) {
+            return null;
+        }
         return JSON.toJSONString(discussionComment);
     }
 

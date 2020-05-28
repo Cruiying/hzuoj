@@ -728,8 +728,9 @@ public class HttpUtil {
                 buffer.append(entiy.getValue());
                 buffer.append("\r\n");
             }
-            if (parameter != null)
+            if (parameter != null) {
                 buffer.append("------footfoodapplicationrequestnetwork--\r\n");
+            }
             outputStream = connection.getOutputStream();
             outputStream.write(buffer.toString().getBytes());
             try {
@@ -756,8 +757,9 @@ public class HttpUtil {
             }
             outputStream = null;
 
-            if (connection != null)
+            if (connection != null) {
                 connection.disconnect();
+            }
             connection = null;
         }
     }

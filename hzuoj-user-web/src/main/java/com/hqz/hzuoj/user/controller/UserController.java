@@ -138,7 +138,9 @@ public class UserController implements ErrorController {
         String token = "";
         // 调用用户服务验证用户名和密码
         User user = userService.loginUser(u);
-        if (user != null) user.setPassword(null);
+        if (user != null) {
+            user.setPassword(null);
+        }
         //用户登陆成功，才进行token日志
         if (user != null) {
             // 登录成功
@@ -173,7 +175,9 @@ public class UserController implements ErrorController {
     @RequestMapping("/user/logout")
     public String logout(HttpServletRequest request, HttpServletResponse response) {
         Object user = request.getSession().getAttribute("userId");
-        if (user == null) return null;
+        if (user == null) {
+            return null;
+        }
         request.getSession().removeAttribute("userId");
         request.getSession().removeAttribute("username");
         CookieUtil.deleteCookie(request, response, "userOldToken");
@@ -204,8 +208,12 @@ public class UserController implements ErrorController {
     @RequestMapping("/ranking")
     public String getRanking(Integer page, ModelMap modelMap, RankingQuery rankingQuery) {
         System.err.println(userService);
-        if (page == null || page <= 0) page = 1;
-        if(rankingQuery == null) rankingQuery = new RankingQuery();
+        if (page == null || page <= 0) {
+            page = 1;
+        }
+        if(rankingQuery == null) {
+            rankingQuery = new RankingQuery();
+        }
         PageInfo<Rank> pageInfo = userService.getRanks(page, rankingQuery);
         modelMap.put("pageInfo", pageInfo);
         return "ranking";
@@ -215,7 +223,9 @@ public class UserController implements ErrorController {
     @ResponseBody
     public PageInfo<Rank> getRanking(Integer page) {
         System.err.println(userService);
-        if (page == null || page <= 0) page = 1;
+        if (page == null || page <= 0) {
+            page = 1;
+        }
         PageInfo<Rank> pageInfo = userService.getRanks(page, new RankingQuery());
         return pageInfo;
     }
@@ -229,7 +239,9 @@ public class UserController implements ErrorController {
     @RequestMapping("/user/{userId}")
     public String getUser(@PathVariable Integer userId, ModelMap modelMap) {
         User user = userService.getUser(userId);
-        if (user == null) return "404";
+        if (user == null) {
+            return "404";
+        }
         modelMap.put("user", user);
         return "user";
     }
@@ -297,7 +309,9 @@ public class UserController implements ErrorController {
     public String upload(@RequestParam MultipartFile file, HttpServletRequest request, HttpServletResponse response) {
         String uploadPath = "error";
         String str = (String) request.getSession().getAttribute("userId");
-        if (str == null) return uploadPath;
+        if (str == null) {
+            return uploadPath;
+        }
         String suffix = file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf(".") + 1, file.getOriginalFilename().length());
         if (!"jpg,jpeg,gif,png".toUpperCase().contains(suffix.toUpperCase())) {
             return "error";

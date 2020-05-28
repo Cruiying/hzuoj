@@ -52,7 +52,9 @@ public class ProblemController {
     public String problems(Integer page, HttpServletRequest request, ModelMap modelMap, ProblemQuery problemQuery) {
         String str = (String) request.getSession().getAttribute("userId");
         Integer userId = null;
-        if (str != null) userId = Integer.parseInt(str);
+        if (str != null) {
+            userId = Integer.parseInt(str);
+        }
         PageInfo<Problem> pageInfo;
         pageInfo = problemService.getProblemQuery(page, userId, problemQuery);
         modelMap.put("pageInfo", pageInfo);
@@ -83,7 +85,9 @@ public class ProblemController {
     @RequestMapping("/problem/{problemId}")
     public String problem(@PathVariable Integer problemId, ModelMap map) {
         Problem problem = getProblem(problemId);
-        if (problem == null) return "404";
+        if (problem == null) {
+            return "404";
+        }
         map.put("problemId", problemId);
         map.put("problem", problem);
         map.put("testCode", new TestCode());

@@ -68,9 +68,15 @@ public class Runner {
      * @return 程序运行结果的唯一英文缩写
      */
     private String getRuntimeResult(int exitCode, int timeLimit, int timeUsed, int memoryLimit, int memoryUsed) {
-        if (timeUsed >= timeLimit) return "TLE";
-        if (memoryUsed >= memoryLimit) return "MLE";
-        if (exitCode == 0) return "AC";
+        if (timeUsed >= timeLimit) {
+            return "TLE";
+        }
+        if (memoryUsed >= memoryLimit) {
+            return "MLE";
+        }
+        if (exitCode == 0) {
+            return "AC";
+        }
         return "RE";
     }
 
@@ -85,7 +91,7 @@ public class Runner {
     private String getRuntimeCmd(Language language, String workDirectory, String baseFileName) {
         String filePathWithoutExtension = String.format("%s/%s", new Object[]{workDirectory, baseFileName});
         StringBuilder cmd = new StringBuilder(language.getLanguageRuntimeCmd().replaceAll("\\{filename\\}", filePathWithoutExtension));
-        if (language.getLanguageName().equalsIgnoreCase("Java")) {
+        if ("Java".equalsIgnoreCase(language.getLanguageName())) {
             int lastIndexOfSpace = cmd.lastIndexOf("/");
             cmd.setCharAt(lastIndexOfSpace, ' ');
         }

@@ -385,7 +385,9 @@ public class ApplicationDispatcher {
      * @param submit
      */
     private void updateSubmit(Submit submit) {
-        if (submit.getSubmitScore() == null) submit.setSubmitScore(0);
+        if (submit.getSubmitScore() == null) {
+            submit.setSubmitScore(0);
+        }
         submitMapper.updateSubmit(submit);
     }
 

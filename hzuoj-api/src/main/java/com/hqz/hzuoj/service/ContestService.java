@@ -41,4 +41,6 @@ public interface ContestService {
     public ResultEntity contestAfreshSubmit(Integer contestId);
 
     String contestDelete(Integer contestId);
+
+    String contestUpdateRankFinal(Integer contestId);
 }

@@ -89,7 +89,9 @@ public class SubmitController {
     public String getSubmit(@PathVariable Integer submitId, ModelMap modelMap) {
         modelMap.put("submitId", submitId);
         Submit submit = submitService.getSubmit(submitId);
-        if (submit == null) return "404";
+        if (submit == null) {
+            return "404";
+        }
         modelMap.put("submit", submit);
         return "submission";
     }
