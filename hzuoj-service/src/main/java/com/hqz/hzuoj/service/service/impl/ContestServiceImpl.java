@@ -414,4 +414,10 @@ public class ContestServiceImpl implements ContestService {
         return count == 1 ? "success" : "error";
     }
 
+    @Override
+    public String contestUpdateRankFinal(Integer contestId) {
+        contestMapper.contestUpdateRankFinal(contestId);
+        return "success";
+    }
+
 }

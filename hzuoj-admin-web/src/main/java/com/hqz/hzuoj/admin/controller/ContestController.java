@@ -39,6 +39,7 @@ public class ContestController {
     @Reference
     private ContestService contestService;
 
+
     @Reference
     private ProblemService problemService;
 

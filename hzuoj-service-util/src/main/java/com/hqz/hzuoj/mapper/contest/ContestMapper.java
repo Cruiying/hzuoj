@@ -50,4 +50,6 @@ public interface ContestMapper extends Mapper<Contest> {
     ContestUserRating getContestUserRating(ContestApply contestApply);
 
     void updateContestRankIsFinish(Contest contest);
+
+    void contestUpdateRankFinal(Integer contestId);
 }

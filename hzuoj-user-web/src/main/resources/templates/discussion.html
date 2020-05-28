@@ -291,7 +291,7 @@
                         </div>
                         <div class="ui teal">
                             <div class="ui fluid vertical menu" style="padding-bottom: 10px">
-                                <div class="item" v-for="discussion,index in discussions" v-if="index < 8">
+                                <div class="item" v-for="discussion,index in discussions.list" v-if="index < 8">
                                     <div style="padding: 5px;">
                                         <a class="m-black" :href="'/discussion/'+discussion.discussionId"
                                            style="color: #333;line-height: 25px"

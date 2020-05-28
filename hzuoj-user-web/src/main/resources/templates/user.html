@@ -25,8 +25,6 @@
     <script type="text/javascript" async
             src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
     </script>
-    <!--    <script src="../static/lib/vs/basic-languages/cpp/cpp.js" th:src="@{/lib/vs/basic-languages/cpp/cpp.js}"></script>-->
-    <!--    <script src="../static/lib/vs/basic-languages/**" th:src="@{/lib/vs/basic-languages/}"></script>-->
     <link rel="stylesheet" type="text/css" href="../static/css/main.css" th:href="@{/css/main.css}">
     <style>
         html, body {
@@ -58,7 +56,7 @@
 <body>
 <!--导航栏-->
 <nav th:replace="fragment::menu('')"></nav>
-<div class="ui" id="app" >
+<div class="ui" id="app">
     <div class="ui tiny dimmer modals page hidden">
         <div id="showEditorUserInfo" class="ui tiny test modal hidden" style="margin-top: -112.5px;">
             <i class="close icon"></i>
@@ -117,8 +115,8 @@
             </div>
         </div>
     </div>
-    <div style="display: block;height: 80px;" :style="'display: none'"  class="ui active centered inline loader"></div>
-    <div  style="display: none;min-height: 400px;" :style="'display: block'" >
+    <div style="display: block;height: 80px;" :style="'display: none'" class="ui active centered inline loader"></div>
+    <div style="display: none;min-height: 400px;" :style="'display: block'">
         <div class="ui">
             <div class="ui" style="background: #495060; height: 200px;">
                 <div class="ui container" style="padding-top: 15px">
@@ -156,7 +154,8 @@
                                 <div style="color:rgb(37, 187, 155);!important; font-size: 15px">
                                     <a th:href="@{'/blog/'+${session.username}}" class="ui mini teal button"
                                        style="background-color: #22ae90;">我的博客</a>
-                                    <span><i class="graduation cap icon"></i> <span v-text="user.school">贺州学院</span></span>
+                                    <span><i class="graduation cap icon"></i> <span
+                                            v-text="user.school">贺州学院</span></span>
                                 </div>
                             </div>
                             <div style="padding-top: 8px;" class="ui middle aligned two column grid">
@@ -178,9 +177,12 @@
                     <div class="four column row" style="text-align: center;">
                         <div v-on:click="onNav(0)" class="column teal active user-nav" style="cursor: pointer"><span>我的比赛</span>
                         </div>
-                        <div v-on:click="onNav(1)" class="column user-nav" style="cursor: pointer"><span>我的练习</span></div>
-                        <div v-on:click="onNav(2)" class="column user-nav" style="cursor: pointer"><span>我的讨论</span></div>
-                        <div v-on:click="onNav(3)" class="column user-nav" style="cursor: pointer"><span>我的题解</span></div>
+                        <div v-on:click="onNav(1)" class="column user-nav" style="cursor: pointer"><span>我的练习</span>
+                        </div>
+                        <div v-on:click="onNav(2)" class="column user-nav" style="cursor: pointer"><span>我的讨论</span>
+                        </div>
+                        <div v-on:click="onNav(3)" class="column user-nav" style="cursor: pointer"><span>我的题解</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -189,19 +191,25 @@
                     <div class="ui grid">
                         <div class="four column row" style="text-align: center">
                             <div class="column" style="cursor: pointer">
-                                <div style="font-size: 24px; color: #5ea1f4!important" v-text="user.userRating">1403</div>
+                                <div style="font-size: 24px; color: #5ea1f4!important" v-text="user.userRating">1403
+                                </div>
                                 <div style="color: #ababab">Rating</div>
                             </div>
                             <div class="column" style="cursor: pointer">
-                                <div style="font-size: 24px; color: #5ea1f4!important" v-text="user.userRanking">693</div>
+                                <div style="font-size: 24px; color: #5ea1f4!important" v-text="user.userRanking">693
+                                </div>
                                 <div style="color: #ababab">Rating排名</div>
                             </div>
                             <div class="column" style="cursor: pointer">
-                                <div style="font-size: 24px;color: #5ea1f4!important " v-text="user.userAcceptedRanking">693</div>
+                                <div style="font-size: 24px;color: #5ea1f4!important "
+                                     v-text="user.userAcceptedRanking">693
+                                </div>
                                 <div style="color: #ababab">刷题排名</div>
                             </div>
                             <div class="column" style="cursor: pointer">
-                                <div style="font-size: 24px; color: #5ea1f4!important" v-text="contestPageInfo.total">45</div>
+                                <div style="font-size: 24px; color: #5ea1f4!important" v-text="contestPageInfo.total">
+                                    45
+                                </div>
                                 <div style="color: #ababab">次比赛</div>
                             </div>
                         </div>
@@ -209,7 +217,9 @@
                     <div class="ui" style="margin-top: 50px;margin-bottom: 10px; border-bottom: 2px solid #25bb9b;">
                         <div class="row">
                             <div class="five wide column">
-                                <button class="ui teal button" style="background-color: #22ae90;border-radius: 0">我参加的比赛</button>
+                                <button class="ui teal button" style="background-color: #22ae90;border-radius: 0">
+                                    我参加的比赛
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -223,9 +233,12 @@
                                                 <div class="ui grid">
                                                     <div class="wide column">
                                                         <h3 class="ui header">
-                                                            <a :href="'/contests/'+contest.contestId" class="m-black" style="font-size: 20px;" v-text="contest.contestName">HZU蓝桥杯校内第二次选拔赛</a>
+                                                            <a :href="'/contests/'+contest.contestId" class="m-black"
+                                                               style="font-size: 20px;" v-text="contest.contestName">HZU蓝桥杯校内第二次选拔赛</a>
                                                             <span>
-                                                        <button style="font-size: 15px; background-color: rgba(255,255,255,0) !important;" class="ui teal basic label m-padded-tiny m-text-thin" v-text="contest.contestType.contestTypeName + '赛制'">ACM赛制</button></span>
+                                                        <button style="font-size: 15px; background-color: rgba(255,255,255,0) !important;"
+                                                                class="ui teal basic label m-padded-tiny m-text-thin"
+                                                                v-text="contest.contestType.contestTypeName + '赛制'">ACM赛制</button></span>
                                                         </h3>
                                                     </div>
                                                 </div>
@@ -237,7 +250,8 @@
                                                                     <i class="calendar icon"></i>
                                                                     报名时间：<span
                                                                         v-text="dateFormat(contest.contestApplyStartTime)">2020-01-18 20:33</span>
-                                                                    至 <span v-text="dateFormat(contest.contestApplyEndTime)">2020-01-18 20:33</span>
+                                                                    至 <span
+                                                                        v-text="dateFormat(contest.contestApplyEndTime)">2020-01-18 20:33</span>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -314,7 +328,9 @@
                                 <div style="color: #ababab">次提交</div>
                             </div>
                             <div class="column" style="cursor: pointer">
-                                <div style="font-size: 24px; color: #5ea1f4!important" v-text="Math.ceil(user.userSubmitAcceptedTotal*100/user.userSubmitTotal)+'%'">45%</div>
+                                <div style="font-size: 24px; color: #5ea1f4!important"
+                                     v-text="Math.ceil(user.userSubmitAcceptedTotal*100/user.userSubmitTotal)+'%'">45%
+                                </div>
                                 <div style="color: #ababab">通过率</div>
                             </div>
                         </div>
@@ -345,7 +361,8 @@
                             </thead>
                             <tbody id="submitList">
                             <tr v-for="submit in submitPageInfo.list">
-                                <td><a style="color: #4183c4;" :href="'/submit/' + submit.submitId"><b v-text="submit.submitId">#3436</b></a>
+                                <td><a style="color: #4183c4;" :href="'/submit/' + submit.submitId"><b
+                                        v-text="submit.submitId">#3436</b></a>
                                 </td>
                                 <td>
                                     <a style="color: #4183c4;" :href="'/problem/' +submit.problem.problemId ">
@@ -367,7 +384,8 @@
                                 </td>
                                 <td v-text="getRuntimeTime(submit.submitRuntimeTime)">0 ms</td>
                                 <td v-text="getRuntimeMemory(submit.submitRuntimeMemory)">0KB</td>
-                                <td style="color: #4183c4;"><a style="color: #4183c4;" :href="'/submit/' + submit.submitId"><b
+                                <td style="color: #4183c4;"><a style="color: #4183c4;"
+                                                               :href="'/submit/' + submit.submitId"><b
                                         v-text="submit.language.languageName">C++</b></a></td>
                                 <td v-text="submit.submitCodeLength">16</td>
                                 <td v-text="dateFormat(submit.submitTime)">2020-01-14 08:15:08</td> <!----></tr>
@@ -377,7 +395,8 @@
                         <div style="margin-top:  30px; " v-if="submitPageInfo != null">
                             <div style="text-align: center; ">
                                 <div class="ui pagination menu" style="box-shadow: none; ">
-                                    <a class="icon item" v-on:click="getUserProblems(1)" :class="{'disabled':submitPage.page == 1}">首页</a>
+                                    <a class="icon item" v-on:click="getUserProblems(1)"
+                                       :class="{'disabled':submitPage.page == 1}">首页</a>
                                     <a class="icon item" v-on:click="getUserProblems(submitPage.page - 1)"
                                        :class="{'disabled':submitPage.page == 1}"><i class="left chevron icon"></i></a>
                                     <a v-for="index in submitPage.end" v-if="index>=submitPage.begin"
@@ -393,7 +412,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="ui user-item" style="display: none; height: 200px">
+                <div class="ui user-item" style="display: none;">
                     <div class="ui" style="margin-top: 50px;margin-bottom: 10px; border-bottom: 2px solid #25bb9b;">
                         <div class="row">
                             <div class="five wide column">
@@ -402,8 +421,37 @@
                             </div>
                         </div>
                     </div>
+                    <div style="overflow-x: auto">
+                        <table class="ui unstackable very basic center aligned table"
+                               style="white-space: nowrap;">
+                            <thead>
+                            <tr>
+                                <th>讨论ID</th>
+                                <th>讨论标题</th>
+                                <th>提交时间</th>
+                                <th>修改时间</th>
+                                <th>是否置顶</th>
+                                <th v-if="user.userId == loginUserId">操作</th>
+                            </tr>
+                            </thead>
+                            <tbody v-if="discussions != null && discussions.list != null">
+                            <tr v-for="discussion in discussions.list">
+                                <td><b><a style="color: #4183c4;" :href="'/discussion/' + discussion.discussionId" v-text="'#'+discussion.discussionId"></a></b></td>
+                                <td><b><a style="color: #4183c4;" :href="'/discussion/' + discussion.discussionId" v-text="discussion.discussionTitle"></a></b></td>
+                                <td v-text="dateFormat(discussion.discussionCreateTime)">2020-222 22</td>
+                                <td v-text="dateFormat(discussion.discussionModifyTime)">2020-222 22</td>
+                                <td v-text="discussion.discussionTop>'0'?'是':'否'">是</td>
+                                <td v-if="user.userId == loginUserId">
+                                    <a :href="'/discussion/' + discussion.discussionId" class="tag button">查看</a>
+                                    <a :href="'/discussion/editor?discussionId=' + discussion.discussionId" class="tag button">修改</a>
+                                    <a v-on:click="deleteDiscussion(discussion.discussionId)" style="color: red;" class="tag button">删除</a>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-                <div class="ui user-item" style="display: none; height: 200px">
+                <div class="ui user-item" style="display: none;">
                     <div class="ui" style="margin-top: 50px;margin-bottom: 10px; border-bottom: 2px solid #25bb9b;">
                         <div class="row">
                             <div class="five wide column">
@@ -428,35 +476,44 @@
                             </thead>
                             <tbody v-if="solutions != null && solutions.list != null">
                             <tr v-for="solution in solutions.list">
-                                <td v-text="'#'+solution.solutionId">#1</td>
-                                <td v-text="solution.solutionTitle">蓝桥杯</td>
-                                <td v-text="solution.problem.problemTitle">蓝桥杯</td>
+                                <td><b><a style="color: #4183c4;"
+                                       :href="'/solution/' + solution.problem.problemId + '?solutionId=' + solution.solutionId"
+                                       v-text="'#'+solution.solutionId"></a></b></td>
+                                <td><b><a style="color: #4183c4;"
+                                       :href="'/solution/' + solution.problem.problemId + '?solutionId=' + solution.solutionId"
+                                       v-text="solution.solutionTitle"></a></b></td>
+                                <td>
+                                    <a style="color: #4183c4;" :href="'/problem/'+solution.problem.problemId"><b
+                                            v-text="solution.problem.problemTitle"></b></a>
+                                </td>
                                 <td v-text="dateFormat(solution.solutionCreateTime)">2020-222 22</td>
                                 <td v-text="dateFormat(solution.solutionModifyTime)">2020-222 22</td>
                                 <td v-text="solution.solutionStatus.solutionStatusName">通过</td>
                                 <td v-if="user.userId == loginUserId">
-                                    <a href="/problems?tagId=41" class="tag button">查看</a>
-                                    <a href="/problems?tagId=41" class="tag button">修改</a>
-                                    <a style="color: red;" href="/problems?tagId=41" class="tag button">删除</a>
+                                    <a :href="'/solution/' + solution.problem.problemId + '/' + solution.solutionId"
+                                       class="tag button">查看</a>
+                                    <a :href="'/problem/solution/editor/'+solution.problem.problemId+'?solutionId='+solution.solutionId"
+                                       class="tag button">修改</a>
+                                    <a v-on:click="deleteSolution(solution.solutionId)" style="color: red;"
+                                       class="tag button">删除</a>
                                 </td>
                             </tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
-
             </div>
             <div style="height: 50px;"></div>
-        </div>
-        <!--页尾-->
-        <footer style=" margin-top: 50px; background: rgba(33,33,33,0.08)!important;"
-                class="ui inverted vertical segment m-padded-tb-large">
-            <div class="content container ui">
-                <div class=" wide column">
-                    <h2 class="m-text-thin m-text-spaced m-opacity-tiny" style="color: black">贺州学院算法竞赛训练平台</h2>
+            <!--页尾-->
+            <footer style=" margin-top: 50px; background: rgba(33,33,33,0.08)!important;"
+                    class="ui inverted vertical segment m-padded-tb-large">
+                <div class="content container ui">
+                    <div class=" wide column">
+                        <h2 class="m-text-thin m-text-spaced m-opacity-tiny" style="color: black">贺州学院算法竞赛训练平台</h2>
+                    </div>
                 </div>
-            </div>
-        </footer>
+            </footer>
+        </div>
     </div>
 </div>
 </body>
@@ -481,6 +538,7 @@
             rankPage: null,
             schools: [],
             solutions: null,
+            discussions: null,
         },
         methods: {
             dateFormat: function (time) {
@@ -497,7 +555,7 @@
                 return ans;
             },
             uploadPhoto: function () {
-                if(this.user.userId != [[${session.userId}]]) return;
+                if (this.user.userId != [[${session.userId}]]) return;
                 $("#photoFile").click();
             },
             /**
@@ -505,13 +563,13 @@
              */
             upload: function () {
                 if ($("#photoFile").val() == '') return;
-                if(this.user.userId != [[${session.userId}]]) return;
+                if (this.user.userId != [[${session.userId}]]) return;
                 let formData = new FormData();
                 formData.append('file', document.getElementById('photoFile').files[0]);
                 axios.post('/user/img/upload', formData, {
                     'Content-Type': 'multipart/form-data'
                 }).then((data) => { // 正确的回调
-                    if(data.data != "error") {
+                    if (data.data != "error") {
                         alert("上传成功");
                         this.user.userImg = data.data;
                     }
@@ -523,7 +581,7 @@
                 return common.formatDuring(mss);
             },
             getColorFromScore: function (score) {
-               return common.getColorFromScore(score);
+                return common.getColorFromScore(score);
             },
             getRankScore: function (score) {
                 return common.getRankScore(score);
@@ -596,22 +654,58 @@
 
             },
             getUserRatingColor: function (username, rating) {
-                return common.getUserRatingColor(username,rating);
+                return common.getUserRatingColor(username, rating);
             },
             getUserSolutions(page) {
-                axios.post("/user/solutions", {"userId": this.user.userId,"solutionId": "", "page": page, "pageSize": 20})
-                    .then((data)=>{
-                   if (data.data["code"] == "1") {
-                       this.solutions = data.data["data"];
-                   } else {
-                       alert(data.data["message"]);
-                   }
-                });
+                axios.post("/user/solutions", {
+                    "userId": this.user.userId,
+                    "solutionId": "",
+                    "page": page,
+                    "pageSize": 20
+                })
+                    .then((data) => {
+                        if (data.data["code"] == "1") {
+                            this.solutions = data.data["data"];
+                        } else {
+                            alert(data.data["message"]);
+                        }
+                    });
+            },
+            deleteDiscussion: function (discussionId) {
+                axios.post('/discussion/delete?discussionId=' + discussionId)
+                    .then((data) => {
+                        const result = data.data;
+                        alert(result["message"]);
+                        if (result["code"] == "1") {
+                            window.location.reload();
+                        }
+                    })
+            },
+            deleteSolution(solutionId) {
+                axios.post("/solution/delete/" + solutionId).then((data) => {
+                    alert(data.data["message"]);
+                    if (data.data["code"] == 1) {
+
+                    }
+                }).catch((error) => {
+
+                })
+            },
+            getUserDiscussions() {
+                axios.post("/discussions/info", {"userId": this.loginUserId})
+                .then((data)=>{
+                    if (data.data["code"] == 1)  {
+                        this.discussions = data.data["data"];
+                    } else {
+                        alert(data.data["message"]);
+                    }
+                })
             }
         },
         created: function () {
             this.getUserSolutions(1);
-            this.rankPage = common.getPage(1,1);
+            this.getUserDiscussions();
+            this.rankPage = common.getPage(1, 1);
             this.submitPage = common.getPage(1, 1);
             this.getUserContests(1);
             this.getUserProblems(1);
@@ -627,6 +721,7 @@
     window.onload = function () {
         dropdown();
     }
+
     function dropdown() {
         $(".ui.dropdown").dropdown();
         setTimeout(dropdown, 1000);

@@ -123,7 +123,7 @@ public class DiscussionController {
     @ResponseBody
     public ResultEntity getDiscussions(@RequestBody DiscussionQuery discussionQuery) {
         try {
-            return ResultEntity.success("获取成功", discussionService.getDiscussions(1, discussionQuery).getList());
+            return ResultEntity.success("获取成功", discussionService.getDiscussions(1, discussionQuery));
         }catch (Exception e) {
             log.error("getDiscussions({}), Error message: {}", discussionQuery, e.getMessage());
             return ResultEntity.error(e.getMessage());

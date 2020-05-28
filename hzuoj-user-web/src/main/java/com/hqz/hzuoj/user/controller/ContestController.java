@@ -47,6 +47,7 @@ public class ContestController {
 
     @Reference
     private ContestService contestService;
+
     @Reference
     private LanguageService languageService;
     @Autowired
@@ -163,8 +164,8 @@ public class ContestController {
     @ResponseBody
     public ResultEntity getRankList() {
         try {
-            return ResultEntity.success("获取成功",userService.getRanks(1, new RankingQuery()));
-        }catch (Exception e) {
+            return ResultEntity.success("获取成功", userService.getRanks(1, new RankingQuery()));
+        } catch (Exception e) {
             log.error("Error", e.getMessage());
             return ResultEntity.error(e.getMessage());
         }

@@ -280,6 +280,9 @@
     <update id="updateContestRankIsFinish">
         update hzuoj_contests set contest_rank_is_finish = #{contestRankIsFinish} where contest_id = #{contestId}
     </update>
+    <update id="contestUpdateRankFinal">
+        update hzuoj_contests set contest_rank_is_finish = 1 - contest_rank_is_finish where contest_id = #{contestId}
+    </update>
     <!--    比赛提交信息-->
     <select id="getContestProblemSubmitInfo" resultType="com.hqz.hzuoj.bean.problem.ProblemSubmitInfo">
         SELECT
