@@ -4,10 +4,12 @@ import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.fastjson.JSON;
 import com.github.pagehelper.PageInfo;
 import com.hqz.hzuoj.annotations.AdminLoginCheck;
+import com.hqz.hzuoj.base.ResultEntity;
 import com.hqz.hzuoj.bean.solution.Solution;
 import com.hqz.hzuoj.bean.solution.SolutionStatus;
 import com.hqz.hzuoj.service.SolutionService;
 import com.hqz.hzuoj.util.MarkdownUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -27,6 +29,7 @@ import java.util.Map;
 @Controller
 @RequestMapping("/admin")
 @AdminLoginCheck
+@Slf4j
 public class SolutionController {
 
     @Reference
@@ -50,10 +53,13 @@ public class SolutionController {
      */
     @RequestMapping("/solutions/list")
     @ResponseBody
-    public PageInfo<Solution> getSolution(Integer page) {
-        PageInfo<Solution> pageInfo = solutionService.getSolutions(page);
-        List<Solution> list = pageInfo.getList();
-        return pageInfo;
+    public ResultEntity getSolution(Integer page) {
+        try {
+            return ResultEntity.success("获取成功", solutionService.getSolutions(page));
+        } catch (Exception e) {
+            log.error("getSolution({}) error message: {}", page, e.getMessage());
+            return ResultEntity.error(e.getMessage());
+        }
     }
 
     /**
@@ -69,29 +75,41 @@ public class SolutionController {
         List<SolutionStatus> solutionStatus = solutionService.getSolutionStatus();
         solution.setSolutionContent(MarkdownUtils.markdownToHtml(solution.getSolutionContent()));
         modelMap.put("solution", solution);
-        modelMap.put("solutionStatus",solutionStatus);
+        modelMap.put("solutionStatus", solutionStatus);
         return "solution";
     }
 
     /**
      * 删除题解
+     *
      * @param solutionId
      * @return
      */
     @RequestMapping("/delete/solution/{solutionId}")
     @ResponseBody
-    private String deleteSolution(@PathVariable Integer solutionId) {
-        boolean flag = solutionService.deleteSolution(solutionId);
-        Map<String, Boolean> map = new HashMap<>();
-        map.put("flag", flag);
-        return JSON.toJSONString(map);
+    private ResultEntity deleteSolution(@PathVariable Integer solutionId) {
+        try {
+            return ResultEntity.success("删除成功", solutionService.deleteSolution(solutionId));
+        }catch (Exception e) {
+            log.error("deleteSolution({}) error message: {}", solutionId, e.getMessage());
+            return ResultEntity.error(e.getMessage());
+        }
     }
 
+    /**
+     * 更新题解状态
+     * @param solution
+     * @return
+     */
     @RequestMapping("/solution/status")
     @ResponseBody
-    private Solution solutionStatus(@RequestBody Solution solution) {
-        System.out.println(solution);
-        return solutionService.updateSolutionStatus(solution);
+    private ResultEntity solutionStatus(@RequestBody Solution solution) {
+        try {
+            return ResultEntity.success("删除成功", solutionService.updateSolutionStatus(solution));
+        } catch (Exception e) {
+            log.error("solutionStatus({}) error message: {}", solution, e.getMessage());
+            return ResultEntity.error(e.getMessage());
+        }
     }
 
 }

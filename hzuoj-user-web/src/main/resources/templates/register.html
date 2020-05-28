@@ -93,8 +93,8 @@
                     data: JSON.stringify(list),
                     //请求成功
                     //判断注册状态
-                    success: function (data) {
-                        if (data == 1) {
+                    success: function (result) {
+                        if (result["code"] == 1) {
                             layer.msg('注册成功');
                             window.location.href="/user/login";
                         } else {

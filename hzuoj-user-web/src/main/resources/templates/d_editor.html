@@ -204,7 +204,7 @@
             url: "/discussion/save",
             data: JSON.stringify(discussion),
             success: function (result) {
-                if (result != null) {
+                if (result["code"] == "1") {
                     if (discussionId == null) {
                         alert("保存成功");
                         discussionId=result.discussionId;

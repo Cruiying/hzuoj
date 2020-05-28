@@ -17,6 +17,7 @@ public class DiscussionQuery implements Serializable {
 
     private Integer order;
 
+
     public DiscussionQuery() {
     }
 

@@ -1,10 +1,15 @@
 package com.hqz.hzuoj.admin.controller;
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.hqz.hzuoj.annotations.AdminLoginCheck;
+import com.hqz.hzuoj.base.ResultEntity;
 import com.hqz.hzuoj.bean.user.Admin;
 import com.hqz.hzuoj.service.AdminService;
 import com.hqz.hzuoj.util.JwtUtil;
+import com.hqz.hzuoj.util.SessionUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.http.ResponseEntity;
+import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
@@ -19,6 +24,7 @@ import java.util.Map;
  */
 @Controller
 @RequestMapping("/admin")
+@Slf4j
 public class AdminController {
 
 
@@ -37,12 +43,15 @@ public class AdminController {
 
     @RequestMapping("/login")
     @ResponseBody
-    public String login(@RequestBody Admin a, HttpServletRequest request) {
-        String token = "111";
-        // 调用用户服务验证用户名和密码
-        Admin admin = adminService.loginAdmin(a);
-        //用户登陆成功，才进行token日志
-        if (admin != null && admin.getAdminStatus()== 1) {
+    public ResultEntity login(@RequestBody Admin a, HttpServletRequest request) {
+        try {
+            Admin admin = adminService.loginAdmin(a);
+            if (null == admin) {
+                return ResultEntity.error("账号或者密码错误");
+            }
+            if ("1".equals(admin.getAdminStatus().toString())) {
+                return ResultEntity.error("该管理员员已经停用");
+            }
             // 登录成功
             // 用jwt制作token
             Integer adminId = admin.getAdminId();
@@ -50,20 +59,18 @@ public class AdminController {
             Map<String, Object> adminMap = new HashMap<>();
             adminMap.put("adminId", adminId.toString());
             adminMap.put("adminName", adminName);
+            adminMap.put("admin", admin);
             String ip = request.getRemoteAddr();// 从request中获取ip
             if (StringUtils.isBlank(ip)) {
                 ip = "127.0.0.1";
             }
             // 按照设计的算法对参数进行加密后，生成token
-            token = JwtUtil.encode("hzuoj", adminMap, ip);
-            // 将token存入redis一份
-//            userService.addUserToken(token, memberId);
-        } else {
-            // 登录失败
-            token = "fail";
-//            System.out.println("登陆失败");
+            String token = JwtUtil.encode("hzuoj", adminMap, ip);
+            return ResultEntity.success("登录成功", token);
+        }catch (Exception e) {
+            log.error("login({}) error message: {}", a, e.getMessage());
+            return ResultEntity.error(e.getMessage());
         }
-        return token;
     }
 
 
@@ -107,13 +114,13 @@ public class AdminController {
     @RequestMapping("/admins/list")
     @ResponseBody
     @AdminLoginCheck
-    public Map<String, Object> getAllAdmin(Integer page) {
-        if (page == null) {
-            page = 1;
+    public ResultEntity getAllAdmin(Integer page) {
+        try {
+            return ResultEntity.success(adminService.getAll(page));
+        } catch (Exception e) {
+            log.error("getAllAdmin({}) error message: {}", page, e.getMessage());
+            return ResultEntity.error(e.getMessage());
         }
-        Map<String, Object> map = new HashMap<>();
-        map.put("pageInfo", adminService.getAll(page));
-        return map;
     }
 
     /**
@@ -126,20 +133,29 @@ public class AdminController {
     @AdminLoginCheck
     @RequestMapping("/update/{adminId}/status")
     @ResponseBody
-    public Map<String, Object> updateAdminStatus(@PathVariable Integer adminId, Integer adminStatus, HttpServletRequest request) {
-        Map<String, Object> map = new HashMap<>();
-        String loginId = (String) request.getAttribute("adminId");
-        Integer loginAdmin = Integer.parseInt(loginId);
-        if (loginAdmin == 1 && adminId != 1) {
-            map.put("msg", "修成功");
-            map.put("flag", true);
-        } else if (loginAdmin == 1 && adminId == 1) {
-            map.put("msg", "修改失败，您是超级管理员，不可以修改自己");
-            map.put("flag", false);
-        } else {
-            map.put("msg", "修改失败，您没有权限！！！需要超级管理员才可以修改");
-            map.put("flag", false);
+    public ResultEntity updateAdminStatus(@PathVariable Integer adminId, Integer adminStatus, HttpServletRequest request) {
+        try {
+            Admin admin = SessionUtils.getAdmin(request);
+            return ResultEntity.success("修改成功", adminService.updateAdminStatus(admin));
+        } catch (Exception e) {
+            log.error("updateAdminStatus({}, {}) error message: {}", adminId, adminStatus, e.getMessage());
+            return ResultEntity.error(e.getMessage());
         }
-        return map;
+    }
+
+    /**
+     * 添加新的管理员
+     * @param admin
+     * @return
+     */
+    @RequestMapping("/add/admin")
+    @ResponseBody
+    public ResultEntity addAdmin(@RequestBody Admin admin) {
+        try {
+            return ResultEntity.success("添加成功",adminService.addAdmin(admin));
+        }catch (Exception e) {
+            log.error("addAdmin({}) error message: {}", admin, e.getMessage());
+            return ResultEntity.error(e.getMessage());
+        }
     }
 }

@@ -20,11 +20,14 @@ import com.hqz.hzuoj.user.mq.MessageSender;
 import com.hqz.hzuoj.user.mq.SubmitResultMessageListener;
 import com.hqz.hzuoj.user.mq.TestResultMessageListener;
 import com.hqz.hzuoj.util.MarkdownUtils;
+import com.hqz.hzuoj.util.SessionUtils;
 import javassist.NotFoundException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Description;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
@@ -33,6 +36,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
+import java.sql.ResultSet;
 import java.util.*;
 
 /**
@@ -42,6 +46,7 @@ import java.util.*;
  */
 @Controller
 @CrossOrigin
+@Slf4j
 public class SubmitController {
 
     @Autowired
@@ -105,14 +110,13 @@ public class SubmitController {
      */
     @RequestMapping("/submit/{submitId}/info")
     @ResponseBody
-    public Map<String, Object> getSubmit(@PathVariable Integer submitId) throws NotFoundException {
-        Map<String, Object> map = new HashMap<>();
-        Submit submit = submitService.getSubmit(submitId);
-        if (submit == null) {
-            throw new NotFoundException("没有找到该提交");
+    public ResultEntity getSubmit(@PathVariable Integer submitId) throws NotFoundException {
+        try {
+            return ResultEntity.success("获取成功", submitService.getSubmit(submitId));
+        }catch (Exception e) {
+            log.error("getSubmit({}), error message: {}", submitId, e.getMessage());
+            return ResultEntity.error(e.getMessage());
         }
-        map.put("submit", submit);
-        return map;
     }
 
     /**
@@ -123,19 +127,22 @@ public class SubmitController {
      */
     @RequestMapping(value = "/test")
     @ResponseBody
-    public Map<String, Object> test(@RequestBody TestCode testCode) {
-        System.out.println(testCode.getLanguage());
-        Map<String, Object> map = new HashMap<>();
-        TestCode saveTestCode = submitService.saveTestCode(testCode);
-        if (saveTestCode == null) {
-            throw new RuntimeException("");
+    public ResultEntity test(@RequestBody TestCode testCode) {
+        try {
+            TestCode saveTestCode = submitService.saveTestCode(testCode);
+            if (null == saveTestCode) {
+                return ResultEntity.error("提交自测失败");
+            }
+            HashMap<String, Object> map = new HashMap<>();
+            map.put("testId", testCode.getTestId());
+            map.put("testCode", JSON.toJSONString(saveTestCode));
+            System.err.println(map);
+            sender.sendQueue(testQueue, map);
+            return ResultEntity.success("提交自测成功", saveTestCode);
+        }catch (Exception e) {
+            log.error("test({}), error message: {}", testCode, e.getMessage());
+            return ResultEntity.error(e.getMessage());
         }
-        Map<String, Object> saveMap = new HashMap<>();
-        saveMap.put("testId", saveTestCode.getTestId());
-        saveMap.put("testCode", JSON.toJSONString(saveTestCode));
-        sender.sendQueue(testQueue, saveMap);
-        map.put("testId", saveTestCode.getTestId());
-        return map;
     }
 
     /**
@@ -167,24 +174,25 @@ public class SubmitController {
     @RequestMapping("/submit")
     @ResponseBody
     @UserLoginCheck
-    public String submit(@RequestBody Submit submit, HttpServletRequest request, HttpServletResponse response) throws IOException, InterruptedException {
-        System.out.println(submit.getLanguage());
-        submit.setSubmitPublic(1); //公开提交
-        submit.setSubmitTime(new Date());
-        User user = new User();
-        String userId = (String) request.getSession().getAttribute("userId");
-        user.setUserId(Integer.parseInt(userId));
-        submit.setUser(user);
-        submit.setSubmitCodeLength(submit.getSubmitCode().length());
-        Submit saveSubmit = submitService.saveSubmit(submit);
-        if (saveSubmit == null) {
-            throw new RuntimeException("");
+    public ResultEntity submit(@RequestBody Submit submit, HttpServletRequest request, HttpServletResponse response) throws IOException, InterruptedException {
+        try {
+            submit.setSubmitPublic(1);
+            submit.setSubmitTime(new Date());
+            User user = SessionUtils.getUser(request);
+            submit.setUser(user);
+            submit.setSubmitCodeLength(submit.getSubmitCode().length());
+            Submit saveSubmit = submitService.saveSubmit(submit);
+            if (null == saveSubmit) {
+                return ResultEntity.error("提交失败");
+            }
+            HashMap<String, Object> map = new HashMap<>();
+            map.put("submitId", saveSubmit.getSubmitId());
+            sender.sendQueue(submitQueue, map);
+            return ResultEntity.success("提交成功", submit);
+        }catch (Exception e) {
+            log.error("submit({}) error message: {}", submit, e.getMessage());
+            return ResultEntity.error(e.getMessage());
         }
-        Map<String, Object> map = new HashMap<>();
-        map.put("submitId", saveSubmit.getSubmitId());
-        sender.sendQueue(submitQueue, map);
-        Thread.sleep(100);
-        return saveSubmit.getSubmitId().toString();
     }
 
     /**
@@ -224,8 +232,13 @@ public class SubmitController {
      */
     @RequestMapping("/submits/list")
     @ResponseBody
-    public PageInfo<Submit> submitList(Integer page, @RequestBody SubmitQuery submitQuery) {
-        return submitService.getSubmits(page, submitQuery);
+    public ResultEntity submitList(Integer page, @RequestBody SubmitQuery submitQuery) {
+        try {
+            return ResultEntity.success("获取成功", submitService.getSubmits(page, submitQuery));
+        } catch (Exception e) {
+            log.error("submitList({}, {}), error message: ", page, submitQuery, e.getMessage());
+            return ResultEntity.error(e.getMessage());
+        }
     }
 
     /**

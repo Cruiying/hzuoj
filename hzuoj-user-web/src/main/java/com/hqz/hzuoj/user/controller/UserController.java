@@ -5,6 +5,7 @@ import com.alibaba.dubbo.config.annotation.Reference;
 import com.github.pagehelper.PageInfo;
 import com.hqz.hzuoj.annotations.LoginWeb;
 import com.hqz.hzuoj.annotations.UserLoginCheck;
+import com.hqz.hzuoj.base.ResultEntity;
 import com.hqz.hzuoj.bean.contest.Contest;
 import com.hqz.hzuoj.bean.contest.ContestQuery;
 import com.hqz.hzuoj.bean.language.Language;
@@ -17,14 +18,13 @@ import com.hqz.hzuoj.bean.user.Rank;
 import com.hqz.hzuoj.bean.user.RankingQuery;
 import com.hqz.hzuoj.bean.user.User;
 import com.hqz.hzuoj.service.*;
-import com.hqz.hzuoj.util.CookieUtil;
-import com.hqz.hzuoj.util.FastDFSClientWrapper;
-import com.hqz.hzuoj.util.JwtUtil;
-import com.hqz.hzuoj.util.MarkdownUtils;
+import com.hqz.hzuoj.util.*;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.error.ErrorController;
+import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -41,6 +41,7 @@ import java.util.*;
  * @Description: TODO
  */
 @Controller
+@Slf4j
 public class UserController implements ErrorController {
 
     @Reference
@@ -110,7 +111,6 @@ public class UserController implements ErrorController {
     @RequestMapping("/user/login")
     @LoginWeb
     public String login() {
-
         return "login";
     }
 
@@ -134,24 +134,20 @@ public class UserController implements ErrorController {
      */
     @RequestMapping("/login")
     @ResponseBody
-    public String login(@RequestBody User u, HttpServletRequest request, HttpServletResponse response) {
-        String token = "";
-        // 调用用户服务验证用户名和密码
-        User user = userService.loginUser(u);
-        if (user != null) {
-            user.setPassword(null);
+    public ResultEntity login(@RequestBody User u, HttpServletRequest request, HttpServletResponse response) {
+        try {
+            User user = userService.loginUser(u);
+            if (null != user) {
+                user.setPassword(null);
+                String token = getToken(user, request.getRemoteAddr());
+                return ResultEntity.success("登录成功", token);
+            } else {
+                return ResultEntity.error("用户不存在");
+            }
+        }catch (Exception e) {
+            log.error("login({}) error message: ", u, e.getMessage());
+            return ResultEntity.error(e.getMessage());
         }
-        //用户登陆成功，才进行token日志
-        if (user != null) {
-            // 登录成功
-            token = getToken(user,  request.getRemoteAddr());
-            // 将token存入redis一份
-
-        } else {
-            // 登录失败
-            token = "fail";
-        }
-        return token;
     }
 
     private String getToken(User user, String ip) {
@@ -163,7 +159,7 @@ public class UserController implements ErrorController {
         userMap.put("userId", userId.toString());
         userMap.put("username", username);
         userMap.put("userImg", user.getUserImg());
-
+        userMap.put("user", user);
         if (StringUtils.isBlank(ip)) {
             ip = "127.0.0.1";
         }
@@ -186,17 +182,17 @@ public class UserController implements ErrorController {
 
     @RequestMapping("/register")
     @ResponseBody
-    public String register(@RequestBody User u) {
-        if (u == null || u.getUsername() == null || u.getPassword() == null || "".equals(u.getUsername()) || "".equals(u.getPassword())) {
-            return "0";
-        }
-        u.setRegisterTime(new Date());
-        u.setUserRating(1500);u.setGender("男");u.setUserImg("");
-        User user = userService.saveUser(u);
-        if (user.getUserId() != null) {
-            return "1";
-        } else {
-            return "0";
+    public ResultEntity register(@RequestBody User u) {
+        try {
+            if (u == null || u.getUsername() == null || u.getPassword() == null || "".equals(u.getUsername()) || "".equals(u.getPassword())) {
+                return ResultEntity.error("用户名或者密码不能为空");
+            }
+            u.setGender("男"); u.setRegisterTime(new Date());
+            u.setUserRating(1500); u.setUserImg("");
+            return ResultEntity.success("注册成功", userService.saveUser(u));
+        }catch (Exception e) {
+            log.error("register({}) error message: {}", u, e.getMessage());
+            return ResultEntity.error(e.getMessage());
         }
     }
 
@@ -207,7 +203,6 @@ public class UserController implements ErrorController {
      */
     @RequestMapping("/ranking")
     public String getRanking(Integer page, ModelMap modelMap, RankingQuery rankingQuery) {
-        System.err.println(userService);
         if (page == null || page <= 0) {
             page = 1;
         }
@@ -219,15 +214,20 @@ public class UserController implements ErrorController {
         return "ranking";
     }
 
+    /**
+     * 获取用户排行榜
+     * @param page
+     * @return
+     */
     @RequestMapping("/rank/list")
     @ResponseBody
-    public PageInfo<Rank> getRanking(Integer page) {
-        System.err.println(userService);
-        if (page == null || page <= 0) {
-            page = 1;
+    public ResultEntity getRanking(Integer page) {
+        try {
+            return ResultEntity.success("获取成功", userService.getRanks(page, new RankingQuery()));
+        }catch (Exception e) {
+            log.error("getRanking({}) error message: {}", page, e.getMessage());
+            return ResultEntity.error(e.getMessage());
         }
-        PageInfo<Rank> pageInfo = userService.getRanks(page, new RankingQuery());
-        return pageInfo;
     }
     /**
      * 获取用户信息
@@ -257,12 +257,15 @@ public class UserController implements ErrorController {
     @RequestMapping("/user/editor")
     @ResponseBody
     @UserLoginCheck
-    public User editorUser(@RequestBody User user, HttpServletRequest request) {
-        String str = (String) request.getSession().getAttribute("userId");
-        Integer userId = Integer.parseInt(str);
-        user.setUserId(userId);
-        user = userService.updateUser(user);
-        return user;
+    public ResultEntity editorUser(@RequestBody User user, HttpServletRequest request) {
+        try {
+            Integer userId = SessionUtils.getUserId(request);
+            user.setUserId(userId);
+            return ResultEntity.success("修改成功", userService.updateUser(user));
+        }catch (Exception e) {
+            log.error("editorUser({}) error message: {}", user, e.getMessage());
+            return ResultEntity.error(e.getMessage());
+        }
     }
 
     /**
@@ -274,11 +277,16 @@ public class UserController implements ErrorController {
      */
     @RequestMapping("/user/contests/{userId}")
     @ResponseBody
-    public PageInfo<Contest> getUserContests(@PathVariable Integer userId, Integer page) {
-        ContestQuery contestQuery = new ContestQuery();
-        contestQuery.setUserId(userId);
-        contestQuery.setSignUpFilter(1);
-        return  contestService.getAllContest(page, contestQuery);
+    public ResultEntity getUserContests(@PathVariable Integer userId, Integer page) {
+        try {
+            ContestQuery contestQuery = new ContestQuery();
+            contestQuery.setUserId(userId);
+            contestQuery.setContestPublic(1);
+            return ResultEntity.success("获取成功", contestService.getAllContest(page, contestQuery));
+        }catch (Exception e) {
+            log.error("getUserContests({}, {}) error message: {}", userId, page, e.getMessage());
+            return ResultEntity.error(e.getMessage());
+        }
     }
 
     /**
@@ -290,10 +298,15 @@ public class UserController implements ErrorController {
      */
     @RequestMapping("/user/problems/{userId}")
     @ResponseBody
-    public PageInfo<Submit> getUserSubmit(@PathVariable Integer userId, Integer page) {
-        SubmitQuery submitQuery = new SubmitQuery();
-        submitQuery.setUserId(userId);
-        return submitService.getSubmits(page, submitQuery);
+    public ResultEntity getUserSubmit(@PathVariable Integer userId, Integer page) {
+        try {
+            SubmitQuery submitQuery = new SubmitQuery();
+            submitQuery.setUserId(userId);
+            return ResultEntity.success("获取成功", submitService.getSubmits(page, submitQuery));
+        }catch (Exception e) {
+            log.error("getUserSubmit({}, {}) error message: {}", userId, page, e.getMessage());
+            return ResultEntity.error(e.getMessage());
+        }
     }
 
     /**
@@ -306,33 +319,27 @@ public class UserController implements ErrorController {
     @PostMapping("/user/img/upload")
     @UserLoginCheck
     @ResponseBody
-    public String upload(@RequestParam MultipartFile file, HttpServletRequest request, HttpServletResponse response) {
-        String uploadPath = "error";
-        String str = (String) request.getSession().getAttribute("userId");
-        if (str == null) {
-            return uploadPath;
-        }
-        String suffix = file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf(".") + 1, file.getOriginalFilename().length());
-        if (!"jpg,jpeg,gif,png".toUpperCase().contains(suffix.toUpperCase())) {
-            return "error";
-        }
-        if (file.getSize() > 1024 * 128) {
-            return uploadPath;
-        }
+    public ResultEntity upload(@RequestParam MultipartFile file, HttpServletRequest request, HttpServletResponse response) {
         try {
-            Integer userId = Integer.parseInt(str);
-            uploadPath = uploadImgPath + "/" + fastDFSClientWrapper.uploadFile(file);
-            User user = new User();
-            user.setUserId(userId);
+            String suffix = file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf(".") + 1);
+            if (!"jpg,jpeg,gif,png".toUpperCase().contains(suffix.toUpperCase())) {
+                return ResultEntity.error("不支持该文件格式");
+            }
+            if (file.getSize() > 1024 * 128) {
+                return ResultEntity.error("上传文件过大");
+            }
+            User user = SessionUtils.getUser(request);
+            String uploadPath = uploadImgPath + "/" + fastDFSClientWrapper.uploadFile(file);
             user.setUserImg(uploadPath);
-            User user1 = userService.updateUserImg(user);
-            String token = getToken(user1,  request.getRemoteAddr());
+            user = userService.updateUserImg(user);
+            String token = getToken(user,  request.getRemoteAddr());
             CookieUtil.setCookie(request, response, "userOldToken", token, 60 * 60 * 24 * 30, true);
             request.getSession().setAttribute("userImg", user.getUserImg());
-        } catch (Exception e) {
-            e.printStackTrace();
+            return ResultEntity.success("上传成功", uploadPath);
+        }catch (Exception e) {
+            log.error("upload({}) error message:{}", file, e.getMessage());
+            return ResultEntity.error(e.getMessage());
         }
-        return uploadPath;
     }
 
 }

@@ -20,6 +20,7 @@ import com.hqz.hzuoj.service.UserService;
 import com.hqz.hzuoj.user.mq.MessageSender;
 import com.hqz.hzuoj.user.mq.SubmitResultMessageListener;
 import com.hqz.hzuoj.util.MarkdownUtils;
+import com.hqz.hzuoj.util.SessionUtils;
 import javassist.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -179,8 +180,13 @@ public class ContestController {
      */
     @RequestMapping("/contests/info")
     @ResponseBody
-    public PageInfo<Integer> getContests(ContestQuery contestQuery) {
-        return null;
+    public ResultEntity getContests(ContestQuery contestQuery) {
+        try {
+            return ResultEntity.success("获取成功", contestService.getAllContest(1, new ContestQuery()));
+        }catch (Exception e) {
+            log.error("getContests({}) error message: {}", contestQuery, e.getMessage());
+            return ResultEntity.error(e.getMessage());
+        }
     }
 
     /**
@@ -190,8 +196,13 @@ public class ContestController {
      */
     @RequestMapping("/contest/types")
     @ResponseBody
-    private List<ContestType> getContestTypes() {
-        return null;
+    private ResultEntity getContestTypes() {
+        try {
+            return ResultEntity.success("获取成功",contestService.getContestTypes());
+        }catch (Exception e) {
+            log.error("getContestTypes() error message: {}", e.getMessage());
+            return ResultEntity.error(e.getMessage());
+        }
     }
 
     /**
@@ -450,27 +461,36 @@ public class ContestController {
      */
     @RequestMapping("/contest/rank/{contestId}")
     @ResponseBody
-    public PageInfo<ContestRank> getContestRank(HttpServletRequest request, @PathVariable Integer contestId, Integer page, @RequestBody ContestRankQuery contestRankQuery) {
-        Contest contest = contestService.getContest(contestId);
-        if (contest == null) {
-            return null;
-        }
-        if ("OI".equals(contest.getContestType().getContestTypeName()) && contest.getContestStatus() == 1) {
-            return null;
-        }
-        PageInfo<ContestRank> pageInfo = submitService.getContestRanks(page, contest, contestRankQuery);
-        String str = (String) request.getSession().getAttribute("userId");
-        if (pageInfo != null && str != null && pageInfo.getPageNum() == 1 && pageInfo.getList().size() != 1) {
-            Integer userId = Integer.parseInt(str);
-            ContestRankQuery contestRankQuery1 = new ContestRankQuery();
-            contestRankQuery1.setUserId(userId);
-            PageInfo<ContestRank> contestRanks = submitService.getContestRanks(1, contest, contestRankQuery1);
-            if (contestRanks != null && contestRanks.getList() != null && contestRanks.getList().size() == 1) {
-                pageInfo.getList().add(0, contestRanks.getList().get(0));
+    public ResultEntity getContestRank(HttpServletRequest request, @PathVariable Integer contestId, Integer page, @RequestBody ContestRankQuery contestRankQuery) {
+        try {
+            Contest contest = contestService.getContest(contestId);
+            if (null == contest) {
+                return ResultEntity.error("该比赛不存在");
             }
+            if ("OI".equals(contest.getContestType().getContestTypeName()) && "1".equals(contest.getContestStatus().toString())) {
+                return ResultEntity.error("比赛未结束，不允许查看比赛排名");
+            }
+            PageInfo<ContestRank> pageInfo = submitService.getContestRanks(page, contest, contestRankQuery);
+            if (pageInfo == null || pageInfo.getList().isEmpty()) {
+                return ResultEntity.error("排名为空");
+            }
+            String str = (String) request.getSession().getAttribute("userId");
+            if (str != null && pageInfo.getPageNum() == 1 && pageInfo.getList().size() != 1) {
+                Integer userId = Integer.parseInt(str);
+                ContestRankQuery contestRankQuery1 = new ContestRankQuery();
+                contestRankQuery1.setUserId(userId);
+                PageInfo<ContestRank> contestRanks = submitService.getContestRanks(1, contest, contestRankQuery1);
+                if (contestRanks != null && contestRanks.getList() != null && contestRanks.getList().size() == 1) {
+                    pageInfo.getList().add(0, contestRanks.getList().get(0));
+                }
 
+            }
+            return ResultEntity.success("获取成功", pageInfo);
+        }catch (Exception e) {
+            log.error("getContestRank({}, {}, {}) error message: {}", contestId, page, contestRankQuery, e.getMessage());
+            return ResultEntity.error(e.getMessage());
         }
-        return pageInfo;
+
     }
 
 }

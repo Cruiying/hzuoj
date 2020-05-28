@@ -52,6 +52,13 @@ public class ProblemServiceImpl implements ProblemService {
      */
     @Override
     public Integer saveProblem(Problem problem) {
+        if (problem == null) {
+            throw new RuntimeException("题目不能为空");
+        }
+        if (problem.getProblemTitle() == null || "".equals(problem.getProblemTitle())) {
+            throw new RuntimeException("题目不能为空");
+        }
+
         Integer problemId = problem.getProblemId();
         if (problem.getProblemId() != null) {
             //更新问题
@@ -168,8 +175,9 @@ public class ProblemServiceImpl implements ProblemService {
      * @param problem
      */
     @Override
-    public void updateProblemPublic(Problem problem) {
+    public String updateProblemPublic(Problem problem) {
         problemMapper.updateProblemPublic(problem);
+        return "success";
     }
 
     /**
@@ -225,6 +233,9 @@ public class ProblemServiceImpl implements ProblemService {
      */
     @Override
     public PageInfo<Tag> getTags(Integer page) {
+        if (page == null || page <= 0) {
+            page = 1;
+        }
         PageHelper.startPage(page, 10, true);
         List<Tag> tags = tagMapper.selectAll();
         return new PageInfo<>(tags, 10);

@@ -60,4 +60,16 @@ public class AdminServiceImpl implements AdminService {
         List<Admin> admins = adminMapper.getAll();
         return new PageInfo<>(admins, 20);
     }
+
+    @Override
+    public String updateAdminStatus(Admin admin) {
+        adminMapper.updateAdminStatus(admin);
+        return "success";
+    }
+
+    @Override
+    public Admin addAdmin(Admin admin) {
+        adminMapper.saveAdmin(admin);
+        return admin;
+    }
 }

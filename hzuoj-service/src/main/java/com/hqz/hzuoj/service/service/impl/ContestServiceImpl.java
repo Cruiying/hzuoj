@@ -5,10 +5,7 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.hqz.hzuoj.base.ResultEntity;
 import com.hqz.hzuoj.bean.contest.*;
-import com.hqz.hzuoj.bean.problem.Data;
-import com.hqz.hzuoj.bean.problem.Example;
-import com.hqz.hzuoj.bean.problem.ProblemSubmitInfo;
-import com.hqz.hzuoj.bean.problem.Tag;
+import com.hqz.hzuoj.bean.problem.*;
 import com.hqz.hzuoj.bean.submit.JudgeResult;
 import com.hqz.hzuoj.bean.submit.Submit;
 import com.hqz.hzuoj.mapper.contest.ContestApplyMapper;
@@ -25,14 +22,12 @@ import com.hqz.hzuoj.service.SubmitService;
 import com.hqz.hzuoj.service.mq.MessageSender;
 import com.hqz.hzuoj.util.util.RedisUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @Author: HQZ
@@ -178,9 +173,40 @@ public class ContestServiceImpl implements ContestService {
     @Override
     public Contest saveContest(Contest contest) {
         if (contest == null) {
-            return null;
+            throw new RuntimeException("比赛不能为空");
+        }
+        if (StringUtils.isNotBlank(contest.getContestName())) {
+            throw new RuntimeException("比赛创建失败！！！必须写入比赛名称");
+        }
+        Date s = contest.getContestStart();
+        Date e = contest.getContestEnd();
+        Date as = contest.getContestApplyStartTime();
+        Date ae = contest.getContestApplyEndTime();
+        if (s == null || e == null || as == null || ae == null) {
+            throw new RuntimeException("比赛创建失败！！！必须写入日期");
+        }
+        long contestLength = e.getTime() - s.getTime();
+        long applyLength = ae.getTime() - as.getTime();
+        if (contestLength < 1080000) {
+            //比赛的进行必须大于等于30分钟
+            throw new RuntimeException("比赛创建失败！！！比赛时长必须大于30分钟");
+        }
+        if (applyLength < 1080000) {
+            //比赛报名时长时间必须大于等于30分钟
+            throw new RuntimeException("比赛创建失败！！！比赛报名时长必须大于30分钟");
         }
         if (contest.getContestId() != null) {
+            //新创建的比赛，需要生成验证码
+            String code = UUID.randomUUID().toString().substring(0, 5);
+            contest.setContestCode(code);
+            //比赛时长=比赛结束时间-比赛开始时间
+            contest.setContestTimeLength((e.getTime() - s.getTime()));
+            //比赛创建时间
+            contest.setContestCreateTime(new Date());
+            //比赛状态
+            contest.setContestStatus(0);
+            //比赛报名状态
+            contest.setContestApplyStatus(0);
             Contest c = getContestStatus(contest.getContestId());
             //比赛还未开始，可以修改除了比赛的邀请码和比赛的contestId和比赛的创建者任何属性
             contest.setAdmin(c.getAdmin());
@@ -190,7 +216,6 @@ public class ContestServiceImpl implements ContestService {
             contest.setContestTimeLength(contest.getContestEnd().getTime() - contest.getContestStart().getTime());
             contestMapper.updateContest(contest);
             return contest;
-
         } else {
             //保存比赛
             contestMapper.saveContest(contest);
@@ -302,7 +327,7 @@ public class ContestServiceImpl implements ContestService {
         if (contestQuery == null) {
             contestQuery = new ContestQuery();
         }
-        if (page == null) {
+        if (page == null || page <= 0) {
             page = 1;
         }
         if (contestQuery.getContestTypeId() != null && contestQuery.getContestTypeId() == -1) {
@@ -418,6 +443,39 @@ public class ContestServiceImpl implements ContestService {
     public String contestUpdateRankFinal(Integer contestId) {
         contestMapper.contestUpdateRankFinal(contestId);
         return "success";
+    }
+
+    /**
+     * 添加比赛题目
+     * @param contestId
+     * @param contestProblem
+     * @return
+     */
+    @Override
+    public ContestProblem addContestProblem(Integer contestId, ContestProblem contestProblem) {
+        Contest contest = contestMapper.getContest(contestId);
+        if (contest == null) {
+            throw new RuntimeException("比赛不存在");
+        }
+        if (contestProblem == null || contestProblem.getProblem() == null || contestProblem.getProblem().getProblemId() == null
+                || contestProblem.getContestProblemScore() == null || contestProblem.getContestProblemScore() <= 0) {
+            throw new RuntimeException("添加失败");
+        }
+        int contestProblemScore = contestProblem.getContestProblemScore();
+        Problem problem = problemMapper.getProblem(contestProblem.getProblem().getProblemId());
+        if (problem == null) {
+            throw new RuntimeException("题目不存在");
+        }
+        ContestProblem cp = contestMapper.getContestProblem(contestProblem);
+        if (null != cp) {
+            throw new RuntimeException("题目已经存在");
+        }
+        if(contestProblemScore <= 0) {
+            throw new RuntimeException("比赛题目分数必须大于0");
+        }
+        contestMapper.saveContestProblem(contestProblem);
+        contestProblem.setContest(contest);
+        return contestProblem;
     }
 
 }

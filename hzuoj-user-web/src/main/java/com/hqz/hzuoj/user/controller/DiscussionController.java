@@ -11,6 +11,7 @@ import com.hqz.hzuoj.bean.discussion.DiscussionQuery;
 import com.hqz.hzuoj.bean.user.User;
 import com.hqz.hzuoj.service.DiscussionService;
 import com.hqz.hzuoj.util.MarkdownUtils;
+import com.hqz.hzuoj.util.SessionUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -68,17 +69,17 @@ public class DiscussionController {
     @RequestMapping("/discussion/save")
     @ResponseBody
     @UserLoginCheck
-    public String saveDiscussion(@RequestBody Discussion discussion, HttpServletRequest request) {
-        String str = (String) request.getSession().getAttribute("userId");
-        if (str == null) {
-            return null;
+    public ResultEntity saveDiscussion(@RequestBody Discussion discussion, HttpServletRequest request) {
+        try {
+            Integer userId = Integer.parseInt(request.getSession().getAttribute("userId").toString());
+            User user = new User();
+            user.setUserId(userId);
+            discussion.setUser(user);
+            return ResultEntity.success("保存或者修改成功", discussionService.saveDiscussion(discussion));
+        }catch (Exception e) {
+            log.error("saveDiscussion({}) error message: {}", discussion, e.getMessage());
+            return ResultEntity.error(e.getMessage());
         }
-        Integer userId = Integer.parseInt(str);
-        User user = new User();
-        user.setUserId(userId);
-        discussion.setUser(user);
-        Discussion saveDiscussion = discussionService.saveDiscussion(discussion);
-        return JSON.toJSONString(saveDiscussion);
     }
 
     /**
@@ -93,6 +94,7 @@ public class DiscussionController {
         modelMap.put("discussionQuery", discussionQuery);
         return "discussions";
     }
+
 
     /**
      * 讨论列表页面页面
@@ -155,18 +157,16 @@ public class DiscussionController {
     @RequestMapping("/discussion/comment")
     @ResponseBody
     @UserLoginCheck
-    public String discussionComment(@RequestBody DiscussionComment comment, HttpServletRequest request) {
-        String str = (String)request.getSession().getAttribute("userId");
-        Integer userId = Integer.parseInt(str);
-        User user = new User();
-        user.setUserId(userId);
-        comment.setUser(user);
-        comment.setCommentTime(new Date());
-        DiscussionComment discussionComment = discussionService.saveDiscussionComment(comment);
-        if (discussionComment == null) {
-            return null;
+    public ResultEntity discussionComment(@RequestBody DiscussionComment comment, HttpServletRequest request) {
+        try {
+            User user = SessionUtils.getUser(request);
+            comment.setUser(user);
+            comment.setCommentTime(new Date());
+            return ResultEntity.success("获取成功", discussionService.saveDiscussionComment(comment));
+        }catch (Exception e) {
+            log.error("discussionComment({}), error message: {}", comment, e.getMessage());
+            return ResultEntity.error(e.getMessage());
         }
-        return JSON.toJSONString(discussionComment);
     }
 
     /**
@@ -180,8 +180,8 @@ public class DiscussionController {
     @UserLoginCheck
     public ResultEntity discussionDelete(Integer discussionId, HttpServletRequest request) {
         try {
-            String userId = (String)request.getSession().getAttribute("userId");
-            return ResultEntity.success("删除成功", discussionService.discussionDelete(Integer.parseInt(userId), discussionId));
+            Integer userId = SessionUtils.getUserId(request);
+            return ResultEntity.success("删除成功", discussionService.discussionDelete(userId, discussionId));
         }catch (Exception e) {
             e.printStackTrace();
             log.error("Error:{}", e.getMessage());
@@ -200,9 +200,7 @@ public class DiscussionController {
     @UserLoginCheck
     public ResultEntity commentDelete(@PathVariable Integer commentId, HttpServletRequest request) {
         try{
-            String userId = (String)request.getSession().getAttribute("userId");
-            User user = new User();
-            user.setUserId(Integer.parseInt(userId));
+            User user = SessionUtils.getUser(request);
             DiscussionComment discussionComment = new DiscussionComment();
             discussionComment.setCommentId(commentId);
             discussionComment.setUser(user);

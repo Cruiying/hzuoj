@@ -100,7 +100,7 @@
                 url: "/admin/admins/list?page=" + page,
                 //请求成功
                 success: function (result) {
-                    let pageInfo = result.pageInfo;
+                    let pageInfo = result["data"];
                     let admins = pageInfo.list;
                     let adminsList = "";
                     for (let i = 0; i < admins.length; i++) {
@@ -207,7 +207,7 @@
                 //请求路径
                 url: "/admin/update/" + id + "/status?adminStatus=" + adminStatus,
                 success: function (result) {
-                    if (result.flag) {
+                    if (result["code"] == "1") {
                         if (adminStatus == 1) {
                             $(obj).attr('title', '启用');
                             $(obj).find('i').html('&#xe601;');
@@ -220,7 +220,7 @@
                             layer.msg('已停止!', {icon: 5, time: 1000});
                         }
                     } else {
-                        layer.alert(result.msg);
+                        layer.alert(result["mesage"]);
                     }
                 },
                 error: function (result) {
@@ -243,7 +243,7 @@
                 //请求路径
                 url: "/admin/delete/admin/" + id,
                 success: function (result) {
-                    if (result.flag) {
+                    if (result["code"] == 1) {
                         $(obj).parents("tr").remove();
                         layer.msg('已删除!', {icon: 1, time: 1000});
                     } else {

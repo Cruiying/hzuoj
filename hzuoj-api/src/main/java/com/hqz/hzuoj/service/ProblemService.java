@@ -59,7 +59,7 @@ public interface ProblemService {
      *
      * @param problem
      */
-    void updateProblemPublic(Problem problem);
+    String updateProblemPublic(Problem problem);
 
     /**
      * 删除问题

@@ -60,17 +60,12 @@
                 //数据，json字符串
                 data: JSON.stringify(data.field),
                 //请求成功
-                success: function (tag) {
-                    tag = JSON.parse(tag);
-                    if (tag.tagId != null) {
-                       // $("#tagId").val(tag.tagId);
-                        layer.alert('成功');
-                    }
-                    return false;
+                success: function (result) {
+                    layer.msg(result["message"]);
                 },
                 //请求失败，包含具体的错误信息
                 error: function (e) {
-                    layui.msg("提交失败")
+                    layer.msg("提交失败")
                 }
             });
             return false;

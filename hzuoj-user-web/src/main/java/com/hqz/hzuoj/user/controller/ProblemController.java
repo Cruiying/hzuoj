@@ -2,6 +2,7 @@ package com.hqz.hzuoj.user.controller;
 
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.github.pagehelper.PageInfo;
+import com.hqz.hzuoj.base.ResultEntity;
 import com.hqz.hzuoj.bean.language.Language;
 import com.hqz.hzuoj.bean.problem.Data;
 import com.hqz.hzuoj.bean.problem.Problem;
@@ -12,6 +13,7 @@ import com.hqz.hzuoj.service.DataService;
 import com.hqz.hzuoj.service.LanguageService;
 import com.hqz.hzuoj.service.ProblemService;
 import com.hqz.hzuoj.util.MarkdownUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Controller;
@@ -32,6 +34,7 @@ import java.util.Map;
  */
 @Controller
 @Async
+@Slf4j
 public class ProblemController {
 
     @Reference
@@ -69,11 +72,13 @@ public class ProblemController {
      */
     @RequestMapping("/problem/{problemId}/info")
     @ResponseBody
-    public Map<String, Object> problemInfo(@PathVariable Integer problemId) {
-        Problem problem = getProblem(problemId);
-        Map<String, Object> map = new HashMap<>();
-        map.put("problem", problem);
-        return map;
+    public ResultEntity problemInfo(@PathVariable Integer problemId) {
+        try {
+            return ResultEntity.success("获取成功", getProblem(problemId));
+        }catch (Exception e) {
+            log.error("problemInfo({}) error message: {}", problemId, e.getMessage());
+            return ResultEntity.error(e.getMessage());
+        }
     }
     /**
      * 题目详细信息

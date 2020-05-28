@@ -569,9 +569,9 @@
                 axios.post('/user/img/upload', formData, {
                     'Content-Type': 'multipart/form-data'
                 }).then((data) => { // 正确的回调
-                    if (data.data != "error") {
+                    if (data.data["code"] == 1) {
                         alert("上传成功");
-                        this.user.userImg = data.data;
+                        this.user.userImg = data.data["data"];
                     }
                 }).catch((error) => { // 错误的回调
                     alert("上传失败")
@@ -601,8 +601,8 @@
                 params.append("page", page);
                 axios.post("/user/contests/" + this.user.userId + "?page=" + page)
                     .then((data) => { // 正确的回调
-                        if (data.data != null) {
-                            this.contestPageInfo = data.data;
+                        if (data.data["code"] == "1") {
+                            this.contestPageInfo = data.data["data"];
                             this.rankPage = common.getPage(this.contestPageInfo.pageNum, this.contestPageInfo.pages);
                         }
                     })
@@ -614,8 +614,8 @@
                 if (page == undefined) page = 1;
                 axios.post("/user/problems/" + this.user.userId + "?page=" + page)
                     .then((data) => { // 正确的回调
-                        if (data.data != null) {
-                            this.submitPageInfo = data.data;
+                        if (data.data["code"] == "1") {
+                            this.submitPageInfo = data.data["data"];
                             this.submitPage = common.getPage(this.submitPageInfo.pageNum, this.submitPageInfo.pages);
 
                         }
@@ -645,11 +645,14 @@
                 tmp.registerTime = null;
                 axios.post('/user/editor', tmp)
                     .then((data) => { // 正确的回调
-                        this.user = data.data;
-                        $("#success").modal("show");
+                        if (data.data["code"] == "1") {
+                            this.user = data.data["data"];
+                            $("#success").modal("show");
+                        }
+
                     }).catch((error) => { // 错误的回调
-                    $("#error").modal("show");
-                })
+                        $("#error").modal("show");
+                    })
 
 
             },

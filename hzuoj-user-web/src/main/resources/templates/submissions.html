@@ -188,8 +188,10 @@
             getSubmitPageInfo: function () {
                 axios.post('/submits/list?page=' + this.submitPageInfo.pageNum,this.submitQuery)
                     .then((data) => { // 正确的回调
-                        this.submitPageInfo = data.data;
-                        this.submitPage = common.getPage(this.submitPageInfo.pageNum, this.submitPageInfo.pages);
+                        if (data.data["code"] == "1") {
+                            this.submitPageInfo = data.data["data"];
+                            this.submitPage = common.getPage(this.submitPageInfo.pageNum, this.submitPageInfo.pages);
+                        }
                     })
             },
             getURL: function (page) {

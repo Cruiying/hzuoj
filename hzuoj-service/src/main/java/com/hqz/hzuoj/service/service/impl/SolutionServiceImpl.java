@@ -69,6 +69,9 @@ public class SolutionServiceImpl implements SolutionService {
     @Override
     public PageInfo<Solution> getSolutions(Integer page, Integer problemId) {
         Solution solution = new Solution();
+        if (page == null || page <= 0) {
+            page = 1;
+        }
         if (problemId != null) {
             Problem problem = new Problem();
             problem.setProblemId(problemId);

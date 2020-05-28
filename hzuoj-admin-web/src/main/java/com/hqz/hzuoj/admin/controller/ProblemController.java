@@ -5,12 +5,14 @@ import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.fastjson.JSON;
 import com.github.pagehelper.PageInfo;
 import com.hqz.hzuoj.annotations.AdminLoginCheck;
+import com.hqz.hzuoj.base.ResultEntity;
 import com.hqz.hzuoj.bean.problem.Problem;
 import com.hqz.hzuoj.bean.problem.ProblemLevel;
 import com.hqz.hzuoj.bean.problem.Tag;
 import com.hqz.hzuoj.service.DataService;
 import com.hqz.hzuoj.service.ExampleService;
 import com.hqz.hzuoj.service.ProblemService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
@@ -30,6 +32,7 @@ import java.util.Map;
 @Controller
 @RequestMapping("/admin")
 @AdminLoginCheck
+@Slf4j
 public class ProblemController {
 
     @Reference
@@ -70,9 +73,13 @@ public class ProblemController {
      */
     @RequestMapping("/levels/list")
     @ResponseBody
-    public String getLevelsList(Integer page) {
-        PageInfo<ProblemLevel> pageInfo = problemService.getProblemLevels(page);
-        return JSON.toJSONString(pageInfo);
+    public ResultEntity getLevelsList(Integer page) {
+        try {
+            return ResultEntity.success("获取成功", problemService.getProblemLevels(page));
+        }catch (Exception e) {
+            log.error("getLevelsList({}) error message: {}", page, e.getMessage());
+            return ResultEntity.error(e.getMessage());
+        }
     }
 
     /**
@@ -104,9 +111,13 @@ public class ProblemController {
      */
     @PostMapping("/add/level")
     @ResponseBody
-    public String addLevel(@RequestBody ProblemLevel problemLevel, HttpServletRequest request) {
-        ProblemLevel saveProblemLevel = problemService.saveProblemLevel(problemLevel);
-        return JSON.toJSONString(saveProblemLevel);
+    public ResultEntity addLevel(@RequestBody ProblemLevel problemLevel, HttpServletRequest request) {
+        try {
+            return ResultEntity.success("添加成功", problemService.saveProblemLevel(problemLevel));
+        }catch (Exception e) {
+            log.error("addLevel({}) error message: {}", problemLevel, e.getMessage());
+            return ResultEntity.error(e.getMessage());
+        }
     }
 
     /**
@@ -116,11 +127,13 @@ public class ProblemController {
      */
     @RequestMapping("/delete/level/{levelId}")
     @ResponseBody
-    public String deleteLevel(@PathVariable Integer levelId) {
-        boolean flag = problemService.deleteProblemLevel(levelId);
-        Map<String, Boolean> map = new HashMap<>();
-        map.put("flag", flag);
-        return JSON.toJSONString(map);
+    public ResultEntity deleteLevel(@PathVariable Integer levelId) {
+        try {
+            return ResultEntity.success("删除成功", problemService.deleteProblemLevel(levelId));
+        }catch (Exception e) {
+            log.error("deleteLevel({}) error message: {}", levelId, e.getMessage());
+            return ResultEntity.error(e.getMessage());
+        }
     }
 
     /**
@@ -141,12 +154,13 @@ public class ProblemController {
      */
     @RequestMapping("/tags/list")
     @ResponseBody
-    public String getTagsList(Integer page) {
-        if (page == null || page <= 0) {
-            page = 1;
+    public ResultEntity getTagsList(Integer page) {
+        try {
+            return ResultEntity.success("获取成功", problemService.getTags(page));
+        }catch (Exception e) {
+            log.error("getTasList({}) error message: {}", page, e.getMessage());
+            return ResultEntity.error(e.getMessage());
         }
-        PageInfo<Tag> pageInfo = problemService.getTags(page);
-        return JSON.toJSONString(pageInfo);
     }
 
     /**
@@ -178,9 +192,13 @@ public class ProblemController {
      */
     @PostMapping("/add/tag")
     @ResponseBody
-    public String addTag(@RequestBody Tag tag, HttpServletRequest request) {
-        Tag saveTag = problemService.saveTag(tag);
-        return JSON.toJSONString(saveTag);
+    public ResultEntity addTag(@RequestBody Tag tag, HttpServletRequest request) {
+        try {
+            return ResultEntity.success("添加成功", problemService.saveTag(tag));
+        }catch (Exception e) {
+            log.error("addTag({}) error message: {}", tag, e.getMessage());
+            return ResultEntity.error(e.getMessage());
+        }
     }
 
     /**
@@ -190,11 +208,13 @@ public class ProblemController {
      */
     @RequestMapping("/delete/tag/{tagId}")
     @ResponseBody
-    public String deleteTag(@PathVariable Integer tagId) {
-        boolean flag = problemService.deleteTag(tagId);
-        Map<String, Boolean> map = new HashMap<>();
-        map.put("flag", flag);
-        return JSON.toJSONString(map);
+    public ResultEntity deleteTag(@PathVariable Integer tagId) {
+        try {
+            return ResultEntity.error("删除成功", problemService.deleteTag(tagId));
+        }catch (Exception e) {
+            log.error("deleteTag({}) error message: {}", tagId, e.getMessage());
+            return ResultEntity.error(e.getMessage());
+        }
     }
 
     /**
@@ -205,14 +225,13 @@ public class ProblemController {
      */
     @RequestMapping("/problems/list")
     @ResponseBody
-    public Map<String, Object> list(Integer page) {
-        if (page == null) {
-            page = 1;
+    public ResultEntity list(Integer page) {
+        try {
+            return ResultEntity.success("获取成功", problemService.getAllProblem(page));
+        }catch (Exception e) {
+            log.error("list({}) error message:{}", page, e.getMessage());
+            return ResultEntity.error(e.getMessage());
         }
-        Map<String, Object> map = new HashMap<>();
-        PageInfo<Problem> pageInfo = problemService.getAllProblem(page);
-        map.put("pageInfo", pageInfo);
-        return map;
     }
 
 
@@ -266,13 +285,13 @@ public class ProblemController {
      */
     @RequestMapping("problem/{problemId}/info")
     @ResponseBody
-    public Map<String, Object> getProblemInfo(@PathVariable Integer problemId, ModelMap modelMap, HttpServletRequest request) {
-        Map<String, Object> map = new HashMap<>();
-        Problem problem = problemService.getProblem(problemId);
-        modelMap.put("adminId", problem.getAdmin().getAdminId());
-        map.put("problem", problem);
-        modelMap.put("problem", problem);
-        return map;
+    public ResultEntity getProblemInfo(@PathVariable Integer problemId, ModelMap modelMap, HttpServletRequest request) {
+        try {
+            return ResultEntity.success("获取成功", problemService.getProblem(problemId));
+        }catch (Exception e) {
+            log.error("getProblemInfo({}) error message: {}", problemId, e.getMessage());
+            return ResultEntity.error(e.getMessage());
+        }
     }
 
     /**
@@ -283,27 +302,13 @@ public class ProblemController {
      */
     @RequestMapping("add/problem")
     @ResponseBody
-    public Map<String, Object> add(@RequestBody Problem problem, HttpServletRequest request, ModelMap modelMap) {
-        Map<String, Object> map = new HashMap<>();
-        modelMap.put("adminId", request.getAttribute("adminId"));
-        if (StringUtils.isBlank(problem.getProblemTitle())) {
-            map.put("msg", "添加失败，必须包含题目名称");
-            map.put("problemId", "0");
-            map.put("flag", false);
-            return map;
+    public ResultEntity add(@RequestBody Problem problem, HttpServletRequest request, ModelMap modelMap) {
+        try {
+            return ResultEntity.success("成功", problemService.saveProblem(problem));
+        }catch (Exception e) {
+            log.error("add({}) error message: {}", problem, e.getMessage());
+            return ResultEntity.error(e.getMessage());
         }
-//        保存题目
-        boolean flag = (problem.getProblemId() != null);
-        Integer problemId = problemService.saveProblem(problem);
-        if (flag) {
-            map.put("msg", "题目修改成功");
-        } else {
-            map.put("msg", "题目添加成功");
-        }
-        request.setAttribute("problemId", problemId);
-        map.put("problemId", problemId);
-        map.put("flag", true);
-        return map;
     }
 
     /**
@@ -315,21 +320,15 @@ public class ProblemController {
      */
     @RequestMapping("/update/{problemId}/public")
     @ResponseBody
-    private Map<String, Object> updateProblemPublic(@PathVariable Integer problemId, Integer problemPublic) {
-        Map<String, Object> map = new HashMap<>();
-        Problem problem = new Problem();
-        problem.setProblemId(problemId);
-        problem.setProblemPublic(problemPublic);
+    private ResultEntity updateProblemPublic(@PathVariable Integer problemId, Integer problemPublic) {
         try {
-            problemService.updateProblemPublic(problem);
-            map.put("msg", "修改成功");
-            map.put("flag", true);
-        } catch (Exception e) {
-            e.printStackTrace();
-            map.put("msg", "修改失败");
-            map.put("flag", false);
+            Problem problem = new Problem();
+            problem.setProblemId(problemId); problem.setProblemPublic(problemPublic);
+            return ResultEntity.error("修改成功", problemService.updateProblemPublic(problem));
+        }catch (Exception e) {
+            log.error("updateProblemPublic({}, {}) error message: {}", problemId, problemPublic, e.getMessage());
+            return ResultEntity.error(e.getMessage());
         }
-        return map;
     }
 
     /**
@@ -340,15 +339,13 @@ public class ProblemController {
      */
     @RequestMapping("delete/problem/{problemId}")
     @ResponseBody
-    public Map<String, Object> deleteProblem(@PathVariable Integer problemId) {
-        Map<String, Object> map = new HashMap<>();
-        String msg = problemService.deleteProblem(problemId);
-        if ("success".equals(msg)) {
-            map.put("flag", true);
-        } else {
-            map.put("flag", false);
+    public ResultEntity deleteProblem(@PathVariable Integer problemId) {
+        try {
+            return ResultEntity.success(problemService.deleteProblem(problemId));
+        }catch (Exception e) {
+            log.error("deleteProblem({}) error message: {}", problemId, e.getMessage());
+            return ResultEntity.error(e.getMessage());
         }
-        return map;
     }
 }
 

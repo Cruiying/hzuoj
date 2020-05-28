@@ -188,80 +188,87 @@
                 data: JSON.stringify(data),
                 //请求成功
                 success: function (result) {
-                    let pageInfo = result.pageInfo;
-                    console.log(pageInfo);
-                    let contests = pageInfo.list;
-                    let list = $("#contests");
-                    list.html("");
-                    for (let i = 0; i < contests.length; i++) {
-                        const contest = contests[i];
-                        //比赛创建时间
-                        const ct = new Date(contest.contestCreateTime).format("yyyy-MM-dd hh:mm");
-                        //比赛开始时间
-                        const s = new Date(contest.contestStart).format("yyyy-MM-dd hh:mm");
-                        //比赛结束时间
-                        const e = new Date(contest.contestEnd).format("yyyy-MM-dd hh:mm");
-                        //比赛报名开始时间
-                        const as = new Date(contest.contestApplyStartTime).format("yyyy-MM-dd hh:mm");
-                        //比赛报名结束时间
-                        const ae = new Date(contest.contestApplyEndTime).format("yyyy-MM-dd hh:mm");
-                        let contestStatus = "";
-                        let contestPublic = "";
-                        let contestLength = (Math.round(contest.contestTimeLength / 3600000)) + "小时" + (Math.round(contest.contestTimeLength / 3600000) % 60) + "分钟";
-                        if (contest.contestStatus == 0) {
-                            contestStatus = "未开始";
-                        } else if (contest.contestStatus == 1) {
-                            contestStatus = "已开始";
-                        } else {
-                            contestStatus = "已结束";
-                        }
-                        if (contest.contestPublic == 0) {
-                            contestPublic = "私有比赛";
-                        } else {
-                            contestPublic = "公开比赛";
-                        }
-                        let isRank = "";
-                        let contestAfreshSubmit = "";
-
-                        isRank = "<a title=\"更新比赛\" onclick=\"updateContestRank(this," + contest.contestId + ")\" href=\"javascript:;\">\n" +
-                            "                                    <i class=\"layui-icon\">&#xe614;</i>\n" +
-                            "                                </a>";
-                        contestAfreshSubmit = "<a title=\"重新测评\" onclick=\"contestAfreshSubmit(this," + contest.contestId + ")\" href=\"javascript:;\">\n" +
-                            "                                    <i class=\"layui-icon\">&#xe614;</i>\n" +
-                            "                                </a>";
-                        list.append("   <tr>\n" +
-                            "                            <td>" + contest.contestId + "</td>\n" +
-                            "                            <td>" + contest.contestName + "</td>\n" +
-                            "                            <td>" + s + "</td>\n" +
-                            "                            <td>" + e + "</td>\n" +
-                            "                            <td>" + contest.contestType.contestTypeName + "</td>\n" +
-                            "                            <td>" + contestStatus + "</td>\n" +
-                            "                            <td>" + contestLength + "</td>\n" +
-                            "                            <td>" + contestPublic + "</td>\n" +
-                            "                            <td class=\"td-manage\">\n" +
-                            "                                <a title=\"编辑\" onclick=\"xadmin.open('编辑','/admin/contest?contestId=" + contest.contestId + "')\" href=\"javascript:;\">\n" +
-                            "                                    <i class=\"layui-icon\">&#xe642;</i>\n" +
-                            "                                </a>\n" +
-                            "                                <a title=\"删除\" onclick=\"contestDelete(this," + contest.contestId + ")\" href=\"javascript:;\">\n" +
-                            "                                    <i class=\"layui-icon\">&#xe640;</i>\n" +
-                            "                                </a>" + isRank + "\n" +
-                            "                                </a>" + contestAfreshSubmit + "\n" +
-                            "                            </td>\n" +
-                            "                        </tr>");
-                    }
-                    lazyPage.render({
-                        elem: 'page'
-                        , count: pageInfo.total
-                        , limit: pageInfo.pageSize
-                        , curr: page
-                        , done: function () {
-                        }
-                        , jump: function (obj, first) {
-                            if (!first) {
-                                loadContests(obj.curr, data);
+                    if (result["code"] == "1") {
+                        let pageInfo = result["data"];
+                        console.log(pageInfo);
+                        let contests = pageInfo.list;
+                        let list = $("#contests");
+                        list.html("");
+                        for (let i = 0; i < contests.length; i++) {
+                            const contest = contests[i];
+                            //比赛创建时间
+                            const ct = new Date(contest.contestCreateTime).format("yyyy-MM-dd hh:mm");
+                            //比赛开始时间
+                            const s = new Date(contest.contestStart).format("yyyy-MM-dd hh:mm");
+                            //比赛结束时间
+                            const e = new Date(contest.contestEnd).format("yyyy-MM-dd hh:mm");
+                            //比赛报名开始时间
+                            const as = new Date(contest.contestApplyStartTime).format("yyyy-MM-dd hh:mm");
+                            //比赛报名结束时间
+                            const ae = new Date(contest.contestApplyEndTime).format("yyyy-MM-dd hh:mm");
+                            let contestStatus = "";
+                            let contestPublic = "";
+                            let contestLength = (Math.round(contest.contestTimeLength / 3600000)) + "小时" + (Math.round(contest.contestTimeLength / 3600000) % 60) + "分钟";
+                            if (contest.contestStatus == 0) {
+                                contestStatus = "未开始";
+                            } else if (contest.contestStatus == 1) {
+                                contestStatus = "已开始";
+                            } else {
+                                contestStatus = "已结束";
                             }
+                            if (contest.contestPublic == 0) {
+                                contestPublic = "私有比赛";
+                            } else {
+                                contestPublic = "公开比赛";
+                            }
+                            let isRank = "";
+                            let contestAfreshSubmit = "";
+
+                            isRank = "<a title=\"更新比赛\" onclick=\"updateContestRank(this," + contest.contestId + ")\" href=\"javascript:;\">\n" +
+                                "                                    <i class=\"layui-icon\">&#xe614;</i>\n" +
+                                "                                </a>";
+                            contestAfreshSubmit = "<a title=\"重新测评\" onclick=\"contestAfreshSubmit(this," + contest.contestId + ")\" href=\"javascript:;\">\n" +
+                                "                                    <i class=\"layui-icon\">&#xe614;</i>\n" +
+                                "                                </a>";
+                            let updateContestRankFinal = "<a title=\"修改比赛榜单状态\" onclick=\"updateContestRankFinal(this," + contest.contestId + ")\" href=\"javascript:;\">\n" +
+                                "                                    <i class=\"layui-icon\">&#xe614;</i>\n" +
+                                "                                </a>";
+
+                            list.append("   <tr>\n" +
+                                "                            <td>" + contest.contestId + "</td>\n" +
+                                "                            <td>" + contest.contestName + "</td>\n" +
+                                "                            <td>" + s + "</td>\n" +
+                                "                            <td>" + e + "</td>\n" +
+                                "                            <td>" + contest.contestType.contestTypeName + "</td>\n" +
+                                "                            <td>" + contestStatus + "</td>\n" +
+                                "                            <td>" + contestLength + "</td>\n" +
+                                "                            <td>" + contestPublic + "</td>\n" +
+                                "                            <td class=\"td-manage\">\n" +
+                                "                                <a title=\"编辑\" onclick=\"xadmin.open('编辑','/admin/contest?contestId=" + contest.contestId + "')\" href=\"javascript:;\">\n" +
+                                "                                    <i class=\"layui-icon\">&#xe642;</i>\n" +
+                                "                                </a>\n" +
+                                "                                <a title=\"删除\" onclick=\"contestDelete(this," + contest.contestId + ")\" href=\"javascript:;\">\n" +
+                                "                                    <i class=\"layui-icon\">&#xe640;</i>\n" +
+                                "                                </a>" + isRank + "\n" +
+                                "                                </a>" + contestAfreshSubmit + "\n" +
+                                "                                </a>" + updateContestRankFinal + "\n" +
+                                "                            </td>\n" +
+                                "                        </tr>");
                         }
-                    });
+                        lazyPage.render({
+                            elem: 'page'
+                            , count: pageInfo.total
+                            , limit: pageInfo.pageSize
+                            , curr: page
+                            , done: function () {
+                            }
+                            , jump: function (obj, first) {
+                                if (!first) {
+                                    loadContests(obj.curr, data);
+                                }
+                            }
+                        });
+                    }
                     return false;
                 },
                 //请求失败，包含具体的错误信息
@@ -277,6 +284,28 @@
         loadContests(1, query);
     });
 
+    function updateContestRankFinal(obj, contestId) {
+        layer.confirm("确定要修改比赛榜单？", function () {
+            $.ajax({
+                dataType: "json",
+                type: "POST",
+                contestType: "application/json;charset=utf-8",
+                url: "/admin/contest/update/rank/final/" + contestId,
+                success: function (result) {
+                    if (result["code"] == "1") {
+                        layer.msg('更新成功!', {icon: 1, time: 1000});
+                    } else {
+                        layer.msg('更新失败!', {icon: 5, time: 1000});
+                    }
+
+                },
+                error: function (result) {
+                    layer.msg("系统错误");
+                }
+            })
+        })
+    }
+
     function updateContestRank(obj, contestId) {
         layer.confirm('确认要更新比赛吗？', function () {
             //发异步删除数据
@@ -289,7 +318,7 @@
                 //请求路径
                 url: "/admin/contest/update/rank/" + contestId,
                 success: function (result) {
-                    if (result != 'fail') {
+                    if (result["code"] == "1") {
                         layer.msg('更新成功!', {icon: 1, time: 1000});
                     } else {
                         layer.msg('更新失败!', {icon: 5, time: 1000});

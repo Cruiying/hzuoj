@@ -4,10 +4,12 @@ import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.fastjson.JSON;
 import com.github.pagehelper.PageInfo;
 import com.hqz.hzuoj.annotations.AdminLoginCheck;
+import com.hqz.hzuoj.base.ResultEntity;
 import com.hqz.hzuoj.bean.discussion.Discussion;
 import com.hqz.hzuoj.bean.discussion.DiscussionQuery;
 import com.hqz.hzuoj.service.DiscussionService;
 import com.hqz.hzuoj.util.MarkdownUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -26,6 +28,7 @@ import java.util.Map;
 @Controller
 @RequestMapping("/admin")
 @AdminLoginCheck
+@Slf4j
 public class DiscussionController {
 
     @Reference
@@ -49,8 +52,13 @@ public class DiscussionController {
      */
     @RequestMapping("/discussions/list")
     @ResponseBody
-    public PageInfo<Discussion> getDiscussions(Integer page) {
-        return discussionService.getDiscussions(page, new DiscussionQuery());
+    public ResultEntity getDiscussions(Integer page) {
+        try {
+            return ResultEntity.success("获取成功", discussionService.getDiscussions(page, new DiscussionQuery()));
+        }catch (Exception e) {
+            log.error("getDiscussions({}) error message: {}", page, e.getMessage());
+            return ResultEntity.error(e.getMessage());
+        }
     }
 
     /**
@@ -76,17 +84,29 @@ public class DiscussionController {
      */
     @RequestMapping("/discussion/top")
     @ResponseBody
-    public Discussion discussionTop(@RequestBody Discussion discussion) {
-        return discussionService.updateDiscussionTop(discussion);
+    public ResultEntity discussionTop(@RequestBody Discussion discussion) {
+        try {
+            return ResultEntity.success("获取成功", discussionService.updateDiscussionTop(discussion));
+        }catch (Exception e) {
+            log.error("discussionTop({}) error message: {}", discussion, e.getMessage());
+            return ResultEntity.error(e.getMessage());
+        }
     }
 
+    /**
+     * 删除讨论
+     * @param discussionId
+     * @return
+     */
     @RequestMapping("/delete/discussion/{discussionId}")
     @ResponseBody
-    private String deleteDiscussion(@PathVariable Integer discussionId) {
-        boolean flag = discussionService.deleteDiscussion(discussionId);
-        Map<String, Boolean> map = new HashMap<>();
-        map.put("flag", flag);
-        return JSON.toJSONString(map);
+    private ResultEntity deleteDiscussion(@PathVariable Integer discussionId) {
+        try {
+            return ResultEntity.success("删除成功", discussionService.deleteDiscussion(discussionId));
+        }catch (Exception e) {
+            log.error("deleteDiscussion({}) error message: {}", discussionId, e.getMessage());
+            return ResultEntity.error(e.getMessage());
+        }
     }
 
 }

@@ -10,9 +10,9 @@ import java.util.List;
  * @Description: TODO
  */
 public interface DataService {
-    void saveData(Integer problemId, List<Data> data, String uploadPath);
+    String saveData(Integer problemId, List<Data> data, String uploadPath);
 
     List<Data> getProblemDatas(Integer problemId);
 
-    void updateProblemData(List<Data> datas);
+    String updateProblemData(List<Data> datas);
 }

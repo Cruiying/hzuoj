@@ -20,4 +20,7 @@ public interface AdminMapper extends Mapper<Admin> {
 
     List<Admin> getAll();
 
+    void updateAdminStatus(Admin admin);
+
+    void saveAdmin(Admin admin);
 }

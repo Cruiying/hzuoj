@@ -16,4 +16,7 @@ public interface AdminService {
 
     PageInfo<Admin> getAll(Integer page);
 
+    String updateAdminStatus(Admin admin);
+
+    Admin addAdmin(Admin admin);
 }

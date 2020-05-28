@@ -50,7 +50,8 @@
         <div class="row" style="margin-top: -23px;">
             <a class="ui teal button" href="#submit">提交</a>
             <a v-if="contestId==null" class="ui purple button" :href="'/problem/solutions/'+problem.problemId">查看题解</a>
-            <a v-if="contestId==null"  :href="'/submits?problemId='+problem.problemId" class="ui positive button">提交记录</a>
+            <a v-if="contestId==null" :href="'/submits?problemId='+problem.problemId"
+               class="ui positive button">提交记录</a>
         </div>
     </div>
     <div class="ui grid" v-if="problem != null">
@@ -161,7 +162,8 @@
                     <div class="ui attached segment">
                         <div class="ui middle aligned column grid">
                             <div class="right aligned column">
-                                <button class="ui teal button" id="submit" v-on:click="submitCode()" :class="flag?'':'disabled'">
+                                <button class="ui teal button" id="submit" v-on:click="submitCode()"
+                                        :class="flag?'':'disabled'">
                                     提交
                                 </button>
                                 <button class="ui teal button" v-on:click="showTest()" id="test" href="#">自测</button>
@@ -278,34 +280,6 @@
 <!--选择语言 提交代码-->
 <!--初始化mathjax-->
 <script th:inline="none">
-    let isMathjaxConfig = false; // 防止重复调用Config，造成性能损耗
-    const initMathjaxConfig = () => {
-        if (!window.MathJax) {
-            return;
-        }
-        window.MathJax.Hub.Config({
-            showProcessingMessages: false, //关闭js加载过程信息
-            messageStyle: "none", //不显示信息
-            jax: ["input/TeX", "output/HTML-CSS"],
-            tex2jax: {
-                inlineMath: [["$", "$"], ["\\(", "\\)"]], //行内公式选择符
-                displayMath: [["$$", "$$"], ["\\[", "\\]"]], //段内公式选择符
-                skipTags: ["script", "noscript", "style", "textarea", "pre", "code", "a"] //避开某些标签
-            },
-            "HTML-CSS": {
-                availableFonts: ["STIX", "TeX"], //可选字体
-                showMathMenu: false //关闭右击菜单显示
-            }
-        });
-        isMathjaxConfig = true; //
-    };
-    if (isMathjaxConfig === false) { // 如果：没有配置MathJax
-        initMathjaxConfig();
-    }
-
-    // 如果，不传入第三个参数，则渲染整个document
-    // 因为使用的Vuejs，所以指明#app，以提高速度
-    window.MathJax.Hub.Queue(["Typeset", MathJax.Hub, document.getElementById('app')]);
 </script>
 <script type="text/javascript" th:inline="javascript">
     let monacoEditor;
@@ -387,9 +361,8 @@
                 this.language = this.languages[index];
                 editorLanguage(model);
             },
-            getMaxRuntimeTime: function() {
-
-                if (null == this.problem || null == this.problem.datas) return ;
+            getMaxRuntimeTime: function () {
+                if (null == this.problem || null == this.problem.datas) return;
                 let time = 0;
                 const datas = this.problem.datas;
                 for (let i = 0; i < datas.length; i++) {
@@ -397,8 +370,8 @@
                 }
                 return common.getRuntimeTime(time);
             },
-            getMaxRuntimeMemory: function() {
-                if (null == this.problem || null == this.problem.datas) return ;
+            getMaxRuntimeMemory: function () {
+                if (null == this.problem || null == this.problem.datas) return;
                 let memory = 0;
                 const datas = this.problem.datas;
                 for (let i = 0; i < datas.length; i++) {
@@ -492,13 +465,11 @@
                 this.submitSuccess = true;
                 axios.post(url, this.submit)
                     .then((data) => { // 正确的回调
-                        let id = data.data;
-                        if (id.length > 20) {
-                            window.location.href = "/user/login";
+                        if (data.data["code"] == "1") {
+                            window.location.href = href + data.data["data"].submitId;
                         } else {
-                            window.location.href = href + id;
+                            window.location.href = "/user/login";
                         }
-
                     })
                     .catch((error) => { // 错误的回调
 
@@ -519,15 +490,17 @@
                 this.testCode.compileInfo = null;
                 axios.post("/test", this.testCode)
                     .then((data) => { // 正确的回调
-                        this.testCode.testId = data.data.testId;
-                        this.connectTest(this.testCode.testId);
+                        if (data.data["code"] == 1) {
+                            this.testCode.testId = data.data["data"].testId;
+                            this.connectTest(this.testCode.testId);
+                        }
                     })
                     .catch((error) => { // 错误的回调
-
                     })
             }
         },
         created: function () {
+            common.initMarkdown();
             const model = this.languages[0].languageModel;
             initEditor(model);
         }

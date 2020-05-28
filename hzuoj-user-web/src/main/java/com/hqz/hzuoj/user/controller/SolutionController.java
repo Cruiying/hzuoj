@@ -11,8 +11,10 @@ import com.hqz.hzuoj.bean.user.User;
 import com.hqz.hzuoj.service.ProblemService;
 import com.hqz.hzuoj.service.SolutionService;
 import com.hqz.hzuoj.util.MarkdownUtils;
+import com.hqz.hzuoj.util.SessionUtils;
 import com.hqz.hzuoj.vo.UserSolutionVO;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.output.ClosedOutputStream;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
@@ -44,7 +46,6 @@ public class SolutionController {
      */
     @RequestMapping("/problem/solutions/{problemId}")
     public String getSolutions(Integer page, @PathVariable Integer problemId, ModelMap modelMap) {
-        if (page == null || page <= 0) page = 1;
         PageInfo<Solution> pageInfo = solutionService.getSolutions(page, problemId);
         Problem problem = problemService.getProblem(problemId);
         List<Solution> solutions = pageInfo.getList();
@@ -70,16 +71,16 @@ public class SolutionController {
     public String editorSolution(@PathVariable Integer problemId, Integer solutionId, ModelMap modelMap, HttpServletRequest request) {
         if (problemId != null) {
             Problem problem = problemService.getProblem(problemId);
-            if (problem == null) return "404";
+            if (problem == null) {
+                return "404";
+            }
             Solution solution = solutionService.getSolution(solutionId);
             if (solution != null) {
-                String str = (String) request.getSession().getAttribute("userId");
-                int userId = Integer.parseInt(str);
-                int duserId = solution.getUser().getUserId();
-                if (duserId != userId) {
+                Integer userId = SessionUtils.getUserId(request);
+                Integer e_userId = solution.getUser().getUserId();
+                if (!userId.equals(e_userId)) {
                     return "404";
                 }
-
                 modelMap.put("solutionId", solutionId);
                 modelMap.put("solution", solution);
             }
@@ -99,17 +100,18 @@ public class SolutionController {
     @RequestMapping("/problem/solution/save")
     @UserLoginCheck
     @ResponseBody
-    public String saveSolution(@RequestBody Solution solution, HttpServletRequest request) {
-        if (solution == null) return null;
-        if (solution.getProblem() == null || solution.getProblem().getProblemId() == null) return null;
-        String str = (String) request.getSession().getAttribute("userId");
-        Integer userId = Integer.parseInt(str);
-        User user = new User();
-        user.setUserId(userId);
-        solution.setUser(user);
-        Solution saveSolution = solutionService.saveSolution(solution);
-        if (saveSolution == null) return null;
-        return JSON.toJSONString(saveSolution);
+    public ResultEntity saveSolution(@RequestBody Solution solution, HttpServletRequest request) {
+        try {
+            if (solution == null || solution.getProblem() == null || solution.getProblem().getProblemId() == null) {
+                return ResultEntity.error("必要参数不能为空");
+            }
+            User user = SessionUtils.getUser(request);
+            solution.setUser(user);
+            return ResultEntity.success("保存或者修改成功", solutionService.saveSolution(solution));
+        }catch (Exception e) {
+            log.error("saveSolution({}, error message: {}", solution, e.getMessage());
+            return ResultEntity.error(e.getMessage());
+        }
     }
 
     /**
@@ -141,8 +143,8 @@ public class SolutionController {
     public ResultEntity solutionDelete(@PathVariable Integer solutionId, HttpSession session) {
         try {
             Solution solution = solutionService.getSolution(solutionId);
-            Integer u = Integer.parseInt(session.getAttribute("userId").toString());
-            if (!u.equals(solution.getUser().getUserId())) {
+            Integer userId = SessionUtils.getUserId(session);
+            if (!userId.equals(solution.getUser().getUserId())) {
                 return ResultEntity.error("不能删除别人发表的题解");
             }
             return ResultEntity.success("删除成功", solutionService.deleteSolution(solutionId));
@@ -165,6 +167,7 @@ public class SolutionController {
             map.put("problemId", problemId);
             map.put("solutionId", solutionId);
             Solution solution = solutionService.getSolution(solutionId);
+            solution.setSolutionContent(MarkdownUtils.markdownToHtml(solution.getSolutionContent()));
             map.put("solution", solution);
         }catch (Exception e) {
             log.error("solution({}, {}), error message: {}", problemId, solutionId, e.getMessage());

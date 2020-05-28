@@ -100,7 +100,7 @@ public class TestResultMessageListener {
      */
     @EventListener
     public void deployEventHandler(TestResultMessageEvent messageEvent) throws IOException, InterruptedException {
-
+        System.err.println(messageEvent);
         Long testId = messageEvent.getTestId();
         MessageListener messageListener = new MessageListener();
         //保证发送的消息顺序性

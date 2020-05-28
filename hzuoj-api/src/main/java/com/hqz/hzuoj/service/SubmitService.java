@@ -43,7 +43,7 @@ public interface SubmitService {
 
     List<ContestRank> getContestRanks(Integer contestId);
 
-    String calculateContestRating(Contest contest);
+    String calculateContestRating(Integer contestId);
 
     String getContestExcel(Integer contestId) throws IOException;
 }

@@ -43,4 +43,6 @@ public interface ContestService {
     String contestDelete(Integer contestId);
 
     String contestUpdateRankFinal(Integer contestId);
+
+    ContestProblem addContestProblem(Integer contestId, ContestProblem contestProblem);
 }

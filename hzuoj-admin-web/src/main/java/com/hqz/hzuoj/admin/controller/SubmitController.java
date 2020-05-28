@@ -3,9 +3,11 @@ package com.hqz.hzuoj.admin.controller;
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.github.pagehelper.PageInfo;
 import com.hqz.hzuoj.annotations.AdminLoginCheck;
+import com.hqz.hzuoj.base.ResultEntity;
 import com.hqz.hzuoj.bean.problem.Problem;
 import com.hqz.hzuoj.bean.submit.Submit;
 import com.hqz.hzuoj.service.SubmitService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,6 +24,7 @@ import java.util.Map;
 @Controller
 @RequestMapping("/admin")
 @AdminLoginCheck
+@Slf4j
 public class SubmitController {
 
     @Reference
@@ -44,11 +47,13 @@ public class SubmitController {
      */
     @RequestMapping("/submits/list")
     @ResponseBody
-    public Map<String, Object> list(Integer page) {
-        Map<String, Object> map = new HashMap<>();
-        PageInfo<Submit> pageInfo = submitService.getSubmits(page);
-        map.put("pageInfo", pageInfo);
-        return map;
+    public ResultEntity list(Integer page) {
+        try {
+            return ResultEntity.success("获取成功", submitService.getSubmits(page));
+        }catch (Exception e) {
+            log.error("list({}) error message: {}", page, e.getMessage());
+            return ResultEntity.error(e.getMessage());
+        }
     }
 
     /**
@@ -58,11 +63,13 @@ public class SubmitController {
      */
     @RequestMapping("/restart/submit/{submitId}")
     @ResponseBody
-    public Map<String, Object> restartSubmit(@PathVariable Integer submitId) {
-        Map<String,Object> map = new HashMap<>();
-        map.put("msg", submitService.restartSubmit(submitId));
-        System.out.println(map);
-        return map;
+    public ResultEntity restartSubmit(@PathVariable Integer submitId) {
+        try {
+            return ResultEntity.success("提交成功", submitService.restartSubmit(submitId));
+        }catch (Exception e) {
+            log.error("restartSubmit({}) error message: {}", submitId, e.getMessage());
+            return ResultEntity.error(e.getMessage());
+        }
     }
 
     /**
@@ -71,10 +78,13 @@ public class SubmitController {
      */
     @RequestMapping("/restart/submits")
     @ResponseBody
-    public Map<String, Object> restartSubmits() {
-        Map<String,Object> map = new HashMap<>();
-        map.put("msg", submitService.restartSubmits());
-        return map;
+    public ResultEntity restartSubmits() {
+        try {
+            return ResultEntity.success("提交成功", submitService.restartSubmits());
+        }catch (Exception e) {
+            log.error("restartSubmits() error message: {}", e.getMessage());
+            return ResultEntity.error(e.getMessage());
+        }
     }
 
 }

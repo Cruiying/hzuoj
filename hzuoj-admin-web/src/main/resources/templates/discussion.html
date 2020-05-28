@@ -84,11 +84,7 @@
                 data: JSON.stringify(data.field),
                 //请求成功
                 success: function (result) {
-                    if (result != null) {
-                        alert('修改成功')
-                    } else {
-                        alert('修改失败');
-                    }
+                    layer.msg(result["message"]);
                 },
                 //请求失败，包含具体的错误信息
                 error: function (e) {

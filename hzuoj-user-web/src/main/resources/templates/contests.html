@@ -379,7 +379,7 @@
                 axios.post('/apply/contest/' + contestId, params)
                     .then((data) => { // 正确的回调
 
-                        if (data.data == "success") {
+                        if (data.data["code"] == "1") {
                             this.showApplySuccess();
                             location.reload();
                         } else this.showApplyError();

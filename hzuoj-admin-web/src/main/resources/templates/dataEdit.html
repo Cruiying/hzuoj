@@ -70,34 +70,36 @@
             //数据，json字符串
             data: JSON.stringify(problemId),
             //请求成功
-            success: function (info) {
-                const datas = info.datas;
-                let dataInfo = "";
-                for (let i = 0; i < datas.length; i++) {
-                    let name = "#" + i;
-                    let Time = datas[i].dataMaxRuntimeTime;
-                    let Memory = datas[i].dataMaxRuntimeMemory;
-                    let dataId = datas[i].dataId;
-                    dataInfo += "<input type=\"hidden\" name=\"dataId\" value=\"" + dataId + "\">\n" +
-                        "            <div class=\"layui-form-item\">\n" +
-                        "                <div class=\"layui-input-inline\">\n" +
-                        "                    <h3 class=\"layui-form-mid\">" + name + "</h3>\n" +
-                        "                </div>\n" +
-                        "                <div class=\"layui-input-inline\">\n" +
-                        "                    <input type=\"text\" class=\"layui-input\" name=\"dataMaxRuntimeTime\" value=\"" + Time + "\">\n" +
-                        "                </div>\n" +
-                        "                <div class=\"layui-form-mid layui-word-aux\">ms</div>\n" +
-                        "                <div class=\"layui-input-inline\">\n" +
-                        "                    <input type=\"text\" class=\"layui-input\" name=\"dataMaxRuntimeMemory\" value=\"" + Memory + "\">\n" +
-                        "                </div>\n" +
-                        "                <div class=\"layui-form-mid layui-word-aux\">KB</div>\n" +
-                        "            </div>"
-                }
-                if (datas.length > 0) {
-                    $("#dataInfo").html(dataInfo);
-                    $("#btn").html(" <button type=\"submit\" class=\"layui-btn\" lay-submit=\"\" lay-filter=\"submit\">保存设置</button>");
-                } else {
+            success: function (result) {
+                if (result["code"] == "1") {
+                    const datas = result["data"];
+                    let dataInfo = "";
+                    for (let i = 0; i < datas.length; i++) {
+                        let name = "#" + i;
+                        let Time = datas[i].dataMaxRuntimeTime;
+                        let Memory = datas[i].dataMaxRuntimeMemory;
+                        let dataId = datas[i].dataId;
+                        dataInfo += "<input type=\"hidden\" name=\"dataId\" value=\"" + dataId + "\">\n" +
+                            "            <div class=\"layui-form-item\">\n" +
+                            "                <div class=\"layui-input-inline\">\n" +
+                            "                    <h3 class=\"layui-form-mid\">" + name + "</h3>\n" +
+                            "                </div>\n" +
+                            "                <div class=\"layui-input-inline\">\n" +
+                            "                    <input type=\"text\" class=\"layui-input\" name=\"dataMaxRuntimeTime\" value=\"" + Time + "\">\n" +
+                            "                </div>\n" +
+                            "                <div class=\"layui-form-mid layui-word-aux\">ms</div>\n" +
+                            "                <div class=\"layui-input-inline\">\n" +
+                            "                    <input type=\"text\" class=\"layui-input\" name=\"dataMaxRuntimeMemory\" value=\"" + Memory + "\">\n" +
+                            "                </div>\n" +
+                            "                <div class=\"layui-form-mid layui-word-aux\">KB</div>\n" +
+                            "            </div>"
+                    }
+                    if (datas.length > 0) {
+                        $("#dataInfo").html(dataInfo);
+                        $("#btn").html(" <button type=\"submit\" class=\"layui-btn\" lay-submit=\"\" lay-filter=\"submit\">保存设置</button>");
+                    } else {
 
+                    }
                 }
                 return false;
             },
@@ -169,7 +171,7 @@
                 data: JSON.stringify(datas),
                 //请求成功
                 success: function (result) {
-                    layer.alert(result.msg)
+                    layer.alert(result["message"]);
                     return false;
                 },
                 //请求失败，包含具体的错误信息

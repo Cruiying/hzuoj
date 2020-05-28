@@ -18,18 +18,32 @@
             <result column="user_challenge_total" property="userChallengeTotal"/>
         </association>
     </resultMap>
+<!--    添加新的管理员-->
+    <insert id="saveAdmin">
+        <selectKey order="AFTER" keyProperty="adminId" resultType="int">
+            select LAST_INSERT_ID()
+        </selectKey>
+        insert into admin(admin_name,password, admin_create_time) values (#{adminName, password, adminCreateTime})
+    </insert>
+<!--    更新管理员状态-->
+    <update id="updateAdminStatus">
+        updata hzuoj_admins set admin_status = 1 - admin_status where admin_id = #{adminId}
+    </update>
+<!--    管理员登录-->
     <select id="loginAdmin" resultMap="adminAndUser">
         select a.admin_id,a.admin_name,a.admin_create_time, a.admin_status, u.* from hzuoj_admin a
         left JOIN hzuoj_users u
         ON a.user_id = u.user_id
         where a.admin_name = #{adminName} and a.password = #{password}
     </select>
+<!--    查找管理员-->
     <select id="selectAdmin" resultMap="adminAndUser">
         select a.admin_id,a.admin_name,a.admin_create_time, a.admin_status, u.* from hzuoj_admin a
         left JOIN hzuoj_users u
         ON a.user_id = u.user_id
         where admin_id = 1
     </select>
+<!--    获取所有管理员-->
     <select id = "getAll" resultMap="adminAndUser">
         select a.admin_id,a.admin_name,a.admin_create_time, a.admin_status, u.* from hzuoj_admin a
         left JOIN hzuoj_users u

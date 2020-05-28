@@ -35,24 +35,16 @@ public class DataServiceImpl implements DataService {
      * @return 成功返回 success， 失败返回：error
      */
     @Override
-    public void saveData(Integer problemId, List<Data> dataList, String uploadPath) {
-        if (null == dataList || dataList.size() <= 0) {
-            return;
-        }
-
-        List<Data> problemDatas = dataMapper.getProblemDatas(problemId);
-        System.out.println(problemDatas);
-        for (Data problemData : problemDatas) {
-            dataMapper.deleteByPrimaryKey(problemData);
+    public String saveData(Integer problemId, List<Data> dataList, String uploadPath) {
+        if (dataList == null || dataList.isEmpty()) {
+            throw new RuntimeException("测试数据不能为空");
         }
         dataMapper.deleteData(problemId);
         for (Data data : dataList) {
             dataMapper.insert(data);
         }
         problemMapper.updateProblemData(problemId, uploadPath);
-        String key = "data:" + problemId + ":info";
-        int time = (int) (Math.random() * 60 * 60 * 24 * 30 + 10);
-        redisUtil.set(key, JSON.toJSONString(dataList), time);
+        return "success";
     }
 
     /**
@@ -80,17 +72,19 @@ public class DataServiceImpl implements DataService {
      * @param datas
      */
     @Override
-    public void updateProblemData(List<Data> datas) {
-        if (datas != null) {
-            for (Data data : datas) {
-                dataMapper.updataTimeAndMemory(data);
-            }
-            if (datas.size()>0) {
-                Integer problemId = datas.get(0).getProblem().getProblemId();
-                String key = "data:" + problemId + ":info";
-                int time = (int) (Math.random() * 60 * 60 + 10);
-                redisUtil.set(key, JSON.toJSONString(datas), time);
-            }
+    public String updateProblemData(List<Data> datas) {
+        if (null == datas) {
+            throw new RuntimeException("参数为空");
         }
+        datas.forEach(data -> {
+            if (data.getDataMaxRuntimeMemory() <= 0) {
+                throw new RuntimeException("运行内存必须大于0");
+            }
+            if (data.getDataMaxRuntimeTime() <= 0) {
+                throw new RuntimeException("运行时间必须大于0");
+            }
+            dataMapper.updataTimeAndMemory(data);
+        });
+        return "success";
     }
 }

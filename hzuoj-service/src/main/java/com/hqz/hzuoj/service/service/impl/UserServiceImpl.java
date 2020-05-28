@@ -118,6 +118,9 @@ public class UserServiceImpl implements UserService {
         if (rankingQuery == null) {
             rankingQuery = new RankingQuery();
         }
+        if (page == null || page <= 0) {
+            page = 1;
+        }
         int size = 20;
         PageHelper.startPage(page, size, true);
         List<Rank> ranks = userMapper.getRanks(rankingQuery);

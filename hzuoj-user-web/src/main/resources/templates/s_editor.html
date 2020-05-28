@@ -48,7 +48,8 @@
         .dropdown-content {
             display: none;
         }
-        .item.dropdown:hover .dropdown-content{
+
+        .item.dropdown:hover .dropdown-content {
             display: block;
         }
 
@@ -66,25 +67,27 @@
 <div class="ui container">
     <div class="ui segment grid">
         <div class="sixteen wide column">
-                <div class="ui form">
-                    <div class="field">
-                        <label><h2>标题</h2></label>
-                        <input id="solutionTitle" type="text" name="solutionTitle" th:value="${discussion != null ? discussion.discussionTitle : ''}" placeholder="请输入标题....">
+            <div class="ui form">
+                <div class="field">
+                    <label><h2>标题</h2></label>
+                    <input id="solutionTitle" type="text" name="solutionTitle"
+                           th:value="${discussion != null ? discussion.discussionTitle : ''}" placeholder="请输入标题....">
+                </div>
+                <div class="field">
+                    <label><h2>内容</h2></label>
+                    <div id="editor">
+                        <textarea id="solutionContent" name="solutionContent"
+                                  class="typo  typo-selection js-toc-content"></textarea>
                     </div>
-                    <div class="field">
-                        <label><h2>内容</h2></label>
-                        <div id="editor">
-                            <textarea id="solutionContent" name="solutionContent" class="typo  typo-selection js-toc-content"></textarea>
-                        </div>
-                    </div>
-                    <div class="field">
-                        <div class="ui middle aligned one column grid">
-                            <div class="center aligned column">
-                                <button onclick="sendPost()" class="ui teal button">发布</button>
-                            </div>
+                </div>
+                <div class="field">
+                    <div class="ui middle aligned one column grid">
+                        <div class="center aligned column">
+                            <button onclick="sendPost()" class="ui teal button">发布</button>
                         </div>
                     </div>
                 </div>
+            </div>
 
         </div>
     </div>
@@ -111,37 +114,11 @@
         th:src="@{/lib/jq-module/zyupload/zyupload-1.0.0.min.js}" charset="utf-8"></script>
 <script src="../static/js/mathjax.js" th:src="@{/js/mathjax.js}"></script>
 <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.17.1/build/highlight.min.js"></script>
+<script src="../static/js/common.js" th:src="@{/js/common.js}"></script>
 <script>hljs.initHighlightingOnLoad();</script>
 <!--初始化mathjax-->
 <script th:inline="none">
-    let isMathjaxConfig = false; // 防止重复调用Config，造成性能损耗
-    const initMathjaxConfig = () => {
-        if (!window.MathJax) {
-            return;
-        }
-        window.MathJax.Hub.Config({
-            showProcessingMessages: false, //关闭js加载过程信息
-            messageStyle: "none", //不显示信息
-            jax: ["input/TeX", "output/HTML-CSS"],
-            tex2jax: {
-                inlineMath: [["$", "$"], ["\\(", "\\)"]], //行内公式选择符
-                displayMath: [["$$", "$$"], ["\\[", "\\]"]], //段内公式选择符
-                skipTags: ["script", "noscript", "style", "textarea", "pre", "code", "a"] //避开某些标签
-            },
-            "HTML-CSS": {
-                availableFonts: ["STIX", "TeX"], //可选字体
-                showMathMenu: false //关闭右击菜单显示
-            }
-        });
-        isMathjaxConfig = true; //
-    };
-    if (isMathjaxConfig === false) { // 如果：没有配置MathJax
-        initMathjaxConfig();
-    }
-
-    // 如果，不传入第三个参数，则渲染整个document
-    // 因为使用的Vuejs，所以指明#app，以提高速度
-    window.MathJax.Hub.Queue(["Typeset", MathJax.Hub, document.getElementById('app')]);
+    common.initMarkdown();
 </script>
 <script th:inline="javascript">
     $('.ui.dropdown').dropdown();
@@ -187,17 +164,17 @@
     let solutionId = [[${solutionId}]];
     const problemId = [[${problemId}]];
     const userId = [[${session.userId}]];
+
     function sendPost() {
         let solution = {};
         let problem = {};
         problem["problemId"] = problemId;
         solution["solutionId"] = solutionId;
-        solution["solutionTitle"]= $("#solutionTitle").val();
-        solution["solutionContent"]= $("#solutionContent").val();
-        solution["problem"]=problem;
-        alert(JSON.stringify(solution))
+        solution["solutionTitle"] = $("#solutionTitle").val();
+        solution["solutionContent"] = $("#solutionContent").val();
+        solution["problem"] = problem;
         if (userId == null) {
-            window.location.href="/user/login";
+            window.location.href = "/user/login";
         }
         $.ajax({
             dataType: "json",
@@ -209,13 +186,12 @@
             url: "/problem/solution/save",
             data: JSON.stringify(solution),
             success: function (result) {
-                if (result != null) {
+                if (result["code"] == 1) {
                     if (solutionId == null) {
                         alert("保存成功");
-                        solutionId=result.solutionId;
+                        solutionId = result.solutionId;
                     } else {
                         alert("修改成功");
-
                     }
                 } else {
                     if (solutionId == null) {

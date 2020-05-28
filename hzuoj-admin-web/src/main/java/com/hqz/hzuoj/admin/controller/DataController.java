@@ -3,12 +3,14 @@ package com.hqz.hzuoj.admin.controller;
 import com.alibaba.dubbo.common.utils.Assert;
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.hqz.hzuoj.annotations.AdminLoginCheck;
+import com.hqz.hzuoj.base.ResultEntity;
 import com.hqz.hzuoj.bean.problem.Data;
 import com.hqz.hzuoj.bean.problem.Problem;
 import com.hqz.hzuoj.service.DataService;
 import com.hqz.hzuoj.service.ExampleService;
 import com.hqz.hzuoj.service.ProblemService;
 import com.hqz.hzuoj.util.FastDFSClientWrapper;
+import lombok.extern.slf4j.Slf4j;
 import net.lingala.zip4j.core.ZipFile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -31,6 +33,7 @@ import java.util.Map;
 @Controller
 @RequestMapping("/admin")
 @AdminLoginCheck
+@Slf4j
 public class DataController {
     @Reference
     private ProblemService problemService;
@@ -64,38 +67,34 @@ public class DataController {
      * @param
      * @return
      */
-    @RequestMapping("/upload")
+    @RequestMapping("/upload/{problemId}")
     @ResponseBody
-    public Map<String, Object> upload(@RequestParam("file") MultipartFile file, Integer problemId) {
-        Map map = new HashMap<String, String>();
-        if (problemId == null) {
-            map.put("msg", "上传失败");
-            return map;
-        }
-        Problem problem = problemService.getProblem(problemId);
-        if (problem == null) {
-            map.put("msg", "上传失败");
-            return map;
-        }
-        Assert.notNull(file, "上传文件不能为空");
-        String suffix = file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf(".") + 1, file.getOriginalFilename().length());
-        if (!"zip".toUpperCase().contains(suffix.toUpperCase())) {
-            map.put("msg", "上传失败");
-            return map;
-        }
-        if (file.getSize() > 1024 * 1024 * 50) {
-            map.put("msg", "上传失败");
-            return map;
-        }
-        //问题数据存放路径
-        String filepath = problemDataPath + "/" + problemId;
-        String filename = file.getOriginalFilename();
-        //解压路径
-        String dataZipPath = dataPath + "/" + problemId;
+    public ResultEntity upload(@RequestParam("file") MultipartFile file, @PathVariable Integer problemId) {
         //确保路径存在
-        File file2 = new File(filepath);
-        File file3 = new File(dataZipPath);
+        File file2 = null;
+        File file3 = null;
         try {
+            //问题数据存放路径
+            String filepath = problemDataPath + "/" + problemId;
+            String filename = file.getOriginalFilename();
+            //解压路径
+            String dataZipPath = dataPath + "/" + problemId;
+            //测试数据文件路径
+            file2 = new File(filepath);
+            file3 = new File(dataZipPath);
+            ;
+            Problem problem = problemService.getProblem(problemId);
+            if (problem == null) {
+                return ResultEntity.error("题目不存在");
+            }
+            Assert.notNull(file, "上传文件不能为空");
+            String suffix = file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf(".") + 1, file.getOriginalFilename().length());
+            if (!"zip".toUpperCase().contains(suffix.toUpperCase())) {
+                return ResultEntity.error("上传文件格式不对");
+            }
+            if (file.getSize() > 1024 * 1024 * 50) {
+                return ResultEntity.error("文件不能大于50M");
+            }
             deleteDirectory(file2);
             deleteDirectory(file3);
             file2.mkdirs();
@@ -112,23 +111,14 @@ public class DataController {
             zipFile.extractAll(dataZipPath);
             List<Data> dataList = check(dataZipPath, problemId);
             //保存数据
-
-            if (dataList != null && dataList.size() > 0) {
-                dataService.saveData(problemId, dataList, up);
-            } else {
-                map.put("msg", "上传失败");
-                return map;
-            }
-
-            map.put("msg", "上传成功");
+            return ResultEntity.success("上传成功", dataService.saveData(problemId, dataList, up));
         } catch (Exception e) {
-            map.put("msg", "上传失败");
-            e.printStackTrace();
+            log.error("upload({}) error message: {}", problemId, e.getMessage());
+            return ResultEntity.error(e.getMessage());
         } finally {
             deleteDirectory(file2);
             deleteDirectory(file3);
         }
-        return map;
     }
 
     /**
@@ -255,11 +245,13 @@ public class DataController {
      */
     @RequestMapping("{problemId}/dataInfo")
     @ResponseBody
-    public Map<String, Object> dataInfo(@PathVariable Integer problemId) {
-        Map<String, Object> map = new HashMap<>();
-        List<Data> datas = dataService.getProblemDatas(problemId);
-        map.put("datas", datas);
-        return map;
+    public ResultEntity dataInfo(@PathVariable Integer problemId) {
+        try {
+            return ResultEntity.success("获取成功", dataService.getProblemDatas(problemId));
+        } catch (Exception e) {
+            log.error("dataInfo({}) error message: {}", problemId, e.getMessage());
+            return ResultEntity.error(e.getMessage());
+        }
     }
 
     /**
@@ -271,26 +263,13 @@ public class DataController {
      */
     @RequestMapping("{problemId}/updateData")
     @ResponseBody
-    public Map<String, Object> updateProblemData(@PathVariable Integer problemId, @RequestBody List<Data> datas) {
-        Map<String, Object> map = new HashMap<>();
+    public ResultEntity updateProblemData(@PathVariable Integer problemId, @RequestBody List<Data> datas) {
         try {
-            if (datas != null) {
-                Problem problem = new Problem();
-                problem.setProblemId(problemId);
-                for (Data data : datas) {
-                    if (data.getDataMaxRuntimeMemory() < 0 || data.getDataMaxRuntimeTime() < 0) {
-                        map.put("msg", "修改失败！运行时间与运行内存必须大于0");
-                    }
-                    data.setProblem(problem);
-                }
-            }
-            dataService.updateProblemData(datas);
-            map.put("msg", "修改成功");
+            return ResultEntity.success("修改成功", dataService.updateProblemData(datas));
         } catch (Exception e) {
-            e.printStackTrace();
-            map.put("msg", "修改失败");
+            log.error("updateProblemData({}, {}) error message: {}", problemId, datas, e.getMessage());
+            return ResultEntity.error(e.getMessage());
         }
-        return map;
     }
 
 }

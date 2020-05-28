@@ -201,7 +201,7 @@
                 //请求路径
                 url: "/admin/update/" + id + "/public?problemPublic=" + problemPublic,
                 success: function (result) {
-                    if (result.flag) {
+                    if (result["code"] == "1") {
                         if (problemPublic == 1) {
                             $(obj).attr('title', '可见');
                             $(obj).find('i').html('&#xe601;');
@@ -235,7 +235,7 @@
                 //请求路径
                 url: "/admin/delete/problem/" + id,
                 success: function (result) {
-                    if (result.flag) {
+                    if (result["code"] == 1) {
                         $(obj).parents("tr").remove();
                         layer.msg('已删除!', {icon: 1, time: 1000});
                     } else {

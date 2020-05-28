@@ -345,27 +345,30 @@
                 url: url,
                 //请求成功
                 success: function (result) {
-                    const problem = result.problem;
-                    const examples = problem.examples;
-                    $("#problemContent").val(problem.problemContent);
-                    $("#problemTitle").val(problem.problemTitle);
-                    $("#problemBackground").val(problem.problemBackground);
-                    $("#problemInputFormat").val(problem.problemInputFormat);
-                    $("#problemOutputFormat").val(problem.problemOutputFormat);
-                    $("#problemExplain").val(problem.problemExplain);
-                    $("#data").html("<div class=\"layui-btn\" onclick=\"xadmin.open('数据点设置','/admin/" + problem.problemId + "/dataEdit')\" ><i class=\"layui-icon\">&#xe642;</i>数据点设置</div>")
-                    if (problem.problemPublic == 1) {
-                        $("#yes").prop("checked",true);
-                        $("#no").prop("checked", false);
-                    } else {
-                        $("#yes").prop("checked",false);
-                        $("#no").prop("checked", true);
+                    if (result["code"] == "1") {
+                        const problem = result["data"];
+                        const examples = problem.examples;
+                        $("#problemContent").val(problem.problemContent);
+                        $("#problemTitle").val(problem.problemTitle);
+                        $("#problemBackground").val(problem.problemBackground);
+                        $("#problemInputFormat").val(problem.problemInputFormat);
+                        $("#problemOutputFormat").val(problem.problemOutputFormat);
+                        $("#problemExplain").val(problem.problemExplain);
+                        $("#data").html("<div class=\"layui-btn\" onclick=\"xadmin.open('数据点设置','/admin/" + problem.problemId + "/dataEdit')\" ><i class=\"layui-icon\">&#xe642;</i>数据点设置</div>")
+                        if (problem.problemPublic == 1) {
+                            $("#yes").prop("checked",true);
+                            $("#no").prop("checked", false);
+                        } else {
+                            $("#yes").prop("checked",false);
+                            $("#no").prop("checked", true);
+                        }
+
+                        for (let i = 0; i < examples.length; i++) {
+                            addExample(examples[i].exampleInput, examples[i].exampleOutput);
+                        }
+                        return false;
                     }
 
-                    for (let i = 0; i < examples.length; i++) {
-                        addExample(examples[i].exampleInput, examples[i].exampleOutput);
-                    }
-                    return false;
                 },
                 //请求失败，包含具体的错误信息
                 error: function (e) {
@@ -432,7 +435,7 @@
                     , size: 1024 * 50 //限制文件大小，单位 KB
                     , done: function (result) {
                         //上传返回信息
-                        layer.msg(result.msg)
+                        layer.msg(result["message"]);
                     }
                 }, true);
             });
@@ -522,11 +525,11 @@
                 //数据，json字符串
                 data: JSON.stringify(problem),
                 //请求成功
-                success: function (info) {
-                    layer.alert(info.msg);
-                    if (info.flag) {
-                        $("#problemId").val(info["problemId"]);
-                        $("#data").html("<div class=\"layui-btn\" onclick=\"xadmin.open('数据点设置','/admin/" + info.problemId + "/dataEdit')\" ><i class=\"layui-icon\">&#xe642;</i>数据点设置</div>")
+                success: function (result) {
+                    layer.alert(result["message"]);
+                    if (result["code"] == "1") {
+                        $("#problemId").val(result["data"]);
+                        $("#data").html("<div class=\"layui-btn\" onclick=\"xadmin.open('数据点设置','/admin/" + result["data"] + "/dataEdit')\" ><i class=\"layui-icon\">&#xe642;</i>数据点设置</div>")
                     }
                 },
                 //请求失败，包含具体的错误信息

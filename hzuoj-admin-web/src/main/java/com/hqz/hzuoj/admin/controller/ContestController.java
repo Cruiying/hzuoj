@@ -13,6 +13,7 @@ import com.hqz.hzuoj.bean.problem.Problem;
 import com.hqz.hzuoj.service.ContestService;
 import com.hqz.hzuoj.service.ProblemService;
 import com.hqz.hzuoj.service.SubmitService;
+import jdk.nashorn.internal.runtime.ECMAException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Controller;
@@ -70,25 +71,23 @@ public class ContestController {
      * 返回比赛的基本信息
      *
      * @param contestId
-     * @param modelMap
      * @return
      */
     @RequestMapping("/contest/{contestId}/info")
     @ResponseBody
-    public Map<String, Object> getContestInfo(ModelMap modelMap, @PathVariable Integer contestId, HttpServletRequest request) {
-        Map<String, Object> map = new HashMap<>();
-        Contest contest = contestService.getContest(contestId);
-        List<ContestProblem> contestProblems = contestService.getContestProblems(contestId, null);
-        if (contest != null) {
-            modelMap.put("adminId", contest.getAdmin().getAdminId());
+    public ResultEntity getContestInfo(@PathVariable Integer contestId) {
+        try {
+            Contest contest = contestService.getContest(contestId);
+            if (contest == null) {
+                return ResultEntity.error("比赛不存在");
+            }
+            List<ContestProblem> contestProblems = contestService.getContestProblems(contestId, null);
             contest.setContestProblems(contestProblems);
-        } else {
-            modelMap.put("adminId", request.getAttribute("adminId"));
+            return ResultEntity.success("获取成功", contest);
+        }catch (Exception e) {
+            log.error("getContestInfo({}) error message: {}", contestId, e.getMessage());
+            return ResultEntity.error(e.getMessage());
         }
-
-        map.put("contest", contest);
-        modelMap.put("contest", contest);
-        return map;
     }
 
 
@@ -102,93 +101,6 @@ public class ContestController {
         return "contests";
     }
 
-    /**
-     * 比赛列表分页数据
-     *
-     * @param page
-     * @return
-     */
-    @RequestMapping("/contests/{page}/list")
-    @ResponseBody
-    public Map<String, Object> contestList(@PathVariable Integer page, @RequestBody ContestQuery contestQuery) {
-        if (page == null) {
-            page = 1;
-        }
-        Map<String, Object> map = new HashMap<>();
-        PageInfo<Contest> pageInfo = contestService.getAllContest(page, contestQuery);
-        map.put("pageInfo", pageInfo);
-        return map;
-    }
-
-    /**
-     * 添加或者修改比赛
-     *
-     * @param contest
-     * @return
-     */
-    @RequestMapping("add/contest")
-    @ResponseBody
-    public Map<String, Object> addContest(@RequestBody Contest contest) {
-        Map<String, Object> map = new HashMap<>();
-        if (contest == null) {
-            map.put("msg", "比赛创建失败");
-            map.put("flag", false);
-            return map;
-        }
-        if (StringUtils.isBlank(contest.getContestName())) {
-            map.put("msg", "比赛创建失败！！！必须写入比赛名称");
-            map.put("flag", false);
-            return map;
-        }
-        Date s = contest.getContestStart();
-        Date e = contest.getContestEnd();
-        Date as = contest.getContestApplyStartTime();
-        Date ae = contest.getContestApplyEndTime();
-        if (s == null || e == null || as == null || ae == null) {
-            map.put("msg", "比赛创建失败！！！必须写入日期");
-            map.put("flag", false);
-            return map;
-        }
-        long contestLength = e.getTime() - s.getTime();
-        long applyLength = ae.getTime() - as.getTime();
-        if (contestLength < 1080000) {
-            //比赛的进行必须大于等于30分钟
-            map.put("msg", "比赛创建失败！！！比赛时长必须大于30分钟");
-            map.put("flag", false);
-            return map;
-        }
-        if (applyLength < 1080000) {
-            //比赛报名时长时间必须大于等于30分钟
-            map.put("msg", "比赛创建失败！！！比赛报名时长必须大于30分钟");
-            map.put("flag", false);
-            return map;
-        }
-        if (contest.getContestId() == null) {
-            //新创建的比赛，需要生成验证码
-            String code = UUID.randomUUID().toString().substring(0, 5);
-            contest.setContestCode(code);
-            //比赛时长=比赛结束时间-比赛开始时间
-            contest.setContestTimeLength((e.getTime() - s.getTime()));
-            //比赛创建时间
-            contest.setContestCreateTime(new Date());
-            //比赛状态
-            contest.setContestStatus(0);
-            //比赛报名状态
-            contest.setContestApplyStatus(0);
-            Contest c = contestService.saveContest(contest);
-            c = contestService.getContest(c.getContestId());
-            map.put("msg", "比赛添加成功");
-            map.put("contest", c);
-            map.put("flag", true);
-        } else {
-            Contest c = contestService.saveContest(contest);
-            c = contestService.getContest(c.getContestId());
-            map.put("contest", c);
-            map.put("msg", "比赛修改成功");
-            map.put("flag", true);
-        }
-        return map;
-    }
 
 
     /**
@@ -199,46 +111,48 @@ public class ContestController {
      */
     @RequestMapping("/contest/{contestId}/add/problem")
     @ResponseBody
-    public Map<String, Object> addContestProblem(@PathVariable Integer contestId, @RequestBody ContestProblem contestProblem) {
-        Map<String, Object> map = new HashMap<>();
-        if (contestProblem == null || contestProblem.getContest() == null
-                || contestProblem.getProblem() == null || contestProblem.getContest().getContestId() == null
-                || contestProblem.getProblem().getProblemId() == null || contestProblem.getContestProblemScore() == null
-                || contestProblem.getContestProblemScore() <= 0) {
-            map.put("msg", "题目添加失败");
-            map.put("flag", false);
-            return map;
+    public ResultEntity addContestProblem(@PathVariable Integer contestId, @RequestBody ContestProblem contestProblem) {
+        try {
+            return ResultEntity.success("添加成功", contestService.addContestProblem(contestId, contestProblem));
+        }catch (Exception e) {
+            log.error("addContestProblem({},{}) error message: {}", contestId, contestProblem, e.getMessage());
+            return ResultEntity.error(e.getMessage());
         }
-        //查询比赛比赛状态
-        Problem problem = problemService.getProblem(contestProblem.getProblem().getProblemId());
-        if (problem == null) {
-            //判断题目是否成功
-            map.put("msg", "添加失败！！！题目不存在");
-            map.put("flag", false);
-            return map;
-        }
-        ContestProblem contestProblem1 = contestService.getContestProblem(contestProblem);
-        if (contestProblem1 != null) {
-            map.put("msg", "添加失败！！！比赛题目已经存在");
-            map.put("flag", false);
-            return map;
-        }
-        int contestProblemScore = contestProblem.getContestProblemScore();
-        if(contestProblemScore <= 0) {
-            map.put("msg", "添加失败！！比赛题目分数必须大于0");
-            map.put("flag", false);
-            return map;
-        }
-        ContestProblem saveContestProblem = contestService.saveContestProblem(contestProblem);
-        saveContestProblem.setProblem(problem);
-        map.put("contestProblem", saveContestProblem);
-        Contest contest = contestService.getContest(contestId);
-        map.put("contest", contest);
-        map.put("msg", "添加成功");
-        map.put("flag", true);
-        return map;
     }
 
+    /**
+     * 比赛列表分页数据
+     *
+     * @param page
+     * @return
+     */
+    @RequestMapping("/contests/{page}/list")
+    @ResponseBody
+    public ResultEntity contestList(@PathVariable Integer page, @RequestBody ContestQuery contestQuery) {
+        try {
+            return ResultEntity.success("获取成功", contestService.getAllContest(page, contestQuery));
+        }catch (Exception e) {
+            log.error("contestList({}, {}) error message: {}", page, contestQuery, e.getMessage());
+            return ResultEntity.error(e.getMessage());
+        }
+    }
+
+    /**
+     * 添加或者修改比赛
+     *
+     * @param contest
+     * @return
+     */
+    @RequestMapping("add/contest")
+    @ResponseBody
+    public ResultEntity addContest(@RequestBody Contest contest) {
+        try {
+            return ResultEntity.success("成功", contestService.saveContest(contest));
+        }catch (Exception e){
+            log.error("addContest({}) error message: {}", contest, e.getMessage());
+            return ResultEntity.error(e.getMessage());
+        }
+    }
     /**
      * 删除比赛题目
      *
@@ -248,22 +162,13 @@ public class ContestController {
      */
     @RequestMapping("/contest/{contestId}/del/problem")
     @ResponseBody
-    public Map<String, Object> delContestProblem(@PathVariable Integer contestId, Integer problemId) {
-        Map<String, Object> map = new HashMap<>();
-        if (problemId == null) {
-            map.put("msg", "删除失败");
-            map.put("flag", true);
-            return map;
+    public ResultEntity delContestProblem(@PathVariable Integer contestId, Integer problemId) {
+        try {
+            return ResultEntity.success("删除成功", contestService.delContestProblem(contestId, problemId));
+        }catch (Exception e) {
+            log.error("delContestProblem({}, {}) error message: {}", contestId, problemId, e.getMessage());
+            return ResultEntity.error(e.getMessage());
         }
-        String result = contestService.delContestProblem(contestId, problemId);
-        if ("success".equals(result)) {
-            map.put("msg", "删除成功");
-            map.put("flag", true);
-        } else {
-            map.put("msg", "删除失败");
-            map.put("flag", false);
-        }
-        return map;
     }
 
     /**
@@ -273,18 +178,13 @@ public class ContestController {
      */
     @RequestMapping("/contest/update/rank/{contestId}")
     @ResponseBody
-    public String updateContestRank(@PathVariable Integer contestId) {
-        if (contestId == null) {
-            return JSON.toJSONString("fail");
+    public ResultEntity updateContestRank(@PathVariable Integer contestId) {
+        try {
+            return ResultEntity.success("更新成功",submitService.calculateContestRating(contestId));
+        }catch (Exception e) {
+            log.error("updateContestRank({}) error message: {}", contestId, e.getMessage());
+            return ResultEntity.error(e.getMessage());
         }
-        Contest contest = contestService.getContest(contestId);
-        if (contest == null) {
-            return JSON.toJSONString("fail");
-        }
-        if (contest.getContestIsRank() == null || contest.getContestIsRank() != 1) {
-            return JSON.toJSONString("fail");
-        }
-        return JSON.toJSONString(submitService.calculateContestRating(contest));
     }
 
     /**
@@ -295,7 +195,6 @@ public class ContestController {
     @RequestMapping("/contest/afresh/{contestId}")
     @ResponseBody
     public ResultEntity contestAfreshSubmit(@PathVariable Integer contestId) {
-        System.out.println(contestId);
         try {
             return contestService.contestAfreshSubmit(contestId);
         }catch (Exception e) {
@@ -319,7 +218,12 @@ public class ContestController {
         }
     }
 
-    @RequestMapping(value = "contest/update/rank/final/{contestId}")
+    /**
+     * 修改比赛榜单状态
+     * @param contestId
+     * @return
+     */
+    @RequestMapping(value = "/contest/update/rank/final/{contestId}")
     @ResponseBody
     public ResultEntity contestUpdateRankFinal(@PathVariable Integer contestId) {
         try {

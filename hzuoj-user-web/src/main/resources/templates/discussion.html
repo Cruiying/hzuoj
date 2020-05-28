@@ -322,40 +322,8 @@
 </footer>
 </body>
 <script th:replace="fragment::script"></script>
-<script src="../static/js/common.js" th:src="@{/js/common.js}"></script>
 <script src="//cdn.bootcss.com/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-<!--初始化mathjax-->
-<script th:inline="none">
-    let isMathjaxConfig = false; // 防止重复调用Config，造成性能损耗
-
-    const initMathjaxConfig = () => {
-        if (!window.MathJax) {
-            return;
-        }
-        window.MathJax.Hub.Config({
-            showProcessingMessages: false, //关闭js加载过程信息
-            messageStyle: "none", //不显示信息
-            jax: ["input/TeX", "output/HTML-CSS"],
-            tex2jax: {
-                inlineMath: [["$", "$"], ["\\(", "\\)"]], //行内公式选择符
-                displayMath: [["$$", "$$"], ["\\[", "\\]"]], //段内公式选择符
-                skipTags: ["script", "noscript", "style", "textarea", "pre", "code", "a"] //避开某些标签
-            },
-            "HTML-CSS": {
-                availableFonts: ["STIX", "TeX"], //可选字体
-                showMathMenu: false //关闭右击菜单显示
-            }
-        });
-        isMathjaxConfig = true; //
-    };
-    if (isMathjaxConfig === false) { // 如果：没有配置MathJax
-        initMathjaxConfig();
-    }
-
-    // 如果，不传入第三个参数，则渲染整个document
-    // 因为使用的Vuejs，所以指明#app，以提高速度
-    window.MathJax.Hub.Queue(["Typeset", MathJax.Hub, document.getElementById('app')]);
-</script>
+<script src="../static/js/common.js" th:src="@{/js/common.js}"></script>
 <script th:inline="javascript">
     new Vue({
         el: '#app',
@@ -379,11 +347,11 @@
                 comment["discussion"] = discussion;
                 axios.post('/discussion/comment', comment)
                     .then((data) => { // 正确的回调
-                        if (data.data != null) {
+                        if (data.data["code"] == 1) {
                             if (k == 2) {
-                                this.comments[i].comments.push(data.data);
+                                this.comments[i].comments.push(data.data["data"]);
                             } else if (k == 3) {
-                                this.comments[i].comments[j].comments.push(data.data);
+                                this.comments[i].comments[j].comments.push(data.data["data"]);
                             }
                             this.getDiscussionComments();
                         }
@@ -414,11 +382,11 @@
                 $("#commentContent").val("");
                 axios.post('/discussion/comment', comment)
                     .then((data) => { // 正确的回调
-                        if (data.data != null) {
-                            this.comments.push(data.data);
+                        if (data.data["code"] == "1") {
+                            this.comments.push(data.data["data"]);
                             this.discussion.discussionReplyCount = this.discussion.discussionReplyCount + 1;
                         }
-                        this.println(this.comments);
+                        this.getDiscussionComments();
                     })
                     .catch((error) => { // 错误的回调
 
@@ -441,7 +409,6 @@
             getDiscussionComments() {
                 axios.post("/discussion/comments/" + this.discussion.discussionId)
                     .then((data) => {
-                        console.log(data.data);
                         if (data.data["code"] == 1) {
                             this.comments = data.data["data"];
                         }
@@ -465,7 +432,7 @@
         created: function () {
             this.getDiscussions();
             this.getDiscussionComments();
-
+            common.initMarkdown();
             show();
             $("#reply").css("display", "block");
         }

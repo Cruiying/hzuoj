@@ -21,83 +21,168 @@
     <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
     <script type="text/javascript" src="https://cdn.bootcss.com/axios/0.19.0-beta.1/axios.js"></script>
     </script>
-    <link rel="stylesheet" type="text/css" href="../static/css/main.css" th:href="@{/css/main.css}">
-    <style>
-        html, body {
-            margin: 0;
-            padding: 0;
-        }
+    <
+    link
+    rel = "stylesheet"
+    type = "text/css"
+    href = "../static/css/main.css"
+    th:href = "@{/css/main.css}" >
+        < style >
+        html, body
+    {
+        margin: 0;
+        padding: 0;
+    }
 
-        a {
-            text-decoration: none !important;
-            target: "_blank" !important;
-        }
+    a
+    {
+        text - decoration
+    :
+        none
+        !important;
+        target: "_blank"
+        !important;
+    }
 
-        .ui.table td {
-            padding: .78571429em !important;
-            text-align: inherit !important;
-        }
+    .ui.table
+    td
+    {
+        padding: .78571429
+        em
+        !important;
+        text - align
+    :
+        inherit
+        !important;
+    }
 
-        .icon {
-            margin: 0 !important;
-        }
+    .icon
+    {
+        margin: 0
+        !important;
+    }
 
-        .count-down-item {
-            text-align: center;
-            letter-spacing: 0;
-            display: inline-block;
-            margin-right: 10px;
-            padding: 10px 5px;
-            border-radius: 4px;
-            background: #c6c6c6;
-            color: #fff;
-            font-size: 18px;
-            line-height: 1.1;
-        }
+    .count - down - item
+    {
+        text - align
+    :
+        center;
+        letter - spacing
+    :
+        0;
+        display: inline - block;
+        margin - right
+    :
+        10
+        px;
+        padding: 10
+        px
+        5
+        px;
+        border - radius
+    :
+        4
+        px;
+        background: #c6c6c6;
+        color: #fff;
+        font - size
+    :
+        18
+        px;
+        line - height
+    :
+        1.1;
+    }
 
-        .count-down-num {
-            font-size: 40px;
-            margin-bottom: 12px;
-        }
+    .count - down - num
+    {
+        font - size
+    :
+        40
+        px;
+        margin - bottom
+    :
+        12
+        px;
+    }
 
-        .first_ac {
-            background: #9de7c4;
-        }
+    .first_ac
+    {
+        background: #9
+        de7c4;
+    }
 
-        .ac {
-            background: #ddf8eb;
-        }
+    .ac
+    {
+        background: #ddf8eb;
+    }
 
-        .wa {
-            background: #fbe3e5;
-        }
+    .wa
+    {
+        background: #fbe3e5;
+    }
 
-        .contest-nav.item {
-            color: #22ae90 !important;
-        }
+    .contest - nav.item
+    {
+        color: #22
+        ae90
+        !important;
+    }
 
-        .tag {
-            border-radius: 12px;
-            border: 1px solid #ddd;
-            display: inline-block;
-            padding: 2px 10px;
-            color: #333;
-            font-size: 12px;
-            margin-right: 2px;
-            background: #fff;
-            margin-bottom: 5px;
-            line-height: 16px;
-            cursor: pointer;
-        }
+    .tag
+    {
+        border - radius
+    :
+        12
+        px;
+        border: 1
+        px
+        solid
+        #ddd;
+        display: inline - block;
+        padding: 2
+        px
+        10
+        px;
+        color: #333;
+        font - size
+    :
+        12
+        px;
+        margin - right
+    :
+        2
+        px;
+        background: #fff;
+        margin - bottom
+    :
+        5
+        px;
+        line - height
+    :
+        16
+        px;
+        cursor: pointer;
+    }
 
-        .m-item {
-            padding: 0 !important;
-            margin: 0 !important;
-        }
-    </style>
-    <link rel="stylesheet" type="text/css" data-name="vs/editor/editor.main"
-          href="https://cdn.jsdelivr.net/npm/syzoj-public-cdn@1.0.6/cdnjs/monaco-editor/0.18.1/min/vs/editor/editor.main.css">
-    <!--    <script async="async" type="text/javascript" src="https://cdn.jsdelivr.net/npm/syzoj-public-cdn@1.0.6/self/vendor/tokenizer/definitions/c_cpp.js"></script>-->
+    .m - item
+    {
+        padding: 0
+        !important;
+        margin: 0
+        !important;
+    }
+    <
+    /style>
+    < link
+    rel = "stylesheet"
+    type = "text/css"
+    data - name = "vs/editor/editor.main"
+    href = "https://cdn.jsdelivr.net/npm/syzoj-public-cdn@1.0.6/cdnjs/monaco-editor/0.18.1/min/vs/editor/editor.main.css" >
+        < !-- < script
+    async = "async"
+    type = "text/javascript"
+    src = "https://cdn.jsdelivr.net/npm/syzoj-public-cdn@1.0.6/self/vendor/tokenizer/definitions/c_cpp.js" ></script>-->
     <!--    <script async="async" type="text/javascript" src="https://cdn.jsdelivr.net/npm/syzoj-public-cdn@1.0.6/self/vendor/tokenizer/definitions/java.js"></script>-->
     <!--    <script async="async" type="text/javascript" src="https://cdn.jsdelivr.net/npm/syzoj-public-cdn@1.0.6/self/vendor/tokenizer/definitions/python.js"></script>-->
 </head>
@@ -471,12 +556,14 @@
                                     <td><a style="color: #4183c4;"
                                            :href="'/contest/submit/'+contest.contestId +'/'+contestSubmit.submit.submitId"
                                            v-html="getColorFromScore(contestSubmit.submit.submitScore)"><span
-                                            class="score" v-html="getColorFromScore(contestSubmit.submit.submitScore)"></span></a>
+                                            class="score"
+                                            v-html="getColorFromScore(contestSubmit.submit.submitScore)"></span></a>
                                     </td>
                                     <td v-text="getRuntimeTime(contestSubmit.submit.submitRuntimeTime)"></td>
                                     <td v-text="getRuntimeMemory(contestSubmit.submit.submitRuntimeMemory)"></td>
                                     <td><a style="color: #4183c4;"
-                                           :href="'/contest/submit/'+contest.contestId +'/'+contestSubmit.submit.submitId"><b v-text="contestSubmit.submit.language.languageName"></b></a>
+                                           :href="'/contest/submit/'+contest.contestId +'/'+contestSubmit.submit.submitId"><b
+                                            v-text="contestSubmit.submit.language.languageName"></b></a>
                                     </td>
                                     <td v-text="contestSubmit.submit.submitCodeLength"></td>
                                     <td><a style="color: #4183c4;" href="/user/3215"
@@ -525,8 +612,10 @@
                     </div>
                     <div class="ui inline">
                         <span>排行榜已在 2019-12-08 17:00:00 比赛结束后正式封榜，比赛时间段之外的提交不计入排行。
-                            <a style="color: #25bb9b;cursor: pointer;" v-on:click="showContestTypeExplain()">点击查看计分规则。</a>
-                            <a style="color: #000; cursor: pointer;" v-on:click="contestRank()" ><i class="download icon"></i>下载比赛排名</a>
+                            <a style="color: #25bb9b;cursor: pointer;"
+                               v-on:click="showContestTypeExplain()">点击查看计分规则。</a>
+                            <a style="color: #000; cursor: pointer;" v-on:click="contestRank()"><i
+                                    class="download icon"></i>下载比赛排名</a>
                         </span>
                     </div>
                     <div style="overflow-x:auto;margin-top: 10px;">
@@ -552,7 +641,8 @@
                                         满分:{{contestProblem.contestProblemScore}}分
                                     </div>
                                 </th>
-                                <th v-if="contest.contestRankIsFinish == true && contest.contestStatus == 2 && contest.contestIsRank == true" style="font-weight: 500;background-color: #e8e8e8">
+                                <th v-if="contest.contestRankIsFinish == true && contest.contestStatus == 2 && contest.contestIsRank == true"
+                                    style="font-weight: 500;background-color: #e8e8e8">
                                     <div>积分</div>
                                 </th>
                             </tr>
@@ -561,11 +651,11 @@
                             <tr v-for="contestRank in rankPageInfo.list" style="height: 70px">
                                 <td>
                                     <span v-if="contestRank.rank == 1" class="ui yellow ribbon label"
-                                         v-text="contestRank.rank"></span>
+                                          v-text="contestRank.rank"></span>
                                     <span v-if="contestRank.rank == 2" class="ui ribbon label"
-                                         v-text="contestRank.rank"></span>
+                                          v-text="contestRank.rank"></span>
                                     <span v-if="contestRank.rank == 3" class="ui brown ribbon label"
-                                         v-text="contestRank.rank"></span>
+                                          v-text="contestRank.rank"></span>
                                     <span v-if="contestRank.rank > 3" v-text="contestRank.rank"></span>
 
                                 </td>
@@ -813,7 +903,7 @@
             showPrivacyApplyContest: function () {
                 $('#showPrivacyApplyContest').modal('show');
             },
-            showContestTypeExplain: function() {
+            showContestTypeExplain: function () {
                 $('#showContestTypeExplain').modal('show');
             },
             /**
@@ -855,7 +945,7 @@
 
                 axios.post('/apply/contest/' + contestId, params)
                     .then((data) => { // 正确的回调
-                        if (data.data == "success") {
+                        if (data.data["code"] == 1) {
                             this.showApplySuccess();
                             location.reload();
                         } else this.showApplyError();
@@ -922,8 +1012,10 @@
                 if (page == undefined) page = 1;
                 axios.post("/contest/submits/" + this.contest.contestId + "?page=" + page, this.submitQuery)
                     .then((data) => { // 正确的回调
-                        this.submitPageInfo = data.data;
-                        this.submitPage = common.getPage(this.submitPageInfo.pageNum, this.submitPageInfo.pages);
+                        if (data.data["code"] == "1") {
+                            this.submitPageInfo = data.data["data"];
+                            this.submitPage = common.getPage(this.submitPageInfo.pageNum, this.submitPageInfo.pages);
+                        }
                     })
                     .catch((error) => { // 错误的回调
 
@@ -933,8 +1025,8 @@
                 if (page == undefined) page = 1;
                 axios.post("/contest/rank/" + this.contest.contestId + "?page=" + page, this.contestRankQuery)
                     .then((data) => { // 正确的回调
-                        if (data.data != null && data.data.list.length > 0) {
-                            this.rankPageInfo = data.data;
+                        if (data.data["code"] == "1") {
+                            this.rankPageInfo = data.data["data"];
                             this.rankPage = common.getPage(this.rankPageInfo.pageNum, this.rankPageInfo.pages)
                         }
 
@@ -950,7 +1042,7 @@
                     }
                 }
             },
-            getContestUserRating: function(contestRank) {
+            getContestUserRating: function (contestRank) {
                 if (contestRank.contestUserRating == null) return "0";
                 if (contestRank.contestUserRating.rank > 0) return "+" + contestRank.contestUserRating.rank;
                 return contestRank.contestUserRating.rank;
@@ -969,11 +1061,13 @@
                 this.getContestRank(page);
                 this.getUserContestRank();
             },
-            contestRank: function() {
+            contestRank: function () {
                 axios.post("/contest/" + this.contest.contestId + "/excel")
-                    .then((data)=>{
-                        let result = data.data;
-                        window.location.href="/downloadOnlineLearnMaterials?fileName=" + result["data"];
+                    .then((data) => {
+                        if (data.data["code"] == "1") {
+                            window.location.href = "/downloadOnlineLearnMaterials?fileName=" + data.data["data"];
+                        }
+
                     });
             },
             getSubmit: function (key, page) {

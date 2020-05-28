@@ -627,20 +627,20 @@ public class SubmitServiceImpl implements SubmitService {
     /**
      * 计算比赛Rating值[管理员方法]
      *
-     * @param contest
+     * @param contestId
      */
     @Override
-    public synchronized String calculateContestRating(Contest contest) {
+    public synchronized String calculateContestRating(Integer contestId) {
+        Contest contest = contestMapper.getContest(contestId);
         if (contest == null || contest.getContestId() == null || contest.getContestStatus() != 2) {
             return "fail";
         }
-        Integer contestId = contest.getContestId();
         List<ContestRank> contestRanks = getContestRanks(contestId);
         if (contestRanks == null || contestRanks.size() <= 1) {
             return "fail";
         }
         contest.setContestRankIsFinish(false);
-        contestMapper.updateContestRankIsFinish(contest);
+        this.contestMapper.updateContestRankIsFinish(contest);
         List<ContestUserRating> contestUserRatings = contestUserRatingMapper.getContestUserRatings(contestId);
         contestUserRatingMapper.updateContestUserRatingStatus(contestId, 1);
         if (contestUserRatings != null) {
@@ -680,8 +680,7 @@ public class SubmitServiceImpl implements SubmitService {
             contestUserRatingMapper.saveContestUserRating(contestUserRating);
         }
         contestUserRatingMapper.updateContestUserRatingStatus(contestId, 2);
-        //contest.setContestRankIsFinish(true);
-        contestMapper.updateContestRankIsFinish(contest);
+        this.contestMapper.updateContestRankIsFinish(contest);
         return "success";
     }
 

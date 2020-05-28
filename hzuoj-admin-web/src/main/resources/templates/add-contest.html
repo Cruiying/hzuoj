@@ -259,8 +259,8 @@
             contentType: "application/json;charset=UTF-8",
             url: "/admin/contest/" + contestId + "/del/problem?problemId=" + problemId,
             success: function (result) {
-                layer.msg(result.msg);
-                if (result.flag) {
+                layer.msg(result["message"]);
+                if (result["code"] == "1") {
                     $(obj.parentNode.parentNode).remove();
                 }
             },
@@ -295,11 +295,11 @@
             data: JSON.stringify(contestProblem),
 
             success: function (result) {
-                if (result.flag) {
-                    const contestProblem = result.contestProblem;
+                if (result["code"] == "1") {
+                    const contestProblem = result["data"];
                     addProblem(contestProblem.problem.problemId, contestProblem.problem.problemTitle, contestProblem.contestProblemScore);
-                    const contest = result.contest;
-                    $("#contestId").val(result.contest.contestId);
+                    const contest = contestProblem.contest;
+                    $("#contestId").val(contest.contestId);
                     if (contest.contestStatus == 2) {
                         contestStatus2();
                     } else if (contest.contestStatus == 1) {
@@ -308,7 +308,7 @@
                         contestStatus0();
                     }
                 }
-                layer.alert(result.msg);
+                layer.alert(result["message"]);
             }
         });
 
@@ -382,30 +382,31 @@
                 url: url,
                 //请求成功
                 success: function (result) {
-                    const contest = result.contest;
-                    $("#contestId").val(contest.contestId);
-                    $("#contestName").val(contest.contestName);
-                    $("#contestCode").html("<h4 style='color: red'>" + contest.contestCode + "</h4>");
-                    $("#contestStart").val(contest.contestStart);
-                    $("#contestEnd").val(contest.contestEnd);
-                    $("#contestApplyStartTime").val(contest.contestApplyStartTime);
-                    $("#contestApplyEndTime").val(contest.contestApplyEndTime);
-                    $("#contestExplain").val(contest.contestExplain);
-                    showAddBtn();
-                    let contestType = $("[name = 'contestType']");
-                    for (let i = 0; i < contestType.length; i++) {
-                        $(contestType[i]).attr("checked", false);
-                    }
-                    for (let i = 0; i < contestType.length; i++) {
-                        if ($(contestType[i]).val() == contest.contestType.contestTypeId) {
-                            $(contestType[i]).attr("checked", true);
+                    if (result["code"] == "1") {
+                        const contest = result["data"];
+                        $("#contestId").val(contest.contestId);
+                        $("#contestName").val(contest.contestName);
+                        $("#contestCode").html("<h4 style='color: red'>" + contest.contestCode + "</h4>");
+                        $("#contestStart").val(contest.contestStart);
+                        $("#contestEnd").val(contest.contestEnd);
+                        $("#contestApplyStartTime").val(contest.contestApplyStartTime);
+                        $("#contestApplyEndTime").val(contest.contestApplyEndTime);
+                        $("#contestExplain").val(contest.contestExplain);
+                        showAddBtn();
+                        let contestType = $("[name = 'contestType']");
+                        for (let i = 0; i < contestType.length; i++) {
+                            $(contestType[i]).attr("checked", false);
+                        }
+                        for (let i = 0; i < contestType.length; i++) {
+                            if ($(contestType[i]).val() == contest.contestType.contestTypeId) {
+                                $(contestType[i]).attr("checked", true);
+                            }
+                        }
+                        const contestProblems = contest.contestProblems;
+                        for (let i = 0; i < contestProblems.length; i++) {
+                            addProblem(contestProblems[i].problem.problemId, contestProblems[i].problem.problemTitle, contestProblems[i].contestProblemScore)
                         }
                     }
-                    const contestProblems = contest.contestProblems;
-                    for (let i = 0; i < contestProblems.length; i++) {
-                        addProblem(contestProblems[i].problem.problemId, contestProblems[i].problem.problemTitle, contestProblems[i].contestProblemScore)
-                    }
-                    return false;
                 },
                 //请求失败，包含具体的错误信息
                 error: function (e) {
@@ -472,14 +473,12 @@
                 //数据，json字符串
                 data: JSON.stringify(contest),
                 //请求成功
-                success: function (info) {
-                    if (info.flag) {
+                success: function (result) {
+                    layer.msg(result["message"]);
+                    if (result["code"] == "1") {
                         showAddBtn();
-                        const contest = info.contest;
-                        layer.msg(info.msg);
-                        $("#contestId").val(info.contest.contestId);
-                    } else {
-                        layer.msg(info.msg);
+                        const contest = result["data"];
+                        $("#contestId").val(contest.contestId);
                     }
                     return false;
                 },

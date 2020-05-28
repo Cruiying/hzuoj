@@ -60,12 +60,13 @@
                 //数据，json字符串
                 data: JSON.stringify(data.field),
                 //请求成功
-                success: function (problemLevel) {
-                    problemLevel = JSON.parse(problemLevel);
-                    if (problemLevel.problemLevelId != null) {
-                        layer.alert('成功');
+                success: function (result) {
+                    if (result["code"] == "1") {
+                        const problemLevel = result["data"];
+                        if (problemLevel.problemLevelId != null) {
+                            layer.alert('成功');
+                        }
                     }
-                    return false;
                 },
                 //请求失败，包含具体的错误信息
                 error: function (e) {
