@@ -122,9 +122,10 @@ public class SolutionController {
     @ResponseBody
     public ResultEntity getUserSolutions(@RequestBody UserSolutionVO userSolutionVO) {
         try {
-            return ResultEntity.success("获取成功", solutionService.getUserSolutions(userSolutionVO));
+            PageInfo<Solution> pageInfo = solutionService.getUserSolutions(userSolutionVO);
+            return ResultEntity.success("获取成功", pageInfo);
         } catch (Exception e) {
-            log.error("error:", e.getMessage());
+            log.error("error: {}", e.getMessage());
             return ResultEntity.error(e.getMessage());
         }
     }
@@ -165,6 +166,7 @@ public class SolutionController {
             map.put("problemId", problemId);
             map.put("solutionId", solutionId);
             Solution solution = solutionService.getSolution(solutionId);
+            solution.setSolutionContent(MarkdownUtils.markdownToHtml(solution.getSolutionContent()));
             map.put("solution", solution);
         }catch (Exception e) {
             log.error("solution({}, {}), error message: {}", problemId, solutionId, e.getMessage());
