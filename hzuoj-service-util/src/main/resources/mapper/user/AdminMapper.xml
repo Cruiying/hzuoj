@@ -23,11 +23,11 @@
         <selectKey order="AFTER" keyProperty="adminId" resultType="int">
             select LAST_INSERT_ID()
         </selectKey>
-        insert into admin(admin_name,password, admin_create_time) values (#{adminName, password, adminCreateTime})
+        insert into hzuoj_admins(admin_name,password, admin_create_time) values (#{adminName}, #{password}, #{adminCreateTime})
     </insert>
 <!--    更新管理员状态-->
     <update id="updateAdminStatus">
-        updata hzuoj_admins set admin_status = 1 - admin_status where admin_id = #{adminId}
+        updata hzuoj_admins set admin_status = (!admin_status) where admin_id = #{adminId}
     </update>
 <!--    管理员登录-->
     <select id="loginAdmin" resultMap="adminAndUser">

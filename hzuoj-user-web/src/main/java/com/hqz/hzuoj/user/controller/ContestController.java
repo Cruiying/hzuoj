@@ -23,6 +23,7 @@ import com.hqz.hzuoj.util.MarkdownUtils;
 import com.hqz.hzuoj.util.SessionUtils;
 import javassist.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.hssf.record.DVALRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
@@ -161,6 +162,10 @@ public class ContestController {
         return "contests";
     }
 
+    /**
+     * 比赛排名列表
+     * @return
+     */
     @RequestMapping("/user/rank/list")
     @ResponseBody
     public ResultEntity getRankList() {
@@ -183,7 +188,7 @@ public class ContestController {
     public ResultEntity getContests(ContestQuery contestQuery) {
         try {
             return ResultEntity.success("获取成功", contestService.getAllContest(1, new ContestQuery()));
-        }catch (Exception e) {
+        } catch (Exception e) {
             log.error("getContests({}) error message: {}", contestQuery, e.getMessage());
             return ResultEntity.error(e.getMessage());
         }
@@ -198,8 +203,8 @@ public class ContestController {
     @ResponseBody
     private ResultEntity getContestTypes() {
         try {
-            return ResultEntity.success("获取成功",contestService.getContestTypes());
-        }catch (Exception e) {
+            return ResultEntity.success("获取成功", contestService.getContestTypes());
+        } catch (Exception e) {
             log.error("getContestTypes() error message: {}", e.getMessage());
             return ResultEntity.error(e.getMessage());
         }
@@ -215,22 +220,18 @@ public class ContestController {
     @RequestMapping("/apply/contest/{contestId}")
     @ResponseBody
     @UserLoginCheck
-    public String ApplyContest(@PathVariable Integer contestId, String contestCode, HttpServletRequest request) {
-        String str = (String) request.getSession().getAttribute("userId");
-        if (str == null) {
-            return "fail";
+    public ResultEntity ApplyContest(@PathVariable Integer contestId, String contestCode, HttpServletRequest request) {
+        try {
+            Integer userId = SessionUtils.getUserId(request);
+            ContestApply contestApply = new ContestApply();
+            contestApply.setApplyTime(new Date());
+            contestApply.setContestId(contestId);
+            contestApply.setUserId(userId);
+            return ResultEntity.success("报名成功", contestService.ApplyContest(contestApply, contestCode));
+        }catch (Exception e) {
+            log.error("ApplyContest({}, {}) error message: {}", contestId, contestCode, e.getMessage());
+            return ResultEntity.error(e.getMessage());
         }
-        Integer userId = Integer.parseInt(str);
-        ContestApply contestApply = new ContestApply();
-        contestApply.setApplyTime(new Date());
-        contestApply.setContestId(contestId);
-        contestApply.setUserId(userId);
-
-        ContestApply saveContestApply = contestService.ApplyContest(contestApply, contestCode);
-        if (saveContestApply == null) {
-            return "fail";
-        }
-        return "success";
     }
 
     /**
@@ -299,40 +300,19 @@ public class ContestController {
     @RequestMapping("/contest/submit/{contestId}")
     @ResponseBody
     @UserLoginCheck
-    public String submitContest(@PathVariable Integer contestId, @RequestBody Submit submit, HttpServletRequest request, HttpServletResponse response) throws NotFoundException {
-
-        if (submit == null || contestId == null || submit.getProblem() == null || submit.getProblem().getProblemId() == null) {
-            return null;
+    public ResultEntity submitContest(@PathVariable Integer contestId, @RequestBody Submit submit, HttpServletRequest request, HttpServletResponse response) throws NotFoundException {
+        try {
+            User user = SessionUtils.getUser(request);
+            submit.setUser(user);
+            submit = submitService.insertContestSubmit(contestId, submit);
+            Map<String, Object> map = new HashMap<>();
+            map.put("submitId", submit.getSubmitId());
+            sender.sendQueue(submitQueue, map);
+            return ResultEntity.success("提交成功", submit);
+        }catch (Exception e) {
+            log.error("submitContest({}, {})  error message: {}", contestId, submit, e.getMessage());
+            return ResultEntity.error(e.getMessage());
         }
-        Contest contest = contestService.getContest(contestId);
-        if (contest == null) {
-            return null;
-        }
-        ContestProblem contestProblem = contestService.getContestProblem(contestId, submit.getProblem().getProblemId());
-        if (contestProblem == null) {
-            return null;
-        }
-        User user = new User();
-        String userId = (String) request.getSession().getAttribute("userId");
-        user.setUserId(Integer.parseInt(userId));
-        submit.setUser(user);
-        submit.setSubmitPublic(0); //比赛提交
-        submit.setSubmitTime(new Date());
-
-        submit.setSubmitCodeLength(submit.getSubmitCode().length());
-        ContestSubmit contestSubmit = new ContestSubmit();
-        contestSubmit.setContest(contest);
-        contestSubmit.setSubmit(submit);
-        ContestSubmit saveContestSubmit = submitService.saveContestSubmit(contestSubmit);
-        if (saveContestSubmit == null) {
-            throw new RuntimeException("");
-        }
-        Map<String, Object> saveMap = new HashMap<>();
-        saveMap.put("submit", saveContestSubmit.getSubmit());
-        Map<String, Object> map = new HashMap<>();
-        map.put("submitId", saveContestSubmit.getSubmit().getSubmitId());
-        sender.sendQueue(submitQueue, map);
-        return saveContestSubmit.getSubmit().getSubmitId().toString();
     }
 
     /**
@@ -437,17 +417,13 @@ public class ContestController {
      */
     @RequestMapping("/contest/submits/{contestId}")
     @ResponseBody
-    public PageInfo<ContestSubmit> getContestSubmits(Integer page, @PathVariable Integer contestId, @RequestBody SubmitQuery submitQuery) {
-        if (page == null || page <= 0) {
-            page = 1;
+    public ResultEntity getContestSubmits(Integer page, @PathVariable Integer contestId, @RequestBody SubmitQuery submitQuery) {
+        try {
+            return ResultEntity.success("获取成功", submitService.getContestSubmits(page, contestId, submitQuery));
+        }catch (Exception e) {
+            log.error("getContestSubmits({}, {}, {}) error message: {}", page, contestId, submitQuery);
+            return ResultEntity.error(e.getMessage());
         }
-        Contest contest = contestService.getContest(contestId);
-        if (contest == null) {
-            return null;
-        }
-
-        PageInfo<ContestSubmit> contestSubmits = submitService.getContestSubmits(page, contestId, submitQuery);
-        return contestSubmits;
     }
 
     /**
@@ -483,10 +459,9 @@ public class ContestController {
                 if (contestRanks != null && contestRanks.getList() != null && contestRanks.getList().size() == 1) {
                     pageInfo.getList().add(0, contestRanks.getList().get(0));
                 }
-
             }
             return ResultEntity.success("获取成功", pageInfo);
-        }catch (Exception e) {
+        } catch (Exception e) {
             log.error("getContestRank({}, {}, {}) error message: {}", contestId, page, contestRankQuery, e.getMessage());
             return ResultEntity.error(e.getMessage());
         }

@@ -85,10 +85,10 @@
                 data: JSON.stringify(solution),
                 //请求成功
                 success: function (result) {
-                    if (result != null) {
-                        alert('修改成功')
+                    if (result["code"] == "1") {
+                        layer.msg("修改成功");
                     } else {
-                        alert('修改失败');
+                        layer.msg(result["message"]);
                     }
                 },
                 //请求失败，包含具体的错误信息

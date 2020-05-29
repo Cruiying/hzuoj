@@ -104,15 +104,15 @@
                     data: JSON.stringify(list),
                     //请求成功
                     success: function (result) {
-                        if (result["code"] != 1) {
-                            layer.msg("登陆失败，用户名或密码错误");
-                        } else {
+                        if (result["code"] == "1") {
                             let url = $("#ReturnUrl").val();
                             if (url == null || url == "") {
                                 url = "/admin/index";
                             }
                             window.location.href = url + "?adminToken=" + result["data"];
                             layer.msg("登陆成功");
+                        } else {
+                            layer.msg("登陆失败，用户名或密码错误");
                         }
                     },
                     //请求失败，包含具体的错误信息

@@ -18,7 +18,6 @@ import javax.jms.JMSException;
 @Configuration
 @EnableJms
 public class ActiveMqConf {
-
     @Value("${activeMQTcp}")
     private String activeMQTcp;
     @Value("${activeMQUsername}")
@@ -29,25 +28,21 @@ public class ActiveMqConf {
     @Bean
     public javax.jms.Connection activeConnection() throws JMSException {
         ConnectionFactory connectionFactory = this.connectionFactory();
-
         return connectionFactory.createConnection();
     }
-    @Bean
-    public ConnectionFactory connectionFactory(){
 
+    @Bean
+    public ConnectionFactory connectionFactory() {
         ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory();
         connectionFactory.setBrokerURL(activeMQTcp);
         connectionFactory.setUserName(activeMQUsername);
         connectionFactory.setPassword(activeMQPassword);
         return connectionFactory;
-
     }
 
     @Bean
     public DefaultJmsListenerContainerFactory jmsQueueListenerContainerFactory() {
-
         DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
-
         factory.setConnectionFactory(connectionFactory());
         //true为topic，false为queue
         factory.setPubSubDomain(false);

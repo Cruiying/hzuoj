@@ -114,10 +114,8 @@
                                     loadData(obj.curr, page);
                                 }
                             }
+                        })
                     }
-
-                    });
-                    return false;
                 },
                 //请求失败，包含具体的错误信息
                 error: function (e) {
@@ -168,7 +166,7 @@
                 //请求路径
                 url: "/admin/delete/level/" + id,
                 success: function (result) {
-                    if (result.flag) {
+                    if (result["code"] == "1") {
                         $(obj).parents("tr").remove();
                         layer.msg('已删除!', {icon: 1, time: 1000});
                     } else {

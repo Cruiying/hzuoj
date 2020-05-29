@@ -310,6 +310,38 @@ public class SubmitServiceImpl implements SubmitService {
     }
 
     /**
+     * 保存比赛提交信息
+     * @param contestId
+     * @param submit
+     * @return
+     */
+    @Override
+    public Submit insertContestSubmit(Integer contestId, Submit submit) {
+        if (submit == null || contestId == null || submit.getProblem() == null || submit.getProblem().getProblemId() == null) {
+            throw new RuntimeException("参数错误");
+        }
+        submit.setSubmitPublic(0); //比赛提交
+        submit.setSubmitTime(new Date());
+        submit.setSubmitCodeLength(submit.getSubmitCode().length());
+        Contest contest = contestMapper.getContest(contestId);
+        if (contest == null) {
+            throw new RuntimeException("比赛不存在");
+        }
+        ContestProblem contestProblem = new ContestProblem();
+        contestProblem.setContest(contest);
+        contestProblem.setProblem(submit.getProblem());
+        ContestProblem cp = contestMapper.getContestProblem(contestProblem);
+        if (cp == null) {
+            throw new RuntimeException("题目不存在");
+        }
+        ContestSubmit contestSubmit = new ContestSubmit();
+        contestSubmit.setContest(contest);
+        contestSubmit.setSubmit(submit);
+        contestSubmitMapper.saveContestSubmit(contestSubmit);
+        return contestSubmit.getSubmit();
+    }
+
+    /**
      * 获取比赛测评记录
      *
      * @param contestSubmit
@@ -987,6 +1019,7 @@ public class SubmitServiceImpl implements SubmitService {
         return null;
     }
 
+
     @Override
     public String getContestExcel(Integer contestId) throws IOException {
         Contest contest = contestMapper.getContest(contestId);
@@ -1083,6 +1116,7 @@ public class SubmitServiceImpl implements SubmitService {
         }
         return null;
     }
+
 
     private String getPunishTime(Long punishTime) {
         long days = Math.round(punishTime / (1000 * 60 * 60 * 24));

@@ -109,7 +109,7 @@
     </select>
     <!--    更新问题的用户可见性-->
     <update id="updateProblemPublic">
-        UPDATE hzuoj_problems set problem_public = #{problemPublic} where problem_id = #{problemId}
+        UPDATE hzuoj_problems set problem_public = 1 - problem_public where problem_id = #{problemId}
     </update>
     <!--    删除问题-->
     <delete id="deleteProblem">

@@ -427,7 +427,7 @@
                 //上传文件
                 upload.render({
                     elem: '#selectFile'
-                    , url: '/admin/upload?problemId=' + problemId
+                    , url: '/admin/upload/' + problemId
                     , accept: "file"
                     , exts: "zip"
                     , auto: false
@@ -612,7 +612,7 @@
 </script>
 <script>
     layui.use(['form'], function () {
-        form = layui.form;
+        const form = layui.form;
 
     });
 

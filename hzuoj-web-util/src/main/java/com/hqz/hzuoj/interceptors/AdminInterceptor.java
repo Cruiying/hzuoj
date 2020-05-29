@@ -64,8 +64,8 @@ public class AdminInterceptor implements HandlerInterceptor {
         if (adminLoginCheck == null && annotation == null) {
             //没有请求地址没有包含拦截标志，直接放行
             if ("success".equals(success) && StringUtils.isNotBlank(token)) {
-                request.setAttribute("adminId", successMap.get("adminId"));
-                request.setAttribute("adminName", successMap.get("adminName"));
+                request.getSession().setAttribute("adminId", successMap.get("adminId"));
+                request.getSession().setAttribute("adminName", successMap.get("adminName"));
                 //验证通过，覆盖cookie中的token
                 if (StringUtils.isNotBlank(token)) {
                     CookieUtil.setCookie(request, response, "adminOldToken", token, 60 * 60 * 30, true);
@@ -82,8 +82,8 @@ public class AdminInterceptor implements HandlerInterceptor {
         } else  {
             // token认证成功（登陆正确），保存用户登陆信息
             // 需要将token携带的管理员信息写入
-            request.setAttribute("adminId", successMap.get("adminId"));
-            request.setAttribute("adminName", successMap.get("adminName"));
+            request.getSession().setAttribute("adminId", successMap.get("adminId"));
+            request.getSession().setAttribute("adminName", successMap.get("adminName"));
             //验证通过，覆盖cookie中的token
             if (StringUtils.isNotBlank(token)) {
                 CookieUtil.setCookie(request, response, "adminOldToken", token, 60 * 60 * 2, true);

@@ -210,7 +210,7 @@ public class ProblemController {
     @ResponseBody
     public ResultEntity deleteTag(@PathVariable Integer tagId) {
         try {
-            return ResultEntity.error("删除成功", problemService.deleteTag(tagId));
+            return ResultEntity.success("删除成功", problemService.deleteTag(tagId));
         }catch (Exception e) {
             log.error("deleteTag({}) error message: {}", tagId, e.getMessage());
             return ResultEntity.error(e.getMessage());
@@ -324,7 +324,7 @@ public class ProblemController {
         try {
             Problem problem = new Problem();
             problem.setProblemId(problemId); problem.setProblemPublic(problemPublic);
-            return ResultEntity.error("修改成功", problemService.updateProblemPublic(problem));
+            return ResultEntity.success("修改成功", problemService.updateProblemPublic(problem));
         }catch (Exception e) {
             log.error("updateProblemPublic({}, {}) error message: {}", problemId, problemPublic, e.getMessage());
             return ResultEntity.error(e.getMessage());

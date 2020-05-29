@@ -49,7 +49,7 @@ public class AdminController {
             if (null == admin) {
                 return ResultEntity.error("账号或者密码错误");
             }
-            if ("1".equals(admin.getAdminStatus().toString())) {
+            if (!"1".equals(admin.getAdminStatus().toString())) {
                 return ResultEntity.error("该管理员员已经停用");
             }
             // 登录成功
@@ -91,6 +91,7 @@ public class AdminController {
      * @return
      */
     @RequestMapping("/welcome")
+    @AdminLoginCheck
     public String welcome(HttpServletRequest request, ModelMap modelMap) {
         modelMap.put("adminName", request.getAttribute("adminName"));
         return "welcome";
@@ -136,6 +137,7 @@ public class AdminController {
     public ResultEntity updateAdminStatus(@PathVariable Integer adminId, Integer adminStatus, HttpServletRequest request) {
         try {
             Admin admin = SessionUtils.getAdmin(request);
+            System.err.println(admin);
             return ResultEntity.success("修改成功", adminService.updateAdminStatus(admin));
         } catch (Exception e) {
             log.error("updateAdminStatus({}, {}) error message: {}", adminId, adminStatus, e.getMessage());
@@ -150,6 +152,7 @@ public class AdminController {
      */
     @RequestMapping("/add/admin")
     @ResponseBody
+    @AdminLoginCheck
     public ResultEntity addAdmin(@RequestBody Admin admin) {
         try {
             return ResultEntity.success("添加成功",adminService.addAdmin(admin));

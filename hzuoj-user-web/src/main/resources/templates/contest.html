@@ -11,178 +11,89 @@
           content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi"/>
     <link rel="stylesheet" href="../static/css/semantic.css" th:href="@{/css/semantic.css}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/semantic-ui/2.2.4/semantic.min.css">
-
     <link rel="stylesheet" href="../static/css/me.css" th:href="@{/css/me.css}">
-    <!--    <script type="text/javascript" src="../static/js/xadmin.js" th:src="@{/js/xadmin.js}"></script>-->
     <link rel="stylesheet" href="../static/lib/layui/css/layui.css" media="all" th:href="@{/lib/layui/css/layui.css}">
-    <link rel="stylesheet" href="../static/lib/jq-module/zyupload/zyupload-1.0.0.min.css"
-          th:href="@{/lib/jq-module/zyupload/zyupload-1.0.0.min.css}" media="all">
+    <link rel="stylesheet" href="../static/lib/jq-module/zyupload/zyupload-1.0.0.min.css" th:href="@{/lib/jq-module/zyupload/zyupload-1.0.0.min.css}" media="all">
     <script src="../static/lib/vue/vue.js" th:src="@{/lib/vue/vue.js}"></script>
     <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
     <script type="text/javascript" src="https://cdn.bootcss.com/axios/0.19.0-beta.1/axios.js"></script>
-    </script>
-    <
-    link
-    rel = "stylesheet"
-    type = "text/css"
-    href = "../static/css/main.css"
-    th:href = "@{/css/main.css}" >
-        < style >
-        html, body
-    {
-        margin: 0;
-        padding: 0;
-    }
+    <link rel="stylesheet" type="text/css" href="../static/css/main.css" th:href="@{/css/main.css}">
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+        }
 
-    a
-    {
-        text - decoration
-    :
-        none
-        !important;
-        target: "_blank"
-        !important;
-    }
+        a {
+            text-decoration: none !important;
+            target: "_blank" !important;
+        }
 
-    .ui.table
-    td
-    {
-        padding: .78571429
-        em
-        !important;
-        text - align
-    :
-        inherit
-        !important;
-    }
+        .ui.table td {
+            padding: .78571429em !important;
+            text-align: inherit !important;
+        }
 
-    .icon
-    {
-        margin: 0
-        !important;
-    }
+        .icon {
+            margin: 0 !important;
+        }
 
-    .count - down - item
-    {
-        text - align
-    :
-        center;
-        letter - spacing
-    :
-        0;
-        display: inline - block;
-        margin - right
-    :
-        10
-        px;
-        padding: 10
-        px
-        5
-        px;
-        border - radius
-    :
-        4
-        px;
-        background: #c6c6c6;
-        color: #fff;
-        font - size
-    :
-        18
-        px;
-        line - height
-    :
-        1.1;
-    }
+        .count-down-item {
+            text-align: center;
+            letter-spacing: 0;
+            display: inline-block;
+            margin-right: 10px;
+            padding: 10px 5px;
+            border-radius: 4px;
+            background: #c6c6c6;
+            color: #fff;
+            font-size: 18px;
+            line-height: 1.1;
+        }
 
-    .count - down - num
-    {
-        font - size
-    :
-        40
-        px;
-        margin - bottom
-    :
-        12
-        px;
-    }
+        .count-down-num {
+            font-size: 40px;
+            margin-bottom: 12px;
+        }
 
-    .first_ac
-    {
-        background: #9
-        de7c4;
-    }
+        .first_ac {
+            background: #9de7c4;
+        }
 
-    .ac
-    {
-        background: #ddf8eb;
-    }
+        .ac {
+            background: #ddf8eb;
+        }
 
-    .wa
-    {
-        background: #fbe3e5;
-    }
+        .wa {
+            background: #fbe3e5;
+        }
 
-    .contest - nav.item
-    {
-        color: #22
-        ae90
-        !important;
-    }
+        .contest-nav.item {
+            color: #22ae90 !important;
+        }
 
-    .tag
-    {
-        border - radius
-    :
-        12
-        px;
-        border: 1
-        px
-        solid
-        #ddd;
-        display: inline - block;
-        padding: 2
-        px
-        10
-        px;
-        color: #333;
-        font - size
-    :
-        12
-        px;
-        margin - right
-    :
-        2
-        px;
-        background: #fff;
-        margin - bottom
-    :
-        5
-        px;
-        line - height
-    :
-        16
-        px;
-        cursor: pointer;
-    }
+        .tag {
+            border-radius: 12px;
+            border: 1px solid #ddd;
+            display: inline-block;
+            padding: 2px 10px;
+            color: #333;
+            font-size: 12px;
+            margin-right: 2px;
+            background: #fff;
+            margin-bottom: 5px;
+            line-height: 16px;
+            cursor: pointer;
+        }
 
-    .m - item
-    {
-        padding: 0
-        !important;
-        margin: 0
-        !important;
-    }
-    <
-    /style>
-    < link
-    rel = "stylesheet"
-    type = "text/css"
-    data - name = "vs/editor/editor.main"
-    href = "https://cdn.jsdelivr.net/npm/syzoj-public-cdn@1.0.6/cdnjs/monaco-editor/0.18.1/min/vs/editor/editor.main.css" >
-        < !-- < script
-    async = "async"
-    type = "text/javascript"
-    src = "https://cdn.jsdelivr.net/npm/syzoj-public-cdn@1.0.6/self/vendor/tokenizer/definitions/c_cpp.js" ></script>-->
+        .m-item {
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+    </style>
+    <link rel="stylesheet" type="text/css" data-name="vs/editor/editor.main"
+          href="https://cdn.jsdelivr.net/npm/syzoj-public-cdn@1.0.6/cdnjs/monaco-editor/0.18.1/min/vs/editor/editor.main.css">
+    <!--    <script async="async" type="text/javascript" src="https://cdn.jsdelivr.net/npm/syzoj-public-cdn@1.0.6/self/vendor/tokenizer/definitions/c_cpp.js"></script>-->
     <!--    <script async="async" type="text/javascript" src="https://cdn.jsdelivr.net/npm/syzoj-public-cdn@1.0.6/self/vendor/tokenizer/definitions/java.js"></script>-->
     <!--    <script async="async" type="text/javascript" src="https://cdn.jsdelivr.net/npm/syzoj-public-cdn@1.0.6/self/vendor/tokenizer/definitions/python.js"></script>-->
 </head>

@@ -103,9 +103,6 @@ public class DiscussionController {
      */
     @RequestMapping("/discussion/{discussionId}")
     public String getDiscussion(@PathVariable Integer discussionId, ModelMap modelMap) {
-        if (discussionId == null) {
-            return "404";
-        }
         Discussion discussion = discussionService.getDiscussion(discussionId);
         if (discussion == null) {
             return "404";

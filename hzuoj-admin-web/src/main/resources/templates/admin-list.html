@@ -207,6 +207,7 @@
                 //请求路径
                 url: "/admin/update/" + id + "/status?adminStatus=" + adminStatus,
                 success: function (result) {
+                    alert(JSON.stringify(result));
                     if (result["code"] == "1") {
                         if (adminStatus == 1) {
                             $(obj).attr('title', '启用');
@@ -220,7 +221,7 @@
                             layer.msg('已停止!', {icon: 5, time: 1000});
                         }
                     } else {
-                        layer.alert(result["mesage"]);
+                        layer.alert(result["message"]);
                     }
                 },
                 error: function (result) {

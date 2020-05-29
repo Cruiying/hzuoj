@@ -83,36 +83,41 @@
                 //请求地址
                 url: "/admin/tags/list?page=" + page,
                 //请求成功
-                success: function (pageInfo) {
-                    $("#tags").html('');
-                    const tags = pageInfo.list;
-                    for (let i = 0; i < tags.length; i++) {
-                        $("#tags").append(" <tr>\n" +
-                            "                            <td>" + tags[i].tagId + "</td>\n" +
-                            "                            <td>" + tags[i].tagName + "</td>\n" +
-                            "                            <td class=\"td-manage\">\n" +
-                            "                                <a title=\"编辑\" onclick=\"xadmin.open('编辑','/admin/add/tag?tagId=" + tags[i].tagId + "')\" href=\"javascript:;\">\n" +
-                            "                                    <i class=\"layui-icon\"></i>\n" +
-                            "                                </a>\n" +
-                            "                                <a title=\"删除\" onclick=\"member_del(this," + tags[i].tagId + ")\" href=\"javascript:;\">\n" +
-                            "                                    <i class=\"layui-icon\"></i>\n" +
-                            "                                </a>\n" +
-                            "                            </td>\n" +
-                            "                        </tr>")
-                    }
-                    laypage.render({
-                        elem: 'page'
-                        , count: pageInfo.total
-                        , limit: pageInfo.pageSize
-                        , curr: page
-                        , done: function () {
+                success: function (result) {
+                    if (result["code"] == "1") {
+                        const pageInfo = result["data"];
+                        $("#tags").html('');
+                        const tags = pageInfo.list;
+                        for (let i = 0; i < tags.length; i++) {
+                            $("#tags").append(" <tr>\n" +
+                                "                            <td>" + tags[i].tagId + "</td>\n" +
+                                "                            <td>" + tags[i].tagName + "</td>\n" +
+                                "                            <td class=\"td-manage\">\n" +
+                                "                                <a title=\"编辑\" onclick=\"xadmin.open('编辑','/admin/add/tag?tagId=" + tags[i].tagId + "')\" href=\"javascript:;\">\n" +
+                                "                                    <i class=\"layui-icon\"></i>\n" +
+                                "                                </a>\n" +
+                                "                                <a title=\"删除\" onclick=\"member_del(this," + tags[i].tagId + ")\" href=\"javascript:;\">\n" +
+                                "                                    <i class=\"layui-icon\"></i>\n" +
+                                "                                </a>\n" +
+                                "                            </td>\n" +
+                                "                        </tr>")
                         }
-                        , jump: function (obj, first) {
-                            if (!first) {
-                                loadData(obj.curr, page);
+                        laypage.render({
+                            elem: 'page'
+                            , count: pageInfo.total
+                            , limit: pageInfo.pageSize
+                            , curr: page
+                            , done: function () {
                             }
-                        }
-                    });
+                            , jump: function (obj, first) {
+                                if (!first) {
+                                    loadData(obj.curr, page);
+                                }
+                            }
+                        });
+                    } else {
+                        layer.msg(result["message"]);
+                    }
                     return false;
                 },
                 //请求失败，包含具体的错误信息
@@ -164,7 +169,7 @@
                 //请求路径
                 url: "/admin/delete/tag/" + id,
                 success: function (result) {
-                    if (result.flag) {
+                    if (result["code"] == "1") {
                         $(obj).parents("tr").remove();
                         layer.msg('已删除!', {icon: 1, time: 1000});
                     } else {

@@ -89,60 +89,63 @@
                 url: "/admin/problems/list?page=" + page,
                 //请求成功
                 success: function (result) {
-                    let pageInfo = result.pageInfo;
-                    let problems = pageInfo.list;
-                    let problemList = "";
+                    if (result["code"] == "1") {
+                        let pageInfo = result["data"];
+                        let problems = pageInfo.list;
+                        let problemList = "";
 
-                    for (let i = 0; i < problems.length; i++) {
-                        let problemCreateTime = new Date(problems[i].problemCreateTime).format("yyyy-MM-dd hh:mm:ss");
-                        let problemUpdateTime = new Date(problems[i].problemUpdateTime).format("yyyy-MM-dd hh:mm:ss");
-                        let problemPublic;
-                        let disabled = "";
-                        if (problems[i].problemPublic == 1) {
-                            problemPublic = "可见";
-                        } else {
-                            problemPublic = "不可见";
-                            disabled = "layui-btn-disabled"
-                        }
-                        problemList += " <tr>\n" +
-                            "                            <td>" + problems[i].problemId + "</td>\n" +
-                            "                            <td>" + problems[i].problemTitle + "</td>\n" +
-                            "                            <td>" + problems[i].admin.adminName + "</td>\n" +
-                            "                            <td>" + problemCreateTime + "</td>\n" +
-                            "                            <td>" + problemUpdateTime + "</td>\n" +
-                            "                            <td class=\"td-status\">\n" +
-                            "                                <span class=\"layui-btn layui-btn-normal layui-btn-mini " + disabled + "\">" + problemPublic + "</span></td>\n" +
-                            "                            <td class=\"td-manage\">\n" +
-                            "                                <a onclick=\"member_stop(this," + problems[i].problemId + ")\" href=\"javascript:;\" title=\"" + problemPublic + "\">\n" +
-                            "                                    <i class=\"layui-icon\">&#xe601;</i>\n" +
-                            "                                </a>\n" +
-                            "                                <a title=\"编辑\" onclick=\"xadmin.open('编辑','/admin/addProblem?problemId=" + problems[i].problemId + "')\"\n" +
-                            "                                   href=\"javascript:;\">\n" +
-                            "                                    <i class=\"layui-icon\">&#xe642;</i>\n" +
-                            "                                </a>\n" +
-                            "                                <a title=\"删除\" onclick=\"member_del(this," + problems[i].problemId + ")\" href=\"javascript:;\">\n" +
-                            "                                    <i class=\"layui-icon\">&#xe640;</i>\n" +
-                            "                                </a>\n" +
-                            "                            </td>\n" +
-                            "                        </tr>"
-                    }
-                    $("#problems").html(problemList);
-
-                    laypage.render({
-                        elem: 'page'
-                        , count: pageInfo.total
-                        , limit: pageInfo.pageSize
-                        , curr: page
-                        , done: function () {
-
-                        }
-                        , jump: function (obj, first) {
-                            if (!first) {
-                                loadData(obj.curr);
+                        for (let i = 0; i < problems.length; i++) {
+                            let problemCreateTime = new Date(problems[i].problemCreateTime).format("yyyy-MM-dd hh:mm:ss");
+                            let problemUpdateTime = new Date(problems[i].problemUpdateTime).format("yyyy-MM-dd hh:mm:ss");
+                            let problemPublic;
+                            let disabled = "";
+                            if (problems[i].problemPublic == 1) {
+                                problemPublic = "可见";
+                            } else {
+                                problemPublic = "不可见";
+                                disabled = "layui-btn-disabled"
                             }
+                            problemList += " <tr>\n" +
+                                "                            <td>" + problems[i].problemId + "</td>\n" +
+                                "                            <td>" + problems[i].problemTitle + "</td>\n" +
+                                "                            <td>" + problems[i].admin.adminName + "</td>\n" +
+                                "                            <td>" + problemCreateTime + "</td>\n" +
+                                "                            <td>" + problemUpdateTime + "</td>\n" +
+                                "                            <td class=\"td-status\">\n" +
+                                "                                <span class=\"layui-btn layui-btn-normal layui-btn-mini " + disabled + "\">" + problemPublic + "</span></td>\n" +
+                                "                            <td class=\"td-manage\">\n" +
+                                "                                <a onclick=\"member_stop(this," + problems[i].problemId + ")\" href=\"javascript:;\" title=\"" + problemPublic + "\">\n" +
+                                "                                    <i class=\"layui-icon\">&#xe601;</i>\n" +
+                                "                                </a>\n" +
+                                "                                <a title=\"编辑\" onclick=\"xadmin.open('编辑','/admin/addProblem?problemId=" + problems[i].problemId + "')\"\n" +
+                                "                                   href=\"javascript:;\">\n" +
+                                "                                    <i class=\"layui-icon\">&#xe642;</i>\n" +
+                                "                                </a>\n" +
+                                "                                <a title=\"删除\" onclick=\"member_del(this," + problems[i].problemId + ")\" href=\"javascript:;\">\n" +
+                                "                                    <i class=\"layui-icon\">&#xe640;</i>\n" +
+                                "                                </a>\n" +
+                                "                            </td>\n" +
+                                "                        </tr>"
                         }
-                    });
+                        $("#problems").html(problemList);
 
+                        laypage.render({
+                            elem: 'page'
+                            , count: pageInfo.total
+                            , limit: pageInfo.pageSize
+                            , curr: page
+                            , done: function () {
+
+                            }
+                            , jump: function (obj, first) {
+                                if (!first) {
+                                    loadData(obj.curr);
+                                }
+                            }
+                        });
+                    } else {
+                        layer.msg(result["message"]);
+                    }
                     return false;
                 },
                 //请求失败，包含具体的错误信息
@@ -216,7 +219,7 @@
                     }
                 },
                 error: function (result) {
-                    alert(result.msg);
+                    alert(result["message"]);
                 }
             });
         });
@@ -235,7 +238,7 @@
                 //请求路径
                 url: "/admin/delete/problem/" + id,
                 success: function (result) {
-                    if (result["code"] == 1) {
+                    if (result["code"] == "1") {
                         $(obj).parents("tr").remove();
                         layer.msg('已删除!', {icon: 1, time: 1000});
                     } else {

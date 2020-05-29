@@ -2,6 +2,7 @@ package com.hqz.hzuoj.util;
 
 import com.hqz.hzuoj.bean.user.Admin;
 import com.hqz.hzuoj.bean.user.User;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletRequest;
@@ -21,11 +22,7 @@ public class SessionUtils {
      * @return
      */
     public static User getUser(HttpServletRequest request) {
-        HttpSession session = request.getSession();
-        Integer userId = Integer.parseInt(session.getAttribute("userId").toString());
-        User user = new User();
-        user.setUserId(userId);
-        return user;
+        return getUser(request.getSession());
     }
 
     /**
@@ -44,7 +41,11 @@ public class SessionUtils {
      * @return
      */
     public static User getUser(HttpSession session) {
-        Integer userId = Integer.parseInt(session.getAttribute("userId").toString());
+        Object str = session.getAttribute("userId");
+        if (str == null) {
+            throw new RuntimeException("用户未登陆");
+        }
+        Integer userId = Integer.parseInt(str.toString());
         User user = new User();
         user.setUserId(userId);
         return user;
@@ -84,11 +85,11 @@ public class SessionUtils {
      * @return
      */
     public static Admin getAdmin(HttpSession session) {
-        String str = session.getAttribute("adminId").toString();
+        Object str = session.getAttribute("adminId");
         if (str == null) {
-            throw new RuntimeException("管理员为登录");
+            throw new RuntimeException("管理员未登录");
         }
-        Integer adminId = Integer.parseInt(str);
+        Integer adminId = Integer.parseInt(str.toString());
         Admin admin = new Admin();
         admin.setAdminId(adminId);
         return admin;
