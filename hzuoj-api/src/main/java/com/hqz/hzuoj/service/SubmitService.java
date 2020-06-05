@@ -46,4 +46,6 @@ public interface SubmitService {
     String calculateContestRating(Integer contestId);
 
     String getContestExcel(Integer contestId) throws IOException;
+
+    Submit insertContestSubmit(Integer contestId, Submit submit);
 }
