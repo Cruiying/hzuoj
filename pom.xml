@@ -41,7 +41,7 @@
         <jest.version>5.3.3</jest.version>
         <jna.version>4.5.1</jna.version>
         <beanUtils.version>1.9.3</beanUtils.version>
-        <mysql.version>5.1.9</mysql.version>
+        <mysql.version>8.0.28</mysql.version>
     </properties>
     <dependencyManagement>
         <dependencies>
